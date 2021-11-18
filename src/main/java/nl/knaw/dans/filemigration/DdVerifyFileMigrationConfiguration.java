@@ -23,4 +23,7 @@ import javax.validation.constraints.NotEmpty;
 
 public class DdVerifyFileMigrationConfiguration extends Configuration {
 
+    // TODO: Add database config for easy-db
+    // TODO: Add database config for dd-verify-file-migration
+
 }

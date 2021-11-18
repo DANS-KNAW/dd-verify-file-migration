@@ -1,13 +1,10 @@
 dd-verify-file-migration
-===========
-
-<!-- Remove this comment and extend the descriptions below -->
-
+=========================
 
 SYNOPSIS
 --------
 
-    dd-verify-file-migration { server | check }
+    dd-verify-file-migration { server | check  | load-from-easy | load-from-dataverse }
 
 
 DESCRIPTION
