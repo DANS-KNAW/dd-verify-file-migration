@@ -1,0 +1,13 @@
+[Unit]
+Description=${project.name} Service
+
+[Service]
+ExecStart=/opt/dans.knaw.nl/dd-verify-file-migration/bin/dd-verify-file-migration server /etc/opt/dans.knaw.nl/dd-verify-file-migration/config.yml
+# Java returns 143 even if the SIGTERM was handled correctly.
+SuccessExitStatus=143
+
+User=dd-verify-file-migration
+Group=dd-verify-file-migration
+
+[Install]
+WantedBy=multi-user.target
