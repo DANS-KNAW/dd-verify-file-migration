@@ -20,7 +20,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "easy_files")
 @NamedQueries({ @NamedQuery(name = "EasyFile.findByDatasetId",
-                            query = "SELECT * FROM EasyFile ef WHERE ef.dataset_sid = :datasedSid ORDER BY path"),
+                            query = "SELECT ef FROM EasyFile ef WHERE ef.datasetSid = :datasedSid ORDER BY path"),
 })
 public class EasyFile {
   public static final String FIND_BY_DATASET_ID ="EasyFile.findByDatasetId";
