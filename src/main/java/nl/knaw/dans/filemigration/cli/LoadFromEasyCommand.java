@@ -17,26 +17,38 @@ package nl.knaw.dans.filemigration.cli;
 
 import io.dropwizard.Application;
 import io.dropwizard.cli.EnvironmentCommand;
+import io.dropwizard.hibernate.HibernateBundle;
+import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
+import nl.knaw.dans.filemigration.api.EasyFile;
+import nl.knaw.dans.filemigration.api.Expected;
+import nl.knaw.dans.filemigration.db.EasyFileDAO;
+
+import static jdk.internal.org.jline.utils.Log.trace;
 
 public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate;
 
     /**
      * Creates a new environment command.
      *
      * @param application the application providing this command
-     * @param name        the name of the command, used for command line invocation
-     * @param description a description of the command's purpose
      */
-    protected LoadFromEasyCommand(Application<DdVerifyFileMigrationConfiguration> application, String name, String description) {
-        super(application, name, description);
+    public LoadFromEasyCommand(Application<DdVerifyFileMigrationConfiguration> application, HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate) {
+        super(application, "load-from-easy", "Load expected table with info from easy_files in fs-rdb and transformation rules");
+        this.hibernate = hibernate;
     }
 
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
-
+        EasyFileDAO easyFileDAO = new EasyFileDAO(hibernate.getSessionFactory());
+        // TODO read IDs as in https://github.com/DANS-KNAW/dd-manage-prestaging/blob/5fb6bd9e163ada89a99ed1342b4454c065528848/src/main/java/nl/knaw/dans/prestaging/cli/LoadFromDataverseCommand.java#L41
+        for (EasyFile ef : easyFileDAO.findByDatasetId("easy-dataset:17")) {
+            trace(ef);
+            // TODO apply transformation rules and add to Expected table
+        }
     }
 }

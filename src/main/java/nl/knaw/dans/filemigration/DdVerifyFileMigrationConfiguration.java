@@ -16,14 +16,32 @@
 
 package nl.knaw.dans.filemigration;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import io.dropwizard.db.DataSourceFactory;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 public class DdVerifyFileMigrationConfiguration extends Configuration {
 
-    // TODO: Add database config for easy-db
-    // TODO: Add database config for dd-verify-file-migration
+  @Valid
+  @NotNull
+  private DataSourceFactory easyDb = new DataSourceFactory();
+  private DataSourceFactory fileMigrationDb = new DataSourceFactory();
 
+  public DataSourceFactory getEasyDb() {
+    return easyDb;
+  }
+
+  public DataSourceFactory getFileMigrationDb() {
+    return fileMigrationDb;
+  }
+
+  public void setEasyDb(DataSourceFactory dataSourceFactory) {
+    this.easyDb = dataSourceFactory;
+  }
+
+  public void setFileMigrationDb(DataSourceFactory dataSourceFactory) {
+    this.fileMigrationDb = dataSourceFactory;
+  }
 }

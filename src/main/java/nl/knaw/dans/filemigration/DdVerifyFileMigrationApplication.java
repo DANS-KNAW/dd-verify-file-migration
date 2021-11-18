@@ -19,8 +19,19 @@ package nl.knaw.dans.filemigration;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.hibernate.HibernateBundle;
+import nl.knaw.dans.filemigration.api.Expected;
+import nl.knaw.dans.filemigration.cli.LoadFromEasyCommand;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate = new HibernateBundle<DdVerifyFileMigrationConfiguration>(Expected.class) {
+
+       @Override
+        public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
+            return configuration.getEasyDb();
+        }
+    };
 
     public static void main(final String[] args) throws Exception {
         new DdVerifyFileMigrationApplication().run(args);
@@ -33,12 +44,11 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
 
     @Override
     public void initialize(final Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap) {
-        // TODO: application initialization
+        bootstrap.addBundle(hibernate);
+        bootstrap.addCommand(new LoadFromEasyCommand(this, hibernate));
     }
 
     @Override
     public void run(final DdVerifyFileMigrationConfiguration configuration, final Environment environment) {
-
     }
-
 }
