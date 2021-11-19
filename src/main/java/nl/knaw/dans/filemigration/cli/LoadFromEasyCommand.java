@@ -18,18 +18,17 @@ package nl.knaw.dans.filemigration.cli;
 import io.dropwizard.Application;
 import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.hibernate.HibernateBundle;
-import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
 import nl.knaw.dans.filemigration.api.EasyFile;
-import nl.knaw.dans.filemigration.api.Expected;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
-
-import static jdk.internal.org.jline.utils.Log.trace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
+    private static final Logger log = LoggerFactory.getLogger(LoadFromEasyCommand.class);
     private final HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate;
 
     /**
@@ -47,7 +46,7 @@ public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrati
         EasyFileDAO easyFileDAO = new EasyFileDAO(hibernate.getSessionFactory());
         // TODO read IDs as in https://github.com/DANS-KNAW/dd-manage-prestaging/blob/5fb6bd9e163ada89a99ed1342b4454c065528848/src/main/java/nl/knaw/dans/prestaging/cli/LoadFromDataverseCommand.java#L41
         for (EasyFile ef : easyFileDAO.findByDatasetId("easy-dataset:17")) {
-            trace(ef);
+            log.trace("ef = {}" , ef);
             // TODO apply transformation rules and add to Expected table
         }
     }
