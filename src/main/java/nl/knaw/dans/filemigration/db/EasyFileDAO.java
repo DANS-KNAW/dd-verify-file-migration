@@ -17,6 +17,7 @@ package nl.knaw.dans.filemigration.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.filemigration.api.EasyFile;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
@@ -29,10 +30,11 @@ public class EasyFileDAO extends AbstractDAO<EasyFile> {
   }
 
   public List<EasyFile> findByDatasetId(String id) {
-    Query<EasyFile> query = currentSession()
-        .createNamedQuery(EasyFile.FIND_BY_DATASET_ID, EasyFile.class);
+    // TODO createNamedQuery(EasyFile.FIND_BY_DATASET_ID, EasyFile.class)
+    Session session = currentSession();
+    Query<EasyFile> query = session.createQuery("SELECT ef FROM nl.knaw.dans.filemigration.api.EasyFile ef WHERE ef.dataset_sid = 'easy-dataset:16' ORDER BY ef.path");
     return query
-        .setParameter(EasyFile.DATASET_ID, id)
+        //.setParameter(EasyFile.DATASET_ID, id)
         .getResultList();
   }
 }

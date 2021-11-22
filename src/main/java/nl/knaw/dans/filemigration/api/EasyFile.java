@@ -20,7 +20,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "easy_files")
 @NamedQueries({ @NamedQuery(name = "EasyFile.findByDatasetId",
-                            query = "SELECT ef FROM EasyFile ef WHERE ef.datasetSid = :datasedSid ORDER BY ef.path",
+                            query = "SELECT ef FROM SELECT ef FROM nl.knaw.dans.filemigration.api.EasyFile ef WHERE ef.datasetSid = :datased_sid ORDER BY ef.path",
                             hints = {
                                 @QueryHint(
                                     name = "org.hibernate.readOnly",
@@ -30,29 +30,29 @@ import javax.persistence.*;
 })
 public class EasyFile {
   public static final String FIND_BY_DATASET_ID ="EasyFile.findByDatasetId";
-  public static final String DATASET_ID ="datasetSid";
+  public static final String DATASET_ID ="dataset_sid";
 
   @Id
-  @Column(name = "pid")
+  @Column(name = "pid", nullable = false)
   private String pid;
-  @Column(name = "parent_sid")
-  private String parentSid;
-  @Column(name = "dataset_sid")
-  private String datasetSid;
+  @Column(name = "parent_sid", nullable = false)
+  private String parent_sid;
+  @Column(name = "dataset_sid", nullable = false)
+  private String dataset_sid;
   @Column(name = "path")
   private String path;
-  @Column(name = "filename")
+  @Column(name = "filename", nullable = false)
   private String filename;
-  @Column(name = "size")
+  @Column(name = "size", nullable = false)
   private long size;
-  @Column(name = "mimetype")
+  @Column(name = "mimetype", nullable = false)
   private String mimetype;
-  @Column(name = "creator_role")
-  private String creatorRole;
-  @Column(name = "visible_to")
-  private String visibleTo;
-  @Column(name = "accessible_to")
-  private String accessibleTo;
+  @Column(name = "creator_role", nullable = false)
+  private String creator_role;
+  @Column(name = "visible_to", nullable = false)
+  private String visible_to;
+  @Column(name = "accessible_to", nullable = false)
+  private String accessible_to;
   @Column(name = "sha1checksum")
   private String sha1checksum;
 
@@ -64,28 +64,28 @@ public class EasyFile {
     this.sha1checksum = sha1checksum;
   }
 
-  public String getAccessibleTo() {
-    return accessibleTo;
+  public String getAccessible_to() {
+    return accessible_to;
   }
 
-  public void setAccessibleTo(String accessibleTo) {
-    this.accessibleTo = accessibleTo;
+  public void setAccessible_to(String accessible_to) {
+    this.accessible_to = accessible_to;
   }
 
-  public String getVisibleTo() {
-    return visibleTo;
+  public String getVisible_to() {
+    return visible_to;
   }
 
-  public void setVisibleTo(String visibleTo) {
-    this.visibleTo = visibleTo;
+  public void setVisible_to(String visible_to) {
+    this.visible_to = visible_to;
   }
 
-  public String getCreatorRole() {
-    return creatorRole;
+  public String getCreator_role() {
+    return creator_role;
   }
 
-  public void setCreatorRole(String creatorRole) {
-    this.creatorRole = creatorRole;
+  public void setCreator_role(String creator_role) {
+    this.creator_role = creator_role;
   }
 
   public String getMimetype() {
@@ -120,20 +120,20 @@ public class EasyFile {
     this.path = path;
   }
 
-  public String getDatasetSid() {
-    return datasetSid;
+  public String getDataset_sid() {
+    return dataset_sid;
   }
 
-  public void setDatasetSid(String datasetSid) {
-    this.datasetSid = datasetSid;
+  public void setDataset_sid(String dataset_sid) {
+    this.dataset_sid = dataset_sid;
   }
 
-  public String getParentSid() {
-    return parentSid;
+  public String getParent_sid() {
+    return parent_sid;
   }
 
-  public void setParentSid(String parentSid) {
-    this.parentSid = parentSid;
+  public void setParent_sid(String parent_sid) {
+    this.parent_sid = parent_sid;
   }
 
   public String getPid() {
