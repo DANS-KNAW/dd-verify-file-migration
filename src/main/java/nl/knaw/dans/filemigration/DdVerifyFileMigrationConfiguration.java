@@ -16,6 +16,7 @@
 
 package nl.knaw.dans.filemigration;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 
@@ -29,6 +30,7 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
   private DataSourceFactory easyDb = new DataSourceFactory();
   private DataSourceFactory fileMigrationDb = new DataSourceFactory();
 
+  @JsonProperty("easyDb")
   public DataSourceFactory getEasyDb() {
     return easyDb;
   }

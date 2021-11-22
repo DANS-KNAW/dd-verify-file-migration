@@ -23,6 +23,7 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import nl.knaw.dans.filemigration.api.Expected;
 import nl.knaw.dans.filemigration.cli.LoadFromEasyCommand;
+import nl.knaw.dans.filemigration.db.EasyFileDAO;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
     private final HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate = new HibernateBundle<DdVerifyFileMigrationConfiguration>(Expected.class) {

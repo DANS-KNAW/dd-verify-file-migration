@@ -18,6 +18,7 @@ package nl.knaw.dans.filemigration.db;
 import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.filemigration.api.EasyFile;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 
 import java.util.List;
 
