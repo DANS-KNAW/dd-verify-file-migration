@@ -15,7 +15,7 @@ easyDb:
   driverClass: org.postgresql.Driver
   url: 'jdbc:postgresql://easy.dans.knaw.nl:5432/easy_db'
   logValidationErrors: true
-  user: fedora_db_admin
+  user: easy_webui
   password: changeme
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'

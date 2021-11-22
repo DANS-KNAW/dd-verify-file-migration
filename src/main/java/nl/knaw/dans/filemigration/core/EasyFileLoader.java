@@ -16,7 +16,6 @@
 package nl.knaw.dans.filemigration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
-import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +41,8 @@ public class EasyFileLoader {
 
   @UnitOfWork
   public void loadFromDatasetId(String id) {
-    for (EasyFile ef : dao.findByDatasetId("easy-dataset:17")) {
-      log.trace("ef = {}" , ef);
+    for (Object ef : dao.findByDatasetId("easy-dataset:9")) {
+      log.info("ef = {}" , ef);
       // TODO apply transformation rules and add to Expected table
     }
   }
