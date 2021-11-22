@@ -15,13 +15,13 @@ easyDb:
   driverClass: org.postgresql.Driver
   url: 'jdbc:postgresql://easy.dans.knaw.nl:5432/easy_db'
   logValidationErrors: true
+  user: fedora_db_admin
+  password: changeme
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
     hibernate.hbm2ddl.auto: update
-    user: fedora_db_admin
-    password: changeme
 
-fileMigrationDb:
+verificationDatabase:
   driverClass: org.hsqldb.jdbcDriver
   url: jdbc:hsqldb:hsql://localhost:9001/dd-verify-file-migration
   logValidationErrors: true

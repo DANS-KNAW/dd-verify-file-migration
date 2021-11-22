@@ -20,7 +20,13 @@ import javax.persistence.*;
 @Entity
 @Table(name = "easy_files")
 @NamedQueries({ @NamedQuery(name = "EasyFile.findByDatasetId",
-                            query = "SELECT ef FROM EasyFile ef WHERE ef.datasetSid = :datasedSid ORDER BY path"),
+                            query = "SELECT ef FROM EasyFile ef WHERE ef.datasetSid = :datasedSid ORDER BY ef.path",
+                            hints = {
+                                @QueryHint(
+                                    name = "org.hibernate.readOnly",
+                                    value = "true"
+                                )
+                            }),
 })
 public class EasyFile {
   public static final String FIND_BY_DATASET_ID ="EasyFile.findByDatasetId";

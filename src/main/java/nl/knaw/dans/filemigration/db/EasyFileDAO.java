@@ -29,6 +29,10 @@ public class EasyFileDAO extends AbstractDAO<EasyFile> {
   }
 
   public List<EasyFile> findByDatasetId(String id) {
-    return list(namedTypedQuery(EasyFile.FIND_BY_DATASET_ID).setParameter(EasyFile.DATASET_ID, id));
+    Query<EasyFile> query = currentSession()
+        .createNamedQuery(EasyFile.FIND_BY_DATASET_ID, EasyFile.class);
+    return query
+        .setParameter(EasyFile.DATASET_ID, id)
+        .getResultList();
   }
 }
