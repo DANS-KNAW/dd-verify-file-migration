@@ -32,8 +32,8 @@ public class EasyFileDAO extends AbstractDAO<EasyFile> {
   public List<EasyFile> findByDatasetId(String id) {
     // TODO createNamedQuery(EasyFile.FIND_BY_DATASET_ID, EasyFile.class)
     Session session = currentSession();
-    Query<EasyFile> query = session.createSQLQuery("SELECT * FROM easy_files WHERE dataset_sid = 'easy-dataset:9' ORDER BY path");
-    List<EasyFile> resultList = query
+    Query<EasyFile> query = session.createSQLQuery("SELECT * FROM easy_files WHERE dataset_sid = ? ORDER BY path");
+    List<EasyFile> resultList = query.setParameter(1,id)
         //.setParameter(EasyFile.DATASET_ID, id)
         .getResultList();
     return resultList;
