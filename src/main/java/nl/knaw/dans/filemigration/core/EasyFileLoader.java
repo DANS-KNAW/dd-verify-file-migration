@@ -42,7 +42,7 @@ public class EasyFileLoader {
   @UnitOfWork
   public void loadFromDatasetId(String id) {
     for (Object ef : dao.findByDatasetId("easy-dataset:9")) {
-      log.info("ef = {}" , ef);
+      log.trace("ef = {}" , ef);
       // TODO apply transformation rules and add to Expected table
     }
   }

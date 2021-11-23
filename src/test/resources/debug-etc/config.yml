@@ -17,7 +17,7 @@ server:
 logging:
   level: INFO
   loggers:
-    "dans.knaw.nl":
+    "nl.knaw.dans":
       level: TRACE
       additive: false
   appenders:
