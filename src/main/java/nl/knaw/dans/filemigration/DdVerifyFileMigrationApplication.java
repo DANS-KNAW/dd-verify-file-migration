@@ -21,12 +21,13 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
-import nl.knaw.dans.filemigration.api.Expected;
+import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.cli.LoadFromEasyCommand;
-import nl.knaw.dans.filemigration.db.EasyFileDAO;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
-    private final HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate = new HibernateBundle<DdVerifyFileMigrationConfiguration>(Expected.class) {
+
+    // TODO other bundles for expected and migration database(s?)
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate = new HibernateBundle<DdVerifyFileMigrationConfiguration>(EasyFile.class) {
 
        @Override
         public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {

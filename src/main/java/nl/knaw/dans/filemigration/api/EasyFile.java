@@ -15,12 +15,16 @@
  */
 package nl.knaw.dans.filemigration.api;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.QueryHint;
+import javax.persistence.Table;
 
-@Entity
-@Table(name = "easy_files")
 @NamedQueries({ @NamedQuery(name = "EasyFile.findByDatasetId",
-                            query = "SELECT ef FROM SELECT ef FROM nl.knaw.dans.filemigration.api.EasyFile ef WHERE ef.datasetSid = :datased_sid ORDER BY ef.path",
+                            query = "SELECT ef FROM EasyFile ef WHERE ef.dataset_sid = :dataset_sid ORDER BY ef.path",
                             hints = {
                                 @QueryHint(
                                     name = "org.hibernate.readOnly",
@@ -28,33 +32,41 @@ import javax.persistence.*;
                                 )
                             }),
 })
+
+@Entity
+@Table(name = "easy_files")
 public class EasyFile {
   public static final String FIND_BY_DATASET_ID ="EasyFile.findByDatasetId";
   public static final String DATASET_ID ="dataset_sid";
 
   @Id
-  @Column(name = "pid", nullable = false)
+  @Column(nullable = false)
   private String pid;
-  @Column(name = "parent_sid", nullable = false)
+  @Column(nullable = false)
   private String parent_sid;
-  @Column(name = "dataset_sid", nullable = false)
+  @Column(nullable = false)
   private String dataset_sid;
-  @Column(name = "path")
+  @Column()
   private String path;
-  @Column(name = "filename", nullable = false)
+  @Column(nullable = false)
   private String filename;
-  @Column(name = "size", nullable = false)
+  @Column(nullable = false)
   private long size;
-  @Column(name = "mimetype", nullable = false)
+  @Column(nullable = false)
   private String mimetype;
-  @Column(name = "creator_role", nullable = false)
+  @Column(nullable = false)
   private String creator_role;
-  @Column(name = "visible_to", nullable = false)
+  @Column(nullable = false)
   private String visible_to;
-  @Column(name = "accessible_to", nullable = false)
+  @Column(nullable = false)
   private String accessible_to;
-  @Column(name = "sha1checksum")
+  @Column()
   private String sha1checksum;
+
+  public String toString() {
+    // TODO improve?
+    return pid + ", " + parent_sid + ", " + dataset_sid + ", " + path + ", " + filename + ", " + size + ", " + creator_role + ", " + visible_to + ", " + accessible_to + ", " + sha1checksum;
+  }
 
   public String getSha1checksum() {
     return sha1checksum;
