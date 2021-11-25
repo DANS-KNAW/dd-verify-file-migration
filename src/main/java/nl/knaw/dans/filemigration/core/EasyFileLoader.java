@@ -20,11 +20,6 @@ import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.StreamSupport;
-
 public class EasyFileLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
@@ -34,14 +29,10 @@ public class EasyFileLoader {
     this.dao = dao;
   }
 
-  public void loadFromDatasetIds(Iterator<String> ids) {
-    Spliterator<String> spliterator = Spliterators.spliteratorUnknownSize(ids, Spliterator.ORDERED);
-    StreamSupport.stream(spliterator, false).forEach(this::loadFromDatasetId);
-  }
-
   @UnitOfWork
-  public void loadFromDatasetId(String id) {
-    for (Object ef : dao.findByDatasetId("easy-dataset:9")) {
+  public void loadFromDatasetId(String datasetId, String doi) {
+    log.trace("{} {}", datasetId , doi);
+    for (Object ef : dao.findByDatasetId(datasetId)) {
       log.trace("{}" , ef);
       // TODO apply transformation rules and add to Expected table
     }
