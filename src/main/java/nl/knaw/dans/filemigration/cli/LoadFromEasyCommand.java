@@ -23,16 +23,16 @@ import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
+import nl.knaw.dans.filemigration.core.FedoraToBagCsv;
 import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
+
+import static nl.knaw.dans.filemigration.core.FedoraToBagCsv.*;
 
 public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
@@ -58,17 +58,6 @@ public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrati
             .help("CSV file produced by easy-fedora-to-bag");
     }
 
-    private static final String datasetIdColumn = "easyDatasetId";
-    private static final String doiColumn = "doi";
-
-    // copy of https://github.com/DANS-KNAW/easy-fedora-to-bag/blob/8ef3a0bad/src/main/scala/nl/knaw/dans/easy/fedoratobag/CsvRecord.scala#L42-L46
-    private static final CSVFormat csvFormat = CSVFormat.RFC4180
-        .withHeader(datasetIdColumn, "uuid1", "uuid2", doiColumn, "depositor", "transformationType", "comment")
-        .withDelimiter(',')
-        .withFirstRecordAsHeader()
-        .withRecordSeparator('\n')
-        .withAutoFlush(true);
-
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
         EasyFileDAO easyFileDAO = new EasyFileDAO(hibernate.getSessionFactory());
@@ -77,8 +66,8 @@ public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrati
             .create(EasyFileLoader.class, EasyFileDAO.class, easyFileDAO);
         for (File file : namespace.<File>getList("csv")) {
             log.info(file.toString());
-            for(CSVRecord r: CSVParser.parse(file, StandardCharsets.UTF_8, csvFormat)) {
-                proxy.loadFromDatasetId(r.get(datasetIdColumn),r.get(doiColumn));
+            for(CSVRecord r: FedoraToBagCsv.parse(file)) {
+                proxy.loadFromCsv(new FedoraToBagCsv(r));
             }
         }
     }

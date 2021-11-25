@@ -16,6 +16,8 @@
 package nl.knaw.dans.filemigration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import nl.knaw.dans.filemigration.api.EasyFile;
+import nl.knaw.dans.filemigration.api.Expected;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +31,24 @@ public class EasyFileLoader {
     this.dao = dao;
   }
 
+  public void loadFromCsv(FedoraToBagCsv csv) {
+    log.trace(csv.toString());
+    if (csv.getComment().contains("OK"))
+      loadFromDatasetId(csv.getDatasetId(),csv.getDoi());
+    else log.warn("skipped {}", csv);
+  }
+
   @UnitOfWork
   public void loadFromDatasetId(String datasetId, String doi) {
     log.trace("{} {}", datasetId , doi);
-    for (Object ef : dao.findByDatasetId(datasetId)) {
-      log.trace("{}" , ef);
-      // TODO apply transformation rules and add to Expected table
+    for (EasyFile ef : dao.findByDatasetId(datasetId)) {
+      log.trace("EasyFile = {}" , ef);
+      Expected expected = new Expected();
+      expected.setEasy_file_id(ef.getDataset_sid());
+      expected.setFs_rdb_path(ef.getPath());
+      expected.setSha1checksum(ef.getSha1checksum());
+      expected.setDoi(doi);
+      log.trace("Expected = {}", expected);
     }
   }
 }

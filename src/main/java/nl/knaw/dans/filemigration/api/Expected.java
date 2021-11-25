@@ -27,7 +27,7 @@ public class Expected {
   @Column(name="sha1checksum")
   private String sha1checksum;
   @Column(name="easy_file_id")
-  private String easyFileId;
+  private String easy_file_id;
   @Column(name="fs_rdb_path")
   private String fs_rdb_path;
   @Column(name="expected_path")
@@ -42,6 +42,11 @@ public class Expected {
   private boolean removed_duplicate_file;
   @Column(name="transformed_name")
   private boolean transformed_name;
+
+  public String toString() {
+    // TODO improve?
+    return  doi + ",  " + sha1checksum + ",  " + easy_file_id + ",  " + fs_rdb_path + ",  " + expected_path + ",  " + added_during_migration + ",  " + removed_thumbnail + ",  " + removed_original_directory + ",  " + removed_duplicate_file + ",  " + transformed_name;
+  }
 
   public boolean isTransformed_name() {
     return transformed_name;
@@ -99,12 +104,12 @@ public class Expected {
     this.fs_rdb_path = fs_rdb_path;
   }
 
-  public String getEasyFileId() {
-    return easyFileId;
+  public String getEasy_file_id() {
+    return easy_file_id;
   }
 
-  public void setEasyFileId(String easyFileId) {
-    this.easyFileId = easyFileId;
+  public void setEasy_file_id(String easy_file_id) {
+    this.easy_file_id = easy_file_id;
   }
 
   public String getSha1checksum() {
@@ -113,5 +118,13 @@ public class Expected {
 
   public void setSha1checksum(String sha1checksum) {
     this.sha1checksum = sha1checksum;
+  }
+
+  public String getDoi() {
+    return doi;
+  }
+
+  public void setDoi(String doi) {
+    this.doi = doi;
   }
 }

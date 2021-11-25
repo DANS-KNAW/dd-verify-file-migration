@@ -41,7 +41,7 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
 
     @Override
     public String getName() {
-        return "Dd Verify File Migration";
+        return "DD Verify File Migration";
     }
 
     @Override
