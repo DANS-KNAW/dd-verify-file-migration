@@ -28,75 +28,75 @@ public class Expected {
   private String sha1checksum;
   @Column(name="easy_file_id")
   private String easyFileId;
-  @Column(name="fsRdbPath")
-  private String fsRdbPath;
-  @Column(name="expectedPath")
-  private String expectedPath;
-  @Column(name="addedDuringMigration")
-  private boolean addedDuringMigration;
-  @Column(name="removedThumbnail")
-  private boolean removedThumbnail;
-  @Column(name="removedOriginalDirectory")
-  private boolean removedOriginalDirectory;
-  @Column(name="removedDuplicateFile")
-  private boolean removedDuplicateFile;
-  @Column(name="transformedName")
-  private boolean transformedName;
+  @Column(name="fs_rdb_path")
+  private String fs_rdb_path;
+  @Column(name="expected_path")
+  private String expected_path;
+  @Column(name="added_during_migration")
+  private boolean added_during_migration;
+  @Column(name="removed_thumbnail")
+  private boolean removed_thumbnail;
+  @Column(name="removed_original_directory")
+  private boolean removed_original_directory;
+  @Column(name="removed_duplicate_file")
+  private boolean removed_duplicate_file;
+  @Column(name="transformed_name")
+  private boolean transformed_name;
 
-  public boolean isTransformedName() {
-    return transformedName;
+  public boolean isTransformed_name() {
+    return transformed_name;
   }
 
-  public void setTransformedName(boolean transformedName) {
-    this.transformedName = transformedName;
+  public void setTransformed_name(boolean transformed_name) {
+    this.transformed_name = transformed_name;
   }
 
-  public boolean isRemovedDuplicateFile() {
-    return removedDuplicateFile;
+  public boolean isRemoved_duplicate_file() {
+    return removed_duplicate_file;
   }
 
-  public void setRemovedDuplicateFile(boolean removedDuplicateFile) {
-    this.removedDuplicateFile = removedDuplicateFile;
+  public void setRemoved_duplicate_file(boolean removed_duplicate_file) {
+    this.removed_duplicate_file = removed_duplicate_file;
   }
 
-  public boolean isRemovedOriginalDirectory() {
-    return removedOriginalDirectory;
+  public boolean isRemoved_original_directory() {
+    return removed_original_directory;
   }
 
-  public void setRemovedOriginalDirectory(boolean removedOriginalDirectory) {
-    this.removedOriginalDirectory = removedOriginalDirectory;
+  public void setRemoved_original_directory(boolean removed_original_directory) {
+    this.removed_original_directory = removed_original_directory;
   }
 
-  public boolean isRemovedThumbnail() {
-    return removedThumbnail;
+  public boolean isRemoved_thumbnail() {
+    return removed_thumbnail;
   }
 
-  public void setRemovedThumbnail(boolean removedThumbnail) {
-    this.removedThumbnail = removedThumbnail;
+  public void setRemoved_thumbnail(boolean removed_thumbnail) {
+    this.removed_thumbnail = removed_thumbnail;
   }
 
-  public boolean isAddedDuringMigration() {
-    return addedDuringMigration;
+  public boolean isAdded_during_migration() {
+    return added_during_migration;
   }
 
-  public void setAddedDuringMigration(boolean addedDuringMigration) {
-    this.addedDuringMigration = addedDuringMigration;
+  public void setAdded_during_migration(boolean added_during_migration) {
+    this.added_during_migration = added_during_migration;
   }
 
-  public String getExpectedPath() {
-    return expectedPath;
+  public String getExpected_path() {
+    return expected_path;
   }
 
-  public void setExpectedPath(String expectedPath) {
-    this.expectedPath = expectedPath;
+  public void setExpected_path(String expected_path) {
+    this.expected_path = expected_path;
   }
 
-  public String getFsRdbPath() {
-    return fsRdbPath;
+  public String getFs_rdb_path() {
+    return fs_rdb_path;
   }
 
-  public void setFsRdbPath(String fsRdbPath) {
-    this.fsRdbPath = fsRdbPath;
+  public void setFs_rdb_path(String fs_rdb_path) {
+    this.fs_rdb_path = fs_rdb_path;
   }
 
   public String getEasyFileId() {
