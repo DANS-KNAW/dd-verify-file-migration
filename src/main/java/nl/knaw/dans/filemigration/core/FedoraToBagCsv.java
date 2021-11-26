@@ -16,16 +16,16 @@ public class FedoraToBagCsv {
   private final String type;
   private final CSVRecord r;
 
-  private static final String datasetIdColumn = "easyDatasetId";
-  private static final String doiColumn = "doi";
-  private static final String commentColumn = "comment"; // "OK", "not strict OK", "OK; no payload...", "FAILED..."
-  private static final String typeColumn = "transformationType"; // simple, thematische-collectie,original-versioned, fedora-versioned
+  private static final String DATASET_ID_COLUMN = "easyDatasetId";
+  private static final String DOI_COLUMN = "doi";
+  private static final String COMMENT_COLUMN = "comment";
+  private static final String TRANSFORMATION_TYPE_COLUMN = "transformationType";
 
   public FedoraToBagCsv(CSVRecord r) {
-    datasetId = r.get(datasetIdColumn);
-    doi = r.get(doiColumn);
-    comment = r.get(commentColumn);
-    type = r.get(typeColumn);
+    datasetId = r.get(DATASET_ID_COLUMN);
+    doi = r.get(DOI_COLUMN);
+    comment = r.get(COMMENT_COLUMN);
+    type = r.get(TRANSFORMATION_TYPE_COLUMN);
     this.r = r;
   }
 
@@ -38,7 +38,7 @@ public class FedoraToBagCsv {
   // see https://github.com/DANS-KNAW/easy-fedora-to-bag/blob/8ef3a0bad/src/main/scala/nl/knaw/dans/easy/fedoratobag/CsvRecord.scala#L42-L46
   private static final CSVFormat csvFormat = CSVFormat
       .RFC4180
-      .withHeader(datasetIdColumn, "uuid1", "uuid2", doiColumn, "depositor", typeColumn, commentColumn)
+      .withHeader(DATASET_ID_COLUMN, "uuid1", "uuid2", DOI_COLUMN, "depositor", TRANSFORMATION_TYPE_COLUMN, COMMENT_COLUMN)
       .withDelimiter(',')
       .withFirstRecordAsHeader()
       .withRecordSeparator('\n')
@@ -48,10 +48,21 @@ public class FedoraToBagCsv {
     return CSVParser.parse(file, StandardCharsets.UTF_8, csvFormat);
   }
 
+  /**
+   * @return possible values:
+   * simple,
+   * thematische-collectie,
+   * original-versioned,
+   * original-versioned without second bag,
+   * fedora-versioned
+   */
   public String getType() {
     return type;
   }
 
+  /**
+   * @return possible values: "OK", "not strict OK", "OK; no payload...", "FAILED..."
+   */
   public String getComment() {
     return comment;
   }
