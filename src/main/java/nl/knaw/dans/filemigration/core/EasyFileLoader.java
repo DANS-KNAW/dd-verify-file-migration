@@ -39,7 +39,7 @@ public class EasyFileLoader {
 
   public void loadFromCsv(FedoraToBagCsv csv) {
     if (csv.getComment().contains("OK"))
-      createExpected(csv);
+      saveExpected(csv);
     else log.warn("skipped {}", csv);
   }
 
@@ -47,28 +47,38 @@ public class EasyFileLoader {
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
   @UnitOfWork
-  void createExpected(FedoraToBagCsv csv) {
+  void saveExpected(FedoraToBagCsv csv) {
     log.trace(csv.toString());
     // read fedora files before adding expected migration files
     // thus we don't write anything when reading fails
     if (!csv.getComment().contains("no payload"))
       easyFileDAO.findByDatasetId(csv.getDatasetId())
-        .forEach(f -> expectedDAO.create(transformedFedoraFile(csv, f)));
+        .forEach(f -> saveExpected(transformedFedoraFile(csv, f)));
     Arrays.stream(migrationFiles).iterator()
         .forEachRemaining(f -> expectedDAO.create(addedMigrationFile(csv, f)));
+  }
+
+  private void saveExpected(Expected expected) {
+    try {
+      expectedDAO.create(expected);
+    } catch (Exception e) {
+      // TODO how to detect duplicate key exception?
+      expected.incRemoved_duplicate_file_count();
+      saveExpected(expected);
+    }
   }
 
   private static Expected addedMigrationFile(FedoraToBagCsv csv, String migrationFile) {
     Expected expected = new Expected();
     expected.setDoi(csv.getDoi());
-    expected.setSha1checksum("");
+    expected.setSha1_checksum("");
     expected.setEasy_file_id("");
     expected.setFs_rdb_path("");
     expected.setExpected_path("migration/" + migrationFile);
     expected.setAdded_during_migration(true);
     expected.setRemoved_thumbnail(false);
     expected.setRemoved_original_directory(false);
-    expected.setRemoved_duplicate_file(false);
+    expected.setRemoved_duplicate_file_count(0);
     expected.setTransformed_name(false);
     return expected;
   }
@@ -85,15 +95,15 @@ public class EasyFileLoader {
 
     Expected expected = new Expected();
     expected.setDoi(csv.getDoi());
-    expected.setSha1checksum(ef.getSha1checksum());
+    expected.setSha1_checksum(ef.getSha1checksum());
     expected.setEasy_file_id(ef.getPid());
     expected.setFs_rdb_path(path);
     expected.setExpected_path(dvPath);
     expected.setAdded_during_migration(false);
     expected.setRemoved_thumbnail(path.matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
     expected.setRemoved_original_directory(removeOriginal);
-    // TODO expected.setRemoved_duplicate_file(...) requires look-back or look-ahead
-    expected.setTransformed_name(!ef.getPath().equals(dvPath));
+    expected.setRemoved_duplicate_file_count(0);
+    expected.setTransformed_name(!path.equals(dvPath));
     return expected;
   }
 
@@ -102,7 +112,7 @@ public class EasyFileLoader {
   private static String replaceForbidden (String s, String forbidden) {
     final CharBuffer b = CharBuffer.allocate(s.length());
     for (char c : s.toCharArray()){
-      b.append(forbidden.indexOf(c) >= 0 ? '-' : c);
+      b.append(forbidden.indexOf(c) >= 0 ? '_' : c);
     }
     return b.toString();
   }

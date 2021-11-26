@@ -20,32 +20,45 @@ import javax.persistence.*;
 @Entity
 @Table(name = "expected")
 public class Expected {
+  // See https://www.objectdb.com/java/jpa/entity/id#composite_primary_key
+  // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 
   @Id
   @Column(name="doi")
   private String doi;
-  @Column(name="sha1checksum")
-  private String sha1checksum;
-  @Column(name="easy_file_id")
-  private String easy_file_id;
-  @Column(name="fs_rdb_path")
-  private String fs_rdb_path;
+
+  @Id
   @Column(name="expected_path")
   private String expected_path;
+
+  @Id
+  @Column(name="removed_duplicate_file_count")
+  private int removed_duplicate_file_count;
+
+  @Column(name="sha1_checksum")
+  private String sha1_checksum;
+
+  @Column(name="easy_file_id")
+  private String easy_file_id;
+
+  @Column(name="fs_rdb_path")
+  private String fs_rdb_path;
+
   @Column(name="added_during_migration")
   private boolean added_during_migration;
+
   @Column(name="removed_thumbnail")
   private boolean removed_thumbnail;
+
   @Column(name="removed_original_directory")
   private boolean removed_original_directory;
-  @Column(name="removed_duplicate_file")
-  private boolean removed_duplicate_file;
+
   @Column(name="transformed_name")
   private boolean transformed_name;
 
   public String toString() {
     // TODO improve?
-    return  doi + ",  " + sha1checksum + ",  " + easy_file_id + ",  " + fs_rdb_path + ",  " + expected_path + ",  " + added_during_migration + ",  " + removed_thumbnail + ",  " + removed_original_directory + ",  " + removed_duplicate_file + ",  " + transformed_name;
+    return  doi + ",  " + sha1_checksum + ",  " + easy_file_id + ",  " + fs_rdb_path + ",  " + expected_path + ",  " + added_during_migration + ",  " + removed_thumbnail + ",  " + removed_original_directory + ",  " + removed_duplicate_file_count + ",  " + transformed_name;
   }
 
   public boolean isTransformed_name() {
@@ -56,12 +69,14 @@ public class Expected {
     this.transformed_name = transformed_name;
   }
 
-  public boolean isRemoved_duplicate_file() {
-    return removed_duplicate_file;
+  public int getRemoved_duplicate_file_count() {
+    return removed_duplicate_file_count;
   }
-
-  public void setRemoved_duplicate_file(boolean removed_duplicate_file) {
-    this.removed_duplicate_file = removed_duplicate_file;
+  public void setRemoved_duplicate_file_count(int removed_duplicate_file) {
+    this.removed_duplicate_file_count = removed_duplicate_file_count;
+  }
+  public void incRemoved_duplicate_file_count() {
+    this.removed_duplicate_file_count += 1;
   }
 
   public boolean isRemoved_original_directory() {
@@ -112,12 +127,12 @@ public class Expected {
     this.easy_file_id = easy_file_id;
   }
 
-  public String getSha1checksum() {
-    return sha1checksum;
+  public String getSha1_checksum() {
+    return sha1_checksum;
   }
 
-  public void setSha1checksum(String sha1checksum) {
-    this.sha1checksum = sha1checksum;
+  public void setSha1_checksum(String sha1_checksum) {
+    this.sha1_checksum = sha1_checksum;
   }
 
   public String getDoi() {
