@@ -16,16 +16,22 @@
 package nl.knaw.dans.filemigration.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
+import nl.knaw.dans.filemigration.api.Expected;
+import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExpectedDAO extends AbstractDAO<ExpectedDAO> {
+  private static final Logger log = LoggerFactory.getLogger(ExpectedDAO.class);
 
   public ExpectedDAO(SessionFactory sessionFactory) {
     super(sessionFactory);
   }
 
-  public ExpectedDAO create(ExpectedDAO basicFileMeta) {
-    currentSession().save(basicFileMeta);
-    return basicFileMeta;
+  public Expected create(Expected expected) {
+    log.trace(expected.toString());
+    // TODO currentSession().save(expected);
+    return expected;
   }
 }

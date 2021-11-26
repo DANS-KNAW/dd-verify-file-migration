@@ -35,7 +35,7 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
     return easyDb;
   }
 
-  public DataSourceFactory getverificationDatabase() {
+  public DataSourceFactory getVerificationDatabase() {
     return verificationDatabase;
   }
 

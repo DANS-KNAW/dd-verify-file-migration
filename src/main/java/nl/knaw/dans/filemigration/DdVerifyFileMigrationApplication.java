@@ -22,16 +22,24 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import nl.knaw.dans.filemigration.api.EasyFile;
+import nl.knaw.dans.filemigration.api.Expected;
 import nl.knaw.dans.filemigration.cli.LoadFromEasyCommand;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
 
-    // TODO other bundles for expected and migration database(s?)
-    private final HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate = new HibernateBundle<DdVerifyFileMigrationConfiguration>(EasyFile.class) {
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> easyBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(EasyFile.class) {
 
        @Override
         public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
             return configuration.getEasyDb();
+        }
+    };
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> verificationBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(Expected.class) {
+
+       // TODO is Expected table in the same DB as migration_info table?
+       @Override
+        public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
+            return configuration.getVerificationDatabase();
         }
     };
 
@@ -46,8 +54,9 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
 
     @Override
     public void initialize(final Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap) {
-        bootstrap.addBundle(hibernate);
-        bootstrap.addCommand(new LoadFromEasyCommand(this, hibernate));
+        bootstrap.addBundle(easyBundle);
+        //TODO bootstrap.addBundle(verificationBundle);
+        bootstrap.addCommand(new LoadFromEasyCommand(this, easyBundle, /* TODO verificationBundle */ easyBundle));
     }
 
     @Override

@@ -19,24 +19,28 @@ import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.Expected;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
+import nl.knaw.dans.filemigration.db.ExpectedDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.CharBuffer;
+import java.util.Arrays;
 
 public class EasyFileLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
-  private final EasyFileDAO dao;
+  private final EasyFileDAO easyFileDAO;
+  private final ExpectedDAO expectedDAO;
 
-  public EasyFileLoader(EasyFileDAO dao) {
-    this.dao = dao;
+  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedDAO expectedDAO) {
+    this.expectedDAO = expectedDAO;
+    this.easyFileDAO = easyFileDAO;
   }
 
   public void loadFromCsv(FedoraToBagCsv csv) {
-    if (!csv.getComment().contains("OK"))
-      log.warn("skipped {}", csv);
-    else createExpected(csv);
+    if (csv.getComment().contains("OK"))
+      createExpected(csv);
+    else log.warn("skipped {}", csv);
   }
 
   /** note: bag-to-deposit also adds emd.xml for bags from the vault, that is not applicable in this context */
@@ -45,10 +49,13 @@ public class EasyFileLoader {
   @UnitOfWork
   void createExpected(FedoraToBagCsv csv) {
     log.trace(csv.toString());
-    for (EasyFile ef : dao.findByDatasetId(csv.getDatasetId()))
-      log.trace("Expected = {}", transformedFedoraFile(csv, ef));
-    for (String mf : migrationFiles)
-      log.trace("Expected = {}", addedMigrationFile(csv, mf));
+    // read fedora files before adding expected migration files
+    // thus we don't write anything when reading fails
+    if (!csv.getComment().contains("no payload"))
+      easyFileDAO.findByDatasetId(csv.getDatasetId())
+        .forEach(f -> expectedDAO.create(transformedFedoraFile(csv, f)));
+    Arrays.stream(migrationFiles).iterator()
+        .forEachRemaining(f -> expectedDAO.create(addedMigrationFile(csv, f)));
   }
 
   private static Expected addedMigrationFile(FedoraToBagCsv csv, String migrationFile) {
@@ -85,7 +92,7 @@ public class EasyFileLoader {
     expected.setAdded_during_migration(false);
     expected.setRemoved_thumbnail(path.matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
     expected.setRemoved_original_directory(removeOriginal);
-    // TODO expected.isRemoved_duplicate_file() requires look-back or look-ahead
+    // TODO expected.setRemoved_duplicate_file(...) requires look-back or look-ahead
     expected.setTransformed_name(!ef.getPath().equals(dvPath));
     return expected;
   }

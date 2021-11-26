@@ -26,27 +26,32 @@ import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
 import nl.knaw.dans.filemigration.core.FedoraToBagCsv;
 import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
+import nl.knaw.dans.filemigration.db.ExpectedDAO;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-import static nl.knaw.dans.filemigration.core.FedoraToBagCsv.*;
-
 public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(LoadFromEasyCommand.class);
-    private final HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate;
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> easyBundle;
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> expectedBundle;
 
     /**
      * Creates a new environment command.
      *
      * @param application the application providing this command
      */
-    public LoadFromEasyCommand(Application<DdVerifyFileMigrationConfiguration> application, HibernateBundle<DdVerifyFileMigrationConfiguration> hibernate) {
+    public LoadFromEasyCommand(
+        Application<DdVerifyFileMigrationConfiguration> application,
+        HibernateBundle<DdVerifyFileMigrationConfiguration> easyBundle,
+        HibernateBundle<DdVerifyFileMigrationConfiguration> expectedBundle
+    ) {
         super(application, "load-from-easy", "Load expected table with info from easy_files in fs-rdb and transformation rules");
-        this.hibernate = hibernate;
+        this.easyBundle = easyBundle;
+        this.expectedBundle = expectedBundle;
     }
 
     @Override
@@ -60,10 +65,15 @@ public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrati
 
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
-        EasyFileDAO easyFileDAO = new EasyFileDAO(hibernate.getSessionFactory());
         // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
-        EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(hibernate)
-            .create(EasyFileLoader.class, EasyFileDAO.class, easyFileDAO);
+        EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle).create(
+                EasyFileLoader.class,
+            new Class[]{EasyFileDAO.class, ExpectedDAO.class},
+            new Object[]{
+                new EasyFileDAO(easyBundle.getSessionFactory()),
+                new ExpectedDAO(expectedBundle.getSessionFactory()),
+            }
+        );
         for (File file : namespace.<File>getList("csv")) {
             log.info(file.toString());
             for(CSVRecord r: FedoraToBagCsv.parse(file)) {
