@@ -36,7 +36,6 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
     };
     private final HibernateBundle<DdVerifyFileMigrationConfiguration> verificationBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(Expected.class) {
 
-       // TODO is Expected table in the same DB as migration_info table?
        @Override
         public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
             return configuration.getVerificationDatabase();
