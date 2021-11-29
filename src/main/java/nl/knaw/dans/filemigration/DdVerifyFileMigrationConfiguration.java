@@ -28,6 +28,9 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
   @Valid
   @NotNull
   private DataSourceFactory easyDb = new DataSourceFactory();
+
+  @Valid
+  @NotNull
   private DataSourceFactory verificationDatabase = new DataSourceFactory();
 
   @JsonProperty("easyDb")
@@ -35,6 +38,7 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
     return easyDb;
   }
 
+  @JsonProperty("verificationDatabase")
   public DataSourceFactory getVerificationDatabase() {
     return verificationDatabase;
   }

@@ -31,7 +31,7 @@ public class ExpectedDAO extends AbstractDAO<ExpectedDAO> {
 
   public Expected create(Expected expected) {
     log.trace(expected.toString());
-    // TODO currentSession().save(expected);
+    currentSession().save(expected);
     return expected;
   }
 }
