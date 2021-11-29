@@ -16,8 +16,10 @@
 package nl.knaw.dans.filemigration.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.filemigration.api.Expected;
 import nl.knaw.dans.filemigration.core.EasyFileLoader;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +31,10 @@ public class ExpectedDAO extends AbstractDAO<ExpectedDAO> {
     super(sessionFactory);
   }
 
+  @UnitOfWork
   public Expected create(Expected expected) {
     log.trace(expected.toString());
+    log.trace(currentSession().toString());
     currentSession().save(expected);
     return expected;
   }

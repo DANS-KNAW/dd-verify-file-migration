@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.CharBuffer;
 import java.util.Arrays;
+import java.util.List;
 
 public class EasyFileLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
@@ -47,22 +48,31 @@ public class EasyFileLoader {
   /** note: bag-to-deposit also adds emd.xml for bags from the vault, that is not applicable in this context */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
-  @UnitOfWork
+  @UnitOfWork("hibernate")
   void saveExpected(FedoraToBagCsv csv) {
     log.trace(csv.toString());
     // read fedora files before adding expected migration files
     // thus we don't write anything when reading fails
-    if (!csv.getComment().contains("no payload"))
-      easyFileDAO.findByDatasetId(csv.getDatasetId())
-        .forEach(f -> saveExpected(transformedFedoraFile(csv, f)));
+    if (!csv.getComment().contains("no payload")) {
+      List<EasyFile> byDatasetId = getByDatasetId(csv); // TODO too many records in memory for a dataset with many files?
+      byDatasetId.forEach(f -> saveExpected(transformedFedoraFile(csv, f)));
+    }
     Arrays.stream(migrationFiles).iterator()
         .forEachRemaining(f -> expectedDAO.create(addedMigrationFile(csv, f)));
   }
 
-  private void saveExpected(Expected expected) {
+  public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {
+    return easyFileDAO.findByDatasetId(csv.getDatasetId());
+  }
+
+  @UnitOfWork("expectedBundle")
+  public void saveExpected(Expected expected) {
     try {
       expectedDAO.create(expected);
-    } catch (ConstraintViolationException e) { // TODO same exception for progres?
+    } catch (ConstraintViolationException e) {
+      // TODO UnitOfWorkAwareProxyFactory calls SessionFactory.onError or check existence in advance
+      // https://www.baeldung.com/hibernate-exceptions#ConstraintViolationException
+      log.info("hallo 1");
       log.trace(e.toString(), e);
       if (expected.getRemoved_duplicate_file_count() > 10) { // TODO temporary safe guard?
         log.error("too many retries on duplicate files {}",expected);
@@ -70,6 +80,9 @@ public class EasyFileLoader {
         expected.incRemoved_duplicate_file_count();
         saveExpected(expected);
       }
+    } catch (RuntimeException e) {
+      log.info("hallo 2");
+      log.trace(e.toString(), e);
     }
   }
 

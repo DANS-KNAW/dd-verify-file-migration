@@ -23,7 +23,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.QueryHint;
 import javax.persistence.Table;
 
-// order by in decreasing order, thus earlier versions become duplicates
+// order by in decreasing order, thus earlier versions become duplicates TODO how to by numeric part?
 @NamedQueries({ @NamedQuery(name = "EasyFile.findByDatasetId",
                             query = "SELECT ef FROM EasyFile ef WHERE ef.dataset_sid = :dataset_sid ORDER BY ef.pid desc",
                             hints = {

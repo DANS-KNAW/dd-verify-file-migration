@@ -28,6 +28,7 @@ import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedDAO;
 import org.apache.commons.csv.CSVRecord;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +67,10 @@ public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrati
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
         // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
+        SessionFactory sessionFactory = expectedBundle.getSessionFactory();
+        sessionFactory.withOptions();
         EasyFileDAO easyFileDAO = new EasyFileDAO(easyBundle.getSessionFactory());
-        ExpectedDAO expectedDAO = new ExpectedDAO(expectedBundle.getSessionFactory());
+        ExpectedDAO expectedDAO = new ExpectedDAO(sessionFactory);
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle)
             .create(EasyFileLoader.class, new Class[] { EasyFileDAO.class, ExpectedDAO.class }, new Object[] { easyFileDAO, expectedDAO });
         for (File file : namespace.<File>getList("csv")) {

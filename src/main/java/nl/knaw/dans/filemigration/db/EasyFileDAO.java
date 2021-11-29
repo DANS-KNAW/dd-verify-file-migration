@@ -18,16 +18,20 @@ package nl.knaw.dans.filemigration.db;
 import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.filemigration.api.EasyFile;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class EasyFileDAO extends AbstractDAO<EasyFile> {
+  private static final Logger log = LoggerFactory.getLogger(EasyFileDAO.class);
 
   public EasyFileDAO(SessionFactory sessionFactory) {
     super(sessionFactory);
   }
 
   public List<EasyFile> findByDatasetId(String id) {
+    log.trace(currentSession().toString());
     return namedTypedQuery(EasyFile.FIND_BY_DATASET_ID)
         .setParameter(EasyFile.DATASET_ID, id)
         .getResultList();
