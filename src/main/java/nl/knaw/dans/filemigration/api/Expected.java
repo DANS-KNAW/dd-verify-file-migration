@@ -18,42 +18,53 @@ package nl.knaw.dans.filemigration.api;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "expected")
+@Table(name = "expected",
+       uniqueConstraints =  @UniqueConstraint(
+           name = "expected_duplicates",
+           columnNames = {
+               "doi",
+               "expected_path",
+               "removed_duplicate_file_count",
+               "removed_original_directory", // TODO true: first version, false last version (2nd in case of fedora-versioned, 1st otherwise)
+           }
+       )
+)
 public class Expected {
   // See https://www.objectdb.com/java/jpa/entity/id#composite_primary_key
   // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 
   @Id
-  @Column(name="doi")
+  @GeneratedValue
+  private Long id;
+
+  @Column()
   private String doi;
 
-  @Id
-  @Column(name="expected_path")
+  @Column()
   private String expected_path;
 
-  @Id
-  @Column(name="removed_duplicate_file_count")
+  @Column()
   private int removed_duplicate_file_count;
 
-  @Column(name="sha1_checksum")
+  @Column()
   private String sha1_checksum;
 
-  @Column(name="easy_file_id")
+  @Column()
   private String easy_file_id;
 
-  @Column(name="fs_rdb_path")
+  @Column()
   private String fs_rdb_path;
 
-  @Column(name="added_during_migration")
+  @Column()
   private boolean added_during_migration;
 
-  @Column(name="removed_thumbnail")
+  @Column()
   private boolean removed_thumbnail;
 
-  @Column(name="removed_original_directory")
+  @Column()
   private boolean removed_original_directory;
 
-  @Column(name="transformed_name")
+  @Column()
   private boolean transformed_name;
 
   public String toString() {
@@ -72,9 +83,11 @@ public class Expected {
   public int getRemoved_duplicate_file_count() {
     return removed_duplicate_file_count;
   }
-  public void setRemoved_duplicate_file_count(int removed_duplicate_file) {
+
+  public void setRemoved_duplicate_file_count(int removed_duplicate_file_count) {
     this.removed_duplicate_file_count = removed_duplicate_file_count;
   }
+
   public void incRemoved_duplicate_file_count() {
     this.removed_duplicate_file_count += 1;
   }
@@ -141,5 +154,13 @@ public class Expected {
 
   public void setDoi(String doi) {
     this.doi = doi;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
   }
 }

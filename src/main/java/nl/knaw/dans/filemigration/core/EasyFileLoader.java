@@ -20,6 +20,7 @@ import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.Expected;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedDAO;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,10 +62,14 @@ public class EasyFileLoader {
   private void saveExpected(Expected expected) {
     try {
       expectedDAO.create(expected);
-    } catch (Exception e) {
-      // TODO how to detect duplicate key exception?
-      expected.incRemoved_duplicate_file_count();
-      saveExpected(expected);
+    } catch (ConstraintViolationException e) { // TODO same exception for progres?
+      log.trace(e.toString(), e);
+      if (expected.getRemoved_duplicate_file_count() > 10) { // TODO temporary safe guard?
+        log.error("too many retries on duplicate files {}",expected);
+      } else {
+        expected.incRemoved_duplicate_file_count();
+        saveExpected(expected);
+      }
     }
   }
 

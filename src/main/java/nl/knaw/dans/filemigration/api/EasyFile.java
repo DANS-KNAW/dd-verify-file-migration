@@ -23,8 +23,9 @@ import javax.persistence.NamedQuery;
 import javax.persistence.QueryHint;
 import javax.persistence.Table;
 
+// order by in decreasing order, thus earlier versions become duplicates
 @NamedQueries({ @NamedQuery(name = "EasyFile.findByDatasetId",
-                            query = "SELECT ef FROM EasyFile ef WHERE ef.dataset_sid = :dataset_sid ORDER BY ef.path",
+                            query = "SELECT ef FROM EasyFile ef WHERE ef.dataset_sid = :dataset_sid ORDER BY ef.pid desc",
                             hints = {
                                 @QueryHint(
                                     name = "org.hibernate.readOnly",
@@ -42,24 +43,34 @@ public class EasyFile {
   @Id
   @Column(nullable = false)
   private String pid;
+
   @Column(nullable = false)
   private String parent_sid;
+
   @Column(nullable = false)
   private String dataset_sid;
+
   @Column()
   private String path;
+
   @Column(nullable = false)
   private String filename;
+
   @Column(nullable = false)
   private long size;
+
   @Column(nullable = false)
   private String mimetype;
+
   @Column(nullable = false)
   private String creator_role;
+
   @Column(nullable = false)
   private String visible_to;
+
   @Column(nullable = false)
   private String accessible_to;
+
   @Column()
   private String sha1checksum;
 
