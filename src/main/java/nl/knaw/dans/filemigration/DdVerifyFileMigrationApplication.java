@@ -34,7 +34,7 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
             return configuration.getEasyDb();
         }
     };
-    private final HibernateBundle<DdVerifyFileMigrationConfiguration> verificationBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(Expected.class) {
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> expectedBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(Expected.class) {
 
        @Override
         public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
@@ -55,7 +55,7 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
     public void initialize(final Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap) {
         bootstrap.addBundle(easyBundle);
         //TODO bootstrap.addBundle(verificationBundle);
-        bootstrap.addCommand(new LoadFromEasyCommand(this, easyBundle, /* TODO verificationBundle */ easyBundle));
+        bootstrap.addCommand(new LoadFromEasyCommand(this, easyBundle, expectedBundle));
     }
 
     @Override

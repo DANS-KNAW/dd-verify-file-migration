@@ -66,14 +66,10 @@ public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrati
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
         // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
-        EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle).create(
-                EasyFileLoader.class,
-            new Class[]{EasyFileDAO.class, ExpectedDAO.class},
-            new Object[]{
-                new EasyFileDAO(easyBundle.getSessionFactory()),
-                new ExpectedDAO(expectedBundle.getSessionFactory()),
-            }
-        );
+        EasyFileDAO easyFileDAO = new EasyFileDAO(easyBundle.getSessionFactory());
+        ExpectedDAO expectedDAO = new ExpectedDAO(expectedBundle.getSessionFactory());
+        EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle)
+            .create(EasyFileLoader.class, new Class[] { EasyFileDAO.class, ExpectedDAO.class }, new Object[] { easyFileDAO, expectedDAO });
         for (File file : namespace.<File>getList("csv")) {
             log.info(file.toString());
             for(CSVRecord r: FedoraToBagCsv.parse(file)) {
