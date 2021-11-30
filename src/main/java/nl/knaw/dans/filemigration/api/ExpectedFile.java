@@ -18,33 +18,27 @@ package nl.knaw.dans.filemigration.api;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "expected",
-       uniqueConstraints =  @UniqueConstraint(
-           name = "expected_duplicates",
-           columnNames = {
-               "doi",
-               "expected_path",
-               "removed_duplicate_file_count",
-               "removed_original_directory", // TODO true: first version, false last version (2nd in case of fedora-versioned, 1st otherwise)
-           }
-       )
-)
+@IdClass(ExpectedFileKey.class)
+@Table(name = "expected")
 public class ExpectedFile {
   // See https://www.objectdb.com/java/jpa/entity/id#composite_primary_key
   // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 
   @Id
-  @GeneratedValue
-  private Long id;
-
   @Column()
   private String doi;
 
+  @Id
   @Column()
   private String expected_path;
 
+  @Id
   @Column()
   private int removed_duplicate_file_count;
+
+  @Id
+  @Column()
+  private boolean removed_original_directory;
 
   @Column()
   private String sha1_checksum;
@@ -60,9 +54,6 @@ public class ExpectedFile {
 
   @Column()
   private boolean removed_thumbnail;
-
-  @Column()
-  private boolean removed_original_directory;
 
   @Column()
   private boolean transformed_name;
@@ -154,13 +145,5 @@ public class ExpectedFile {
 
   public void setDoi(String doi) {
     this.doi = doi;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
   }
 }
