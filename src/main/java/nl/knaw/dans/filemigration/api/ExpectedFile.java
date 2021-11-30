@@ -29,7 +29,7 @@ import javax.persistence.*;
            }
        )
 )
-public class Expected {
+public class ExpectedFile {
   // See https://www.objectdb.com/java/jpa/entity/id#composite_primary_key
   // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 

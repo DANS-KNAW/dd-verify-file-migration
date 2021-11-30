@@ -17,9 +17,9 @@ package nl.knaw.dans.filemigration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.filemigration.api.EasyFile;
-import nl.knaw.dans.filemigration.api.Expected;
+import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
-import nl.knaw.dans.filemigration.db.ExpectedDAO;
+import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +33,9 @@ public class EasyFileLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
   private final EasyFileDAO easyFileDAO;
-  private final ExpectedDAO expectedDAO;
+  private final ExpectedFileDAO expectedDAO;
 
-  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedDAO expectedDAO) {
+  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO) {
     this.expectedDAO = expectedDAO;
     this.easyFileDAO = easyFileDAO;
   }
@@ -55,7 +55,7 @@ public class EasyFileLoader {
     // thus we don't write anything when reading fails
     for (EasyFile f: getByDatasetId(csv)) {
       // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
-      Expected expected = transformedFedoraFile(csv, f);
+      ExpectedFile expected = transformedFedoraFile(csv, f);
       try {
         saveExpected(expected);
       } catch(PersistenceException e){
@@ -84,12 +84,12 @@ public class EasyFileLoader {
   }
 
   @UnitOfWork("expectedBundle")
-  public void saveExpected(Expected expected) {
+  public void saveExpected(ExpectedFile expected) {
       expectedDAO.create(expected);
   }
 
-  private static Expected addedMigrationFile(FedoraToBagCsv csv, String migrationFile) {
-    Expected expected = new Expected();
+  private static ExpectedFile addedMigrationFile(FedoraToBagCsv csv, String migrationFile) {
+    ExpectedFile expected = new ExpectedFile();
     expected.setDoi(csv.getDoi());
     expected.setSha1_checksum("");
     expected.setEasy_file_id("");
@@ -103,7 +103,7 @@ public class EasyFileLoader {
     return expected;
   }
 
-  private static Expected transformedFedoraFile(FedoraToBagCsv csv, EasyFile ef) {
+  private static ExpectedFile transformedFedoraFile(FedoraToBagCsv csv, EasyFile ef) {
     log.trace("EasyFile = {}" , ef);
     final boolean removeOriginal = csv.getType().startsWith("original") && ef.getPath().startsWith("original/");
     final String path = removeOriginal
@@ -113,7 +113,7 @@ public class EasyFileLoader {
     final String folder = replaceForbidden(path.replaceAll("[^/]*",""), forbiddenInFolders);
     final String dvPath = folder + "/" + file;
 
-    Expected expected = new Expected();
+    ExpectedFile expected = new ExpectedFile();
     expected.setDoi(csv.getDoi());
     expected.setSha1_checksum(ef.getSha1checksum());
     expected.setEasy_file_id(ef.getPid());

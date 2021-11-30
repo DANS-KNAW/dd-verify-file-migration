@@ -22,7 +22,7 @@ import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import nl.knaw.dans.filemigration.api.EasyFile;
-import nl.knaw.dans.filemigration.api.Expected;
+import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.cli.LoadFromFedoraCommand;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
@@ -35,7 +35,7 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
       }
     };
 
-    private final HibernateBundle<DdVerifyFileMigrationConfiguration> expectedBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(Expected.class) {
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> expectedBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(ExpectedFile.class) {
 
       @Override
       public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {

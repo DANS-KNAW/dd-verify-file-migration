@@ -26,7 +26,7 @@ import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
 import nl.knaw.dans.filemigration.core.FedoraToBagCsv;
 import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
-import nl.knaw.dans.filemigration.db.ExpectedDAO;
+import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,11 +67,11 @@ public class LoadFromFedoraCommand extends EnvironmentCommand<DdVerifyFileMigrat
     protected void run(Environment environment, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
         // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
         EasyFileDAO easyFileDAO = new EasyFileDAO(easyBundle.getSessionFactory());
-        ExpectedDAO expectedDAO = new ExpectedDAO(expectedBundle.getSessionFactory());
+        ExpectedFileDAO expectedDAO = new ExpectedFileDAO(expectedBundle.getSessionFactory());
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle)
             .create(
                 EasyFileLoader.class,
-                new Class[] { EasyFileDAO.class, ExpectedDAO.class },
+                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class },
                 new Object[] { easyFileDAO, expectedDAO }
             );
         for (File file : namespace.<File>getList("csv")) {
