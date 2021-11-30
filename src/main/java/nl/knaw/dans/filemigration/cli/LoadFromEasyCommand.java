@@ -68,7 +68,6 @@ public class LoadFromEasyCommand  extends EnvironmentCommand<DdVerifyFileMigrati
     protected void run(Environment environment, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
         // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
         SessionFactory sessionFactory = expectedBundle.getSessionFactory();
-        sessionFactory.withOptions();
         EasyFileDAO easyFileDAO = new EasyFileDAO(easyBundle.getSessionFactory());
         ExpectedDAO expectedDAO = new ExpectedDAO(sessionFactory);
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle)

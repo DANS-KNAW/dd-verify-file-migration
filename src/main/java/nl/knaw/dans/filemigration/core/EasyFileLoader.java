@@ -24,6 +24,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.PersistenceException;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.List;
@@ -40,50 +41,51 @@ public class EasyFileLoader {
   }
 
   public void loadFromCsv(FedoraToBagCsv csv) {
-    if (csv.getComment().contains("OK"))
-      saveExpected(csv);
+    if (csv.getComment().contains("OK") && !csv.getComment().contains("no payload"))
+      fedoraFiles(csv);
     else log.warn("skipped {}", csv);
   }
 
   /** note: bag-to-deposit also adds emd.xml for bags from the vault, that is not applicable in this context */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
-  @UnitOfWork("hibernate")
-  void saveExpected(FedoraToBagCsv csv) {
+  void fedoraFiles(FedoraToBagCsv csv) {
     log.trace(csv.toString());
     // read fedora files before adding expected migration files
     // thus we don't write anything when reading fails
-    if (!csv.getComment().contains("no payload")) {
-      List<EasyFile> byDatasetId = getByDatasetId(csv); // TODO too many records in memory for a dataset with many files?
-      byDatasetId.forEach(f -> saveExpected(transformedFedoraFile(csv, f)));
+    for (EasyFile f: getByDatasetId(csv)) {
+      // TODO what about the biggest pdf/image for europeana?
+      Expected expected = transformedFedoraFile(csv, f);
+      try {
+        fedoraFiles(expected);
+      } catch(PersistenceException e){
+        // logged as error by org.hibernate.engine.jdbc.spi.SqlExceptionHelper
+        if (!(e.getCause() instanceof ConstraintViolationException))
+          throw e;
+        else {
+          if (expected.getRemoved_duplicate_file_count() > 10) {
+            // TODO temporary safe guard?
+            log.error("too many retries on duplicate file, skipping: {}", expected);
+          }
+          else {
+            expected.incRemoved_duplicate_file_count();
+            fedoraFiles(expected);
+          }
+        }
+      }
     }
     Arrays.stream(migrationFiles).iterator()
-        .forEachRemaining(f -> expectedDAO.create(addedMigrationFile(csv, f)));
+        .forEachRemaining(f -> fedoraFiles(addedMigrationFile(csv, f)));
   }
 
+  @UnitOfWork("hibernate")
   public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {
     return easyFileDAO.findByDatasetId(csv.getDatasetId());
   }
 
   @UnitOfWork("expectedBundle")
-  public void saveExpected(Expected expected) {
-    try {
+  public void fedoraFiles(Expected expected) {
       expectedDAO.create(expected);
-    } catch (ConstraintViolationException e) {
-      // TODO UnitOfWorkAwareProxyFactory calls SessionFactory.onError or check existence in advance
-      // https://www.baeldung.com/hibernate-exceptions#ConstraintViolationException
-      log.info("hallo 1");
-      log.trace(e.toString(), e);
-      if (expected.getRemoved_duplicate_file_count() > 10) { // TODO temporary safe guard?
-        log.error("too many retries on duplicate files {}",expected);
-      } else {
-        expected.incRemoved_duplicate_file_count();
-        saveExpected(expected);
-      }
-    } catch (RuntimeException e) {
-      log.info("hallo 2");
-      log.trace(e.toString(), e);
-    }
   }
 
   private static Expected addedMigrationFile(FedoraToBagCsv csv, String migrationFile) {
