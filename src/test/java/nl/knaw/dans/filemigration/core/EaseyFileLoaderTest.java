@@ -15,10 +15,6 @@
  */
 package nl.knaw.dans.filemigration.core;
 
-import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.hibernate.HibernateBundle;
-import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
-import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
 import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
@@ -27,6 +23,7 @@ import org.easymock.EasyMock;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
@@ -56,15 +53,19 @@ public class EaseyFileLoaderTest {
     verify(csv);
   }
 
-  private ExpectedFileDAO mockExpectedDAO(ExpectedFile expectedFile) {
+  private ExpectedFileDAO mockExpectedDAO(List<ExpectedFile> expectedFiles) {
+    // TODO a variant that throws a duplicate key exception
     ExpectedFileDAO mock = createMock(ExpectedFileDAO.class);
-//    expect(mock.create(expectedFile)).anyTimes();
+    for (ExpectedFile f : expectedFiles) {
+      mock.create(f);
+      EasyMock.expectLastCall().once();
+    }
     return mock;
   }
 
   private EasyFileDAO mockEasyFileDAO(ArrayList<EasyFile> easyFiles) {
     EasyFileDAO mock = createMock(EasyFileDAO.class);
-    expect(mock.findByDatasetId(datasetId)).andReturn(easyFiles).anyTimes();
+    expect(mock.findByDatasetId(datasetId)).andReturn(easyFiles).once();
     return mock;
   }
 
@@ -73,7 +74,7 @@ public class EaseyFileLoaderTest {
     expect(mockedCSV.getComment()).andReturn(comment).anyTimes();
     expect(mockedCSV.getType()).andReturn(type).anyTimes();
     expect(mockedCSV.getDoi()).andReturn("10.80270/test-nySe-x6f-kf66").anyTimes();
-    expect(mockedCSV.getDatasetId()).andReturn(datasetId).anyTimes();
+    expect(mockedCSV.getDatasetId()).andReturn(datasetId).once();
     return mockedCSV;
   }
 }
