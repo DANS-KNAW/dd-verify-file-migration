@@ -23,7 +23,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.Expected;
-import nl.knaw.dans.filemigration.cli.LoadFromEasyCommand;
+import nl.knaw.dans.filemigration.cli.LoadFromFedoraCommand;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
 
@@ -62,7 +62,7 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
     public void initialize(final Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap) {
         bootstrap.addBundle(easyBundle);
         bootstrap.addBundle(expectedBundle);
-        bootstrap.addCommand(new LoadFromEasyCommand(this, easyBundle, expectedBundle));
+        bootstrap.addCommand(new LoadFromFedoraCommand(this, easyBundle, expectedBundle));
     }
 
     @Override

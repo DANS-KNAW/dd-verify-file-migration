@@ -46,7 +46,7 @@ public class EasyFileLoader {
     else log.warn("skipped {}", csv);
   }
 
-  /** note: bag-to-deposit also adds emd.xml for bags from the vault, that is not applicable in this context */
+  /** note: bag-to-deposit also adds emd.xml to bags from the vault, that does not apply to migration */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
   void fedoraFiles(FedoraToBagCsv csv) {
@@ -54,10 +54,10 @@ public class EasyFileLoader {
     // read fedora files before adding expected migration files
     // thus we don't write anything when reading fails
     for (EasyFile f: getByDatasetId(csv)) {
-      // TODO what about the biggest pdf/image for europeana?
+      // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
       Expected expected = transformedFedoraFile(csv, f);
       try {
-        fedoraFiles(expected);
+        saveExpected(expected);
       } catch(PersistenceException e){
         // logged as error by org.hibernate.engine.jdbc.spi.SqlExceptionHelper
         if (!(e.getCause() instanceof ConstraintViolationException))
@@ -69,13 +69,13 @@ public class EasyFileLoader {
           }
           else {
             expected.incRemoved_duplicate_file_count();
-            fedoraFiles(expected);
+            saveExpected(expected);
           }
         }
       }
     }
     Arrays.stream(migrationFiles).iterator()
-        .forEachRemaining(f -> fedoraFiles(addedMigrationFile(csv, f)));
+        .forEachRemaining(f -> saveExpected(addedMigrationFile(csv, f)));
   }
 
   @UnitOfWork("hibernate")
@@ -84,7 +84,7 @@ public class EasyFileLoader {
   }
 
   @UnitOfWork("expectedBundle")
-  public void fedoraFiles(Expected expected) {
+  public void saveExpected(Expected expected) {
       expectedDAO.create(expected);
   }
 
