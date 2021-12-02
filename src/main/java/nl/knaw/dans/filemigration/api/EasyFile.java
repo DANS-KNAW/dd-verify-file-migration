@@ -24,9 +24,9 @@ import javax.persistence.QueryHint;
 import javax.persistence.Table;
 import java.util.Objects;
 
-// order by in decreasing order, thus earlier versions become duplicates TODO how to by numeric part?
+// order by in decreasing numeric order, thus earlier versions become duplicates
 @NamedQueries({ @NamedQuery(name = "EasyFile.findByDatasetId",
-                            query = "SELECT ef FROM EasyFile ef WHERE ef.dataset_sid = :dataset_sid ORDER BY ef.pid desc",
+                            query = "SELECT ef FROM EasyFile ef WHERE ef.dataset_sid = :dataset_sid ORDER BY length(ef.pid) desc, ef.pid desc",
                             hints = {
                                 @QueryHint(
                                     name = "org.hibernate.readOnly",
