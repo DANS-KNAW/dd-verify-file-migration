@@ -16,6 +16,7 @@
 package nl.knaw.dans.filemigration.api;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @IdClass(ExpectedFileKey.class)
@@ -145,5 +146,20 @@ public class ExpectedFile {
 
   public void setDoi(String doi) {
     this.doi = doi;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    ExpectedFile that = (ExpectedFile) o;
+    return removed_duplicate_file_count == that.removed_duplicate_file_count && removed_original_directory == that.removed_original_directory && added_during_migration == that.added_during_migration && removed_thumbnail == that.removed_thumbnail && transformed_name == that.transformed_name && Objects.equals(doi, that.doi) && Objects.equals(expected_path, that.expected_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(easy_file_id, that.easy_file_id) && Objects.equals(fs_rdb_path, that.fs_rdb_path);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(doi, expected_path, removed_duplicate_file_count, removed_original_directory, sha1_checksum, easy_file_id, fs_rdb_path, added_during_migration, removed_thumbnail, transformed_name);
   }
 }

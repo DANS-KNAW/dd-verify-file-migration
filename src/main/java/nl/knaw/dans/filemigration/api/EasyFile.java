@@ -42,37 +42,37 @@ public class EasyFile {
 
   @Id
   @Column(nullable = false)
-  private String pid;
+  private String pid = "";
 
   @Column(nullable = false)
-  private String parent_sid;
+  private String parent_sid = "";
 
   @Column(nullable = false)
-  private String dataset_sid;
+  private String dataset_sid = "";
 
   @Column()
-  private String path;
+  private String path = "";
 
   @Column(nullable = false)
-  private String filename;
+  private String filename = "";
 
   @Column(nullable = false)
   private long size;
 
   @Column(nullable = false)
-  private String mimetype;
+  private String mimetype = "";
 
   @Column(nullable = false)
-  private String creator_role;
+  private String creator_role = "";
 
   @Column(nullable = false)
-  private String visible_to;
+  private String visible_to = "";
 
   @Column(nullable = false)
-  private String accessible_to;
+  private String accessible_to = "";
 
   @Column()
-  private String sha1checksum;
+  private String sha1checksum = "";
 
   public String toString() {
     // TODO improve?

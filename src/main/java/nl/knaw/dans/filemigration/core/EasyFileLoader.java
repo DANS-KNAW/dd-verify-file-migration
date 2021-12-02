@@ -81,7 +81,7 @@ public class EasyFileLoader {
 
   public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {
     List<EasyFile> easyFiles = easyFileDAO.findByDatasetId(csv.getDatasetId());
-    if (easyFiles == null) // TODO how caused by mocking?
+    if (easyFiles == null) // TODO how caused by mocking? Manual test with easy-dataset:3 did not cause null
       return new ArrayList<EasyFile>();
     else return easyFiles;
   }
