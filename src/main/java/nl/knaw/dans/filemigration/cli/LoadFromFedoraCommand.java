@@ -23,6 +23,7 @@ import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
+import nl.knaw.dans.filemigration.core.EasyFileLoaderImpl;
 import nl.knaw.dans.filemigration.core.FedoraToBagCsv;
 import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
@@ -70,7 +71,7 @@ public class LoadFromFedoraCommand extends EnvironmentCommand<DdVerifyFileMigrat
         ExpectedFileDAO expectedDAO = new ExpectedFileDAO(expectedBundle.getSessionFactory());
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle)
             .create(
-                EasyFileLoader.class,
+                EasyFileLoaderImpl.class,
                 new Class[] { EasyFileDAO.class, ExpectedFileDAO.class },
                 new Object[] { easyFileDAO, expectedDAO }
             );

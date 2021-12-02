@@ -41,13 +41,13 @@ public class ExpectedFile {
   private boolean removed_original_directory;
 
   @Column()
-  private String sha1_checksum;
+  private String sha1_checksum = "";
 
   @Column()
-  private String easy_file_id;
+  private String easy_file_id = "";
 
   @Column()
-  private String fs_rdb_path;
+  private String fs_rdb_path = "";
 
   @Column()
   private boolean added_during_migration;

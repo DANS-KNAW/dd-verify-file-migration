@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.filemigration.core;
 
-import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
@@ -26,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.PersistenceException;
 import java.nio.CharBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,7 +53,8 @@ public class EasyFileLoader {
     log.trace(csv.toString());
     // read fedora files before adding expected migration files
     // thus we don't write anything when reading fails
-    for (EasyFile f: getByDatasetId(csv)) {
+    List<EasyFile> easyFiles = getByDatasetId(csv);
+    for (EasyFile f: easyFiles) {
       // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
       ExpectedFile expected = transformedFedoraFile(csv, f);
       try {
@@ -78,12 +79,13 @@ public class EasyFileLoader {
         .forEachRemaining(f -> saveExpected(addedMigrationFile(csv, f)));
   }
 
-  @UnitOfWork("hibernate")
   public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {
-    return easyFileDAO.findByDatasetId(csv.getDatasetId());
+    List<EasyFile> easyFiles = easyFileDAO.findByDatasetId(csv.getDatasetId());
+    if (easyFiles == null) // TODO how caused by mocking?
+      return new ArrayList<EasyFile>();
+    else return easyFiles;
   }
 
-  @UnitOfWork("expectedBundle")
   public void saveExpected(ExpectedFile expected) {
       expectedDAO.create(expected);
   }
