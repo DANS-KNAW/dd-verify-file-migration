@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.PersistenceException;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,10 +79,7 @@ public class EasyFileLoader {
   }
 
   public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {
-    List<EasyFile> easyFiles = easyFileDAO.findByDatasetId(csv.getDatasetId());
-    if (easyFiles == null) // TODO how caused by mocking? Manual test with easy-dataset:3 did not cause null
-      return new ArrayList<EasyFile>();
-    else return easyFiles;
+    return easyFileDAO.findByDatasetId(csv.getDatasetId());
   }
 
   public void saveExpected(ExpectedFile expected) {
@@ -112,14 +108,14 @@ public class EasyFileLoader {
         ? ef.getPath().replace("original/","")
         : ef.getPath();
     final String file = replaceForbidden(path.replaceAll(".*/",""), forbiddenInFileName);
-    final String folder = replaceForbidden(path.replaceAll("[^/]*",""), forbiddenInFolders);
-    final String dvPath = folder + "/" + file;
+    final String folder = replaceForbidden(path.replaceAll("[^/]*$",""), forbiddenInFolders);
+    final String dvPath = folder + file;
 
     ExpectedFile expected = new ExpectedFile();
     expected.setDoi(csv.getDoi());
     expected.setSha1_checksum(ef.getSha1checksum());
     expected.setEasy_file_id(ef.getPid());
-    expected.setFs_rdb_path(path);
+    expected.setFs_rdb_path(ef.getPath());
     expected.setExpected_path(dvPath);
     expected.setAdded_during_migration(false);
     expected.setRemoved_thumbnail(path.matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
@@ -129,13 +125,12 @@ public class EasyFileLoader {
     return expected;
   }
 
-  private static final String forbiddenInFileName = ":*?\"<>|;#";
-  private static final String forbiddenInFolders = forbiddenInFileName + "'(),[]&+'";
-  private static String replaceForbidden (String s, String forbidden) {
-    final CharBuffer b = CharBuffer.allocate(s.length());
-    for (char c : s.toCharArray()){
-      b.append(forbidden.indexOf(c) >= 0 ? '_' : c);
-    }
-    return b.toString();
+  private static final String forbidden = ":*?\"<>|;#";
+  private static final char[] forbiddenInFileName = ":*?\"<>|;#".toCharArray();
+  private static final char[] forbiddenInFolders = (forbidden + "'(),[]&+'").toCharArray();
+  private static String replaceForbidden (String s, char[] forbidden) {
+    for (char c: forbidden)
+      s = s.replace(c,'_');
+    return s;
   }
 }

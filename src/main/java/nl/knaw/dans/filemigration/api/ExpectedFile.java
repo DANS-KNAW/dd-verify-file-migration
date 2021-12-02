@@ -22,8 +22,22 @@ import java.util.Objects;
 @IdClass(ExpectedFileKey.class)
 @Table(name = "expected")
 public class ExpectedFile {
-  // See https://www.objectdb.com/java/jpa/entity/id#composite_primary_key
   // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
+
+  public ExpectedFile() {}
+
+  public ExpectedFile(String doi, String expected_path, int removed_duplicate_file_count, boolean removed_original_directory, String sha1_checksum, String easy_file_id, String fs_rdb_path, boolean added_during_migration, boolean removed_thumbnail, boolean transformed_name) {
+    this.doi = doi;
+    this.expected_path = expected_path;
+    this.removed_duplicate_file_count = removed_duplicate_file_count;
+    this.removed_original_directory = removed_original_directory;
+    this.sha1_checksum = sha1_checksum;
+    this.easy_file_id = easy_file_id;
+    this.fs_rdb_path = fs_rdb_path;
+    this.added_during_migration = added_during_migration;
+    this.removed_thumbnail = removed_thumbnail;
+    this.transformed_name = transformed_name;
+  }
 
   @Id
   @Column()
@@ -59,9 +73,9 @@ public class ExpectedFile {
   @Column()
   private boolean transformed_name;
 
+  @Override
   public String toString() {
-    // TODO improve?
-    return  doi + ",  " + sha1_checksum + ",  " + easy_file_id + ",  " + fs_rdb_path + ",  " + expected_path + ",  " + added_during_migration + ",  " + removed_thumbnail + ",  " + removed_original_directory + ",  " + removed_duplicate_file_count + ",  " + transformed_name;
+    return "ExpectedFile{" + "doi='" + doi + '\'' + ", expected_path='" + expected_path + '\'' + ", removed_duplicate_file_count=" + removed_duplicate_file_count + ", removed_original_directory=" + removed_original_directory + ", sha1_checksum='" + sha1_checksum + '\'' + ", easy_file_id='" + easy_file_id + '\'' + ", fs_rdb_path='" + fs_rdb_path + '\'' + ", added_during_migration=" + added_during_migration + ", removed_thumbnail=" + removed_thumbnail + ", transformed_name=" + transformed_name + '}';
   }
 
   public boolean isTransformed_name() {

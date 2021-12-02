@@ -20,9 +20,12 @@ import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 import org.easymock.EasyMock;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 
+import javax.persistence.PersistenceException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.easymock.EasyMock.createMock;
@@ -39,8 +42,7 @@ public class EaseyFileLoaderTest {
 
     FedoraToBagCsv csv = mockCSV("OK no payload", "blabla");
     replay(csv);
-    new EasyFileLoader(null, null)
-        .loadFromCsv(csv);
+    new EasyFileLoader(null, null).loadFromCsv(csv);
     verify(csv);
   }
 
@@ -48,9 +50,9 @@ public class EaseyFileLoaderTest {
   public void skipFailed() {
 
     FedoraToBagCsv csv = mockCSV("Failed for some reason", "blabla");
+
     replay(csv);
-    new EasyFileLoader(null, null)
-        .loadFromCsv(csv);
+    new EasyFileLoader(null, null).loadFromCsv(csv);
     verify(csv);
   }
 
@@ -58,12 +60,82 @@ public class EaseyFileLoaderTest {
   public void migrationFilesForEmptyDataset() {
 
     FedoraToBagCsv csv = mockCSV("OK", "blabla");
-    EasyFileDAO easyFileDAO = mockEasyFileDAO(new ArrayList<EasyFile>());
-    ExpectedFileDAO expectedFileDAO = mockExpectedFileDAO(expectedMigrationFiles());
+    EasyFileDAO easyFileDAO = mockEasyFileDAO();
+    ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
+    for (ExpectedFile ef: expectedMigrationFiles())
+      expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
     new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
+  }
+
+  @Test
+  public void duplicateFiles() {
+
+    FedoraToBagCsv csv = mockCSV("OK", "blabla");
+    EasyFileDAO easyFileDAO = mockEasyFileDAO(
+        new EasyFile("easy-file:2","easy-folder:1",datasetId,"some_/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123"),
+        new EasyFile("easy-file:1","easy-folder:1",datasetId,"some?/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123")
+    );
+    ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
+    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:2","some_/file.txt",false,false,false));
+    expectThrows(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:1","some?/file.txt",false,false,true));
+    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",1,false,"123","easy-file:1","some?/file.txt",false,false,true));
+    for (ExpectedFile ef: expectedMigrationFiles())
+      expectSuccess(expectedFileDAO, ef);
+
+    replay(csv, easyFileDAO, expectedFileDAO);
+    new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    verify(csv, easyFileDAO, expectedFileDAO);
+  }
+
+  @Test
+  public void duplicateCausedByOriginalVersioned() {
+
+    FedoraToBagCsv csv = mockCSV("OK", "original_versioned");
+    EasyFileDAO easyFileDAO = mockEasyFileDAO(
+        new EasyFile("easy-file:2","easy-folder:1",datasetId,"some_/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123"),
+        new EasyFile("easy-file:1","easy-folder:1",datasetId,"original/some?/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123")
+    );
+    ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
+    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:2","some_/file.txt",false,false,false));
+    expectThrows(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,true,"123","easy-file:1","original/some?/file.txt",false,false,true));
+    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",1,true,"123","easy-file:1","original/some?/file.txt",false,false,true));
+    for (ExpectedFile ef: expectedMigrationFiles())
+      expectSuccess(expectedFileDAO, ef);
+
+    replay(csv, easyFileDAO, expectedFileDAO);
+    new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    verify(csv, easyFileDAO, expectedFileDAO);
+  }
+
+
+  @Test
+  public void dropThumbnail() {
+
+    FedoraToBagCsv csv = mockCSV("OK", "blabla");
+    EasyFileDAO easyFileDAO = mockEasyFileDAO(
+        new EasyFile("easy-file:1","easy-folder:1",datasetId,"some_thumbnails/image_small.png","image_small.png",10,"png","DEPOSITOR","ANONYMOUS","ANONYMOUS","123")
+    );
+    ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
+    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_thumbnails/image_small.png",0,false,"123","easy-file:1","some_thumbnails/image_small.png",false,true,false));
+    for (ExpectedFile ef: expectedMigrationFiles())
+      expectSuccess(expectedFileDAO, ef);
+
+    replay(csv, easyFileDAO, expectedFileDAO);
+    new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    verify(csv, easyFileDAO, expectedFileDAO);
+  }
+
+  private void expectSuccess(ExpectedFileDAO expectedFileDAO, ExpectedFile ef) {
+    expectedFileDAO.create(ef);
+    EasyMock.expectLastCall().once();
+  }
+
+  private void expectThrows(ExpectedFileDAO expectedFileDAO, ExpectedFile ef) {
+    expectedFileDAO.create(ef);
+    EasyMock.expectLastCall().andThrow(new PersistenceException(new ConstraintViolationException("",null,"blabla"))).once();
   }
 
   private List<ExpectedFile> expectedMigrationFiles() {
@@ -89,21 +161,10 @@ public class EaseyFileLoaderTest {
     return mockedCSV;
   }
 
-  private ExpectedFileDAO mockExpectedFileDAO(List<ExpectedFile> expectedFiles) {
-
-    // TODO a variant that can throw a duplicate key exception
-    ExpectedFileDAO mock = createMock(ExpectedFileDAO.class);
-    for (ExpectedFile f : expectedFiles) {
-      mock.create(f);
-      EasyMock.expectLastCall().once();
-    }
-    return mock;
-  }
-
-  private EasyFileDAO mockEasyFileDAO(List<EasyFile> easyFiles) {
+  private EasyFileDAO mockEasyFileDAO(EasyFile... easyFiles) {
 
     EasyFileDAO mock = createMock(EasyFileDAO.class);
-    expect(mock.findByDatasetId(datasetId)).andReturn(easyFiles).once();
+    expect(mock.findByDatasetId(datasetId)).andReturn(Arrays.asList(easyFiles)).once();
     return mock;
   }
 }
