@@ -25,7 +25,6 @@ public class ExpectedFileKey implements Serializable {
   private String doi;
   private String expected_path;
   private int removed_duplicate_file_count;
-  private boolean removed_original_directory;
 
   // Equals contract implementation generated with IntelliJ
   @Override
@@ -37,7 +36,6 @@ public class ExpectedFileKey implements Serializable {
         .append(doi, that.doi)
         .append(expected_path, that.expected_path)
         .append(removed_duplicate_file_count, that.removed_duplicate_file_count)
-        .append(removed_original_directory, that.removed_original_directory)
         .isEquals();
   }
 
@@ -46,7 +44,6 @@ public class ExpectedFileKey implements Serializable {
     return new HashCodeBuilder(17, 37)
         .append(doi)
         .append(expected_path)
-        .append(removed_duplicate_file_count)
-        .append(removed_original_directory).toHashCode();
+        .append(removed_duplicate_file_count).toHashCode();
   }
 }

@@ -51,7 +51,6 @@ public class ExpectedFile {
   @Column()
   private int removed_duplicate_file_count;
 
-  @Id
   @Column()
   private boolean removed_original_directory;
 
