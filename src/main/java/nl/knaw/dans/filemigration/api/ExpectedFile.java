@@ -39,12 +39,15 @@ public class ExpectedFile {
     this.transformed_name = transformed_name;
   }
 
+  // most lengths from easy-dtap/provisioning/roles/easy-fs-rdb/templates/create-easy-db-tables.sql
+  // doi length as in dd-dtap/shared-code/dataverse/scripts/database/create/create_v*.sql
+
   @Id
-  @Column()
+  @Column(length = 255)
   private String doi;
 
   @Id
-  @Column()
+  @Column(length = 1024) // TODO basic_file_meta has only 1000
   private String expected_path;
 
   @Id
@@ -54,13 +57,13 @@ public class ExpectedFile {
   @Column()
   private boolean removed_original_directory;
 
-  @Column()
+  @Column(length = 40)
   private String sha1_checksum = "";
 
-  @Column()
+  @Column(length = 64)
   private String easy_file_id = "";
 
-  @Column()
+  @Column(length = 1024)
   private String fs_rdb_path = "";
 
   @Column()
