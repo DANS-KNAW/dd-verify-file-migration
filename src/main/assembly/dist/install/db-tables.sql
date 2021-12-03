@@ -11,4 +11,4 @@ create table expected (
  transformed_name boolean,
  primary key (doi, expected_path, removed_duplicate_file_count)
 );
-GRANT INSERT, SELECT, UPDATE, DELETE ON expected TO dd-verify-file-migration;
+GRANT INSERT, SELECT, UPDATE, DELETE ON expected TO dd_verify_file_migration;

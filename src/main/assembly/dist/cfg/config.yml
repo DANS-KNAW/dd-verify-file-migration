@@ -23,10 +23,10 @@ easyDb:
 
 verificationDatabase:
   driverClass: org.hsqldb.jdbcDriver
-  url: jdbc:hsqldb:hsql://localhost:9001/dd-verify-file-migration
+  url: 'jdbc:postgresql://easy.dans.knaw.nl:5432/dd_verify_file_migration'
   logValidationErrors: true
   # See: https://stackoverflow.com/questions/10684244/dbcp-validationquery-for-different-databases
   validationQuery: SELECT * FROM INFORMATION_SCHEMA.SYSTEM_TABLES
   properties:
-    hibernate.dialect: 'org.hibernate.dialect.HSQLDialect'
+    hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
     hibernate.hbm2ddl.auto: update
