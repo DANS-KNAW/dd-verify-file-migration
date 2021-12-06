@@ -40,9 +40,14 @@ public class EasyFileLoader {
   }
 
   public void loadFromCsv(FedoraToBagCsv csv) {
-    if (csv.getComment().contains("OK") && !csv.getComment().contains("no payload"))
-      fedoraFiles(csv);
-    else log.warn("skipped {}", csv);
+    if (!csv.getComment().contains("OK"))
+      log.warn("skipped {}", csv);
+    else {
+      if (!csv.getComment().contains("no payload"))
+        fedoraFiles(csv);
+      Arrays.stream(migrationFiles).iterator()
+          .forEachRemaining(f -> saveExpected(addedMigrationFile(csv, f)));
+    }
   }
 
   /** note: bag-to-deposit also adds emd.xml to bags from the vault, that does not apply to migration */
@@ -74,8 +79,6 @@ public class EasyFileLoader {
         }
       }
     }
-    Arrays.stream(migrationFiles).iterator()
-        .forEachRemaining(f -> saveExpected(addedMigrationFile(csv, f)));
   }
 
   public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {

@@ -41,9 +41,14 @@ public class EaseyFileLoaderTest {
   public void skipNoPayload() {
 
     FedoraToBagCsv csv = mockCSV("OK no payload", "blabla");
-    replay(csv);
-    new EasyFileLoader(null, null).loadFromCsv(csv);
-    verify(csv);
+    ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
+    EasyFileDAO easyFileDAO = createMock(EasyFileDAO.class);
+    for (ExpectedFile ef: expectedMigrationFiles())
+      expectSuccess(expectedFileDAO, ef);
+
+    replay(csv, expectedFileDAO, easyFileDAO);
+    new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    verify(csv, expectedFileDAO, easyFileDAO);
   }
 
   @Test
@@ -51,9 +56,11 @@ public class EaseyFileLoaderTest {
 
     FedoraToBagCsv csv = mockCSV("Failed for some reason", "blabla");
 
-    replay(csv);
+    ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
+    EasyFileDAO easyFileDAO = createMock(EasyFileDAO.class);
+    replay(csv, expectedFileDAO, easyFileDAO);
     new EasyFileLoader(null, null).loadFromCsv(csv);
-    verify(csv);
+    verify(csv, expectedFileDAO, easyFileDAO);
   }
 
   @Test
