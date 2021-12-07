@@ -20,13 +20,12 @@ import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Environment;
-import net.sourceforge.argparse4j.inf.Argument;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
+import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import nl.knaw.dans.filemigration.core.EasyFileLoaderImpl;
 import nl.knaw.dans.filemigration.core.FedoraToBagCsv;
-import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 import org.apache.commons.csv.CSVRecord;
@@ -35,10 +34,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-public class LoadFromFedoraCommand extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
+public class LoadFromVault extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(LoadFromFedoraCommand.class);
-    private final HibernateBundle<DdVerifyFileMigrationConfiguration> easyBundle;
+    private static final Logger log = LoggerFactory.getLogger(LoadFromVault.class);
     private final HibernateBundle<DdVerifyFileMigrationConfiguration> expectedBundle;
 
     /**
@@ -46,13 +44,11 @@ public class LoadFromFedoraCommand extends EnvironmentCommand<DdVerifyFileMigrat
      *
      * @param application the application providing this command
      */
-    public LoadFromFedoraCommand(
+    public LoadFromVault(
         Application<DdVerifyFileMigrationConfiguration> application,
-        HibernateBundle<DdVerifyFileMigrationConfiguration> easyBundle,
         HibernateBundle<DdVerifyFileMigrationConfiguration> expectedBundle
     ) {
         super(application, "load-from-fedora", "Load expected table with info from easy_files in fs-rdb and transformation rules");
-        this.easyBundle = easyBundle;
         this.expectedBundle = expectedBundle;
     }
 
@@ -64,7 +60,7 @@ public class LoadFromFedoraCommand extends EnvironmentCommand<DdVerifyFileMigrat
             .required(true)
             .help("application configuration file");
 
-        subparser.addArgument("csv")
+        subparser.addArgument("uuid")
             .type(File.class)
             .nargs("+")
             .help("CSV file produced by easy-fedora-to-bag");
@@ -73,13 +69,12 @@ public class LoadFromFedoraCommand extends EnvironmentCommand<DdVerifyFileMigrat
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
         // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
-        EasyFileDAO easyFileDAO = new EasyFileDAO(easyBundle.getSessionFactory());
         ExpectedFileDAO expectedDAO = new ExpectedFileDAO(expectedBundle.getSessionFactory());
-        EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle)
+        EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(expectedBundle)
             .create(
                 EasyFileLoaderImpl.class,
-                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class },
-                new Object[] { easyFileDAO, expectedDAO }
+                new Class[] { ExpectedFileDAO.class },
+                new Object[] { expectedDAO }
             );
         for (File file : namespace.<File>getList("csv")) {
             log.info(file.toString());
