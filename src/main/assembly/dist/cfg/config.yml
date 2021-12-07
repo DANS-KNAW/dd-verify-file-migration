@@ -11,6 +11,8 @@ server:
       # Replace with port number unique for this service
       port: 20001
 
+bagstoreBaseUri: 'http://localhost/'
+
 dataverse:
   baseUrl: 'http://localhost:8080/'
   apiKey: changeme

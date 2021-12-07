@@ -28,6 +28,7 @@ import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.cli.LoadFromFedoraCommand;
 import nl.knaw.dans.filemigration.cli.LoadFromDataverseCommand;
+import nl.knaw.dans.filemigration.cli.LoadFromVaultCommand;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
 
@@ -71,6 +72,7 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
         bootstrap.getObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         bootstrap.addCommand(new LoadFromFedoraCommand(this, easyBundle, verificationBundle));
         bootstrap.addCommand(new LoadFromDataverseCommand(this, verificationBundle));
+        bootstrap.addCommand(new LoadFromVaultCommand(this, easyBundle));
     }
 
     @Override

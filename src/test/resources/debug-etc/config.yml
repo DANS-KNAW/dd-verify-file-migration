@@ -28,6 +28,9 @@ logging:
       archive: false
       currentLogFilename: data/dd-verify-file-migration.log
 
+# with tunnel ssh -L 18080:localhost:20110 USER@peasy11.dans.knaw.nl
+bagstoreBaseUri: 'http://localhost:18080/'
+
 dataverse:
   baseUrl: 'http://dar.dans.knaw.nl:8080/'
   apiKey: changeme
