@@ -20,6 +20,7 @@ import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Environment;
+import net.sourceforge.argparse4j.inf.Argument;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
@@ -57,10 +58,16 @@ public class LoadFromFedoraCommand extends EnvironmentCommand<DdVerifyFileMigrat
 
     @Override
     public void configure(Subparser subparser) {
-        super.configure(subparser);
+        // mandatory variant of: super.configure(subparser);
+        subparser.addArgument("file")
+            .type(File.class)
+            .required(true)
+            .help("application configuration file");
+
         subparser.addArgument("csv")
             .type(File.class)
-            .nargs("*")
+            .nargs("+")
+            .required(true)
             .help("CSV file produced by easy-fedora-to-bag");
     }
 
