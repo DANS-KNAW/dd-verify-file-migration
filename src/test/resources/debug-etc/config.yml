@@ -28,6 +28,10 @@ logging:
       archive: false
       currentLogFilename: data/dd-verify-file-migration.log
 
+dataverse:
+  baseUrl: 'http://dar.dans.knaw.nl:8080/'
+  apiKey: changeme
+
 easyDb:
   driverClass: org.postgresql.Driver
   url: 'jdbc:postgresql://deasy.dans.knaw.nl:5432/easy_db'

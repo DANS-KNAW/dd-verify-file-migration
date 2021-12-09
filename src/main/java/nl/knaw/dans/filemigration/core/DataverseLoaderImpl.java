@@ -16,27 +16,18 @@
 package nl.knaw.dans.filemigration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
-import nl.knaw.dans.filemigration.api.EasyFile;
-import nl.knaw.dans.filemigration.api.ExpectedFile;
-import nl.knaw.dans.filemigration.db.EasyFileDAO;
-import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
+import nl.knaw.dans.filemigration.api.ActualFile;
+import nl.knaw.dans.filemigration.db.ActualFileDAO;
+import nl.knaw.dans.lib.dataverse.DataverseClient;
 
-import java.util.List;
+public class DataverseLoaderImpl extends DataverseLoader {
 
-public class EasyFileLoaderImpl extends EasyFileLoader{
-
-  public EasyFileLoaderImpl(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO) {
-    super(easyFileDAO,expectedDAO);
-  }
-
-  @UnitOfWork("easyBundle")
-  public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {
-    return super.getByDatasetId(csv);
+  public DataverseLoaderImpl(DataverseClient client, ActualFileDAO actualFileDAO) {
+    super(client, actualFileDAO);
   }
 
   @UnitOfWork("hibernate")
-  public void saveExpected(ExpectedFile expected) {
-    super.saveExpected(expected);
+  public void saveActual(ActualFile actualFile) {
+    super.saveActual(actualFile);
   }
-
 }

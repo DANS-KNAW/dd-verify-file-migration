@@ -12,3 +12,12 @@ create table expected (
  primary key (doi, expected_path, removed_duplicate_file_count)
 );
 GRANT INSERT, SELECT, UPDATE, DELETE ON expected TO dd_verify_file_migration;
+
+CREATE TABLE IF NOT EXISTS actual (
+    doi VARCHAR(100) NOT NULL,
+    sha1_checksum CHAR(40) NOT NULL,
+    actual_path VARCHAR(1000),
+    storage_id VARCHAR(60) NOT NULL,
+    version_nr INTEGER NOT NULL,
+    PRIMARY KEY (doi, actual_path, version_nr));
+GRANT INSERT, SELECT, UPDATE, DELETE ON actual TO dd_verify_file_migration;
