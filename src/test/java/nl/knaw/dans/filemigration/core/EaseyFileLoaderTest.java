@@ -162,7 +162,7 @@ public class EaseyFileLoaderTest {
 
     FedoraToBagCsv mockedCSV = createMock(FedoraToBagCsv.class);
     expect(mockedCSV.getComment()).andReturn(comment).anyTimes();
-    expect(mockedCSV.getType()).andReturn(type).anyTimes();
+    expect(mockedCSV.getTransformation()).andReturn(type).anyTimes();
     expect(mockedCSV.getDoi()).andReturn(doi).anyTimes();
     expect(mockedCSV.getDatasetId()).andReturn(datasetId).anyTimes();
     return mockedCSV;

@@ -24,9 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.PersistenceException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class EasyFileLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
@@ -50,8 +50,8 @@ public class EasyFileLoader {
     }
   }
 
-  /** note: bag-to-deposit also adds emd.xml to bags from the vault, that does not apply to migration */
-  private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
+  /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
+  private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
 
   void fedoraFiles(FedoraToBagCsv csv) {
     log.trace(csv.toString());
@@ -95,7 +95,7 @@ public class EasyFileLoader {
     expected.setSha1_checksum("");
     expected.setEasy_file_id("");
     expected.setFs_rdb_path("");
-    expected.setExpected_path("migration/" + migrationFile);
+    expected.setExpected_path("easy-migration/" + migrationFile);
     expected.setAdded_during_migration(true);
     expected.setRemoved_thumbnail(false);
     expected.setRemoved_original_directory(false);
@@ -106,7 +106,7 @@ public class EasyFileLoader {
 
   private static ExpectedFile transformedFedoraFile(FedoraToBagCsv csv, EasyFile ef) {
     log.trace("EasyFile = {}" , ef);
-    final boolean removeOriginal = csv.getType().startsWith("original") && ef.getPath().startsWith("original/");
+    final boolean removeOriginal = csv.getTransformation().startsWith("original") && ef.getPath().startsWith("original/");
     final String path = removeOriginal
         ? ef.getPath().replace("original/","")
         : ef.getPath();
@@ -121,7 +121,7 @@ public class EasyFileLoader {
     expected.setFs_rdb_path(ef.getPath());
     expected.setExpected_path(dvPath);
     expected.setAdded_during_migration(false);
-    expected.setRemoved_thumbnail(path.matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
+    expected.setRemoved_thumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
     expected.setRemoved_original_directory(removeOriginal);
     expected.setRemoved_duplicate_file_count(0);
     expected.setTransformed_name(!path.equals(dvPath));

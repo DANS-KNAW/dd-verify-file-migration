@@ -28,7 +28,7 @@ public class FedoraToBagCsv {
   private final String datasetId;
   private final String doi;
   private final String comment;
-  private final String type;
+  private final String transformation;
   private final CSVRecord r;
 
   private static final String DATASET_ID_COLUMN = "easyDatasetId";
@@ -40,7 +40,7 @@ public class FedoraToBagCsv {
     datasetId = r.get(DATASET_ID_COLUMN);
     doi = r.get(DOI_COLUMN);
     comment = r.get(COMMENT_COLUMN);
-    type = r.get(TRANSFORMATION_TYPE_COLUMN);
+    transformation = r.get(TRANSFORMATION_TYPE_COLUMN);
     this.r = r;
   }
 
@@ -70,8 +70,8 @@ public class FedoraToBagCsv {
    * original-versioned without second bag,
    * fedora-versioned
    */
-  public String getType() {
-    return type;
+  public String getTransformation() {
+    return transformation;
   }
 
   /**
