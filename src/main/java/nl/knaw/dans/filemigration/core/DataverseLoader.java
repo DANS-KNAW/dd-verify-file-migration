@@ -21,6 +21,7 @@ import nl.knaw.dans.filemigration.db.ActualFileDAO;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.DataverseResponse;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
+import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,10 +59,17 @@ public class DataverseLoader {
     for (DatasetVersion v : versions) {
       int count = 0;
       for (FileMeta f : v.getFiles()) {
+        saveActual(toActual(f, doi));
         ++count;
         log.debug("Stored file, label: {}, directoryLabel: {}", f.getLabel(), f.getDirectoryLabel());
       }
       log.info("Stored {} basic file metas for DOI {}, Version seqNr {}", count, doi, seqNum);
     }
+  }
+
+  private ActualFile toActual(FileMeta f, String doi) {
+    DataFile dataFile = f.getDataFile();
+    String actual_path = f.getDirectoryLabel() + "/" + f.getLabel();
+    return new ActualFile(doi, actual_path, f.getVersion(),dataFile.getChecksum().getValue(), dataFile.getStorageIdentifier());
   }
 }
