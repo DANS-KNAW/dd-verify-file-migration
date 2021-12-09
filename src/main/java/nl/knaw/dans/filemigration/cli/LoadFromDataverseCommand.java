@@ -43,9 +43,9 @@ import static java.util.Collections.singletonList;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.StreamSupport.stream;
 
-public class LoadFromVaultCommand extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
+public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(LoadFromVaultCommand.class);
+    private static final Logger log = LoggerFactory.getLogger(LoadFromDataverseCommand.class);
     private final HibernateBundle<DdVerifyFileMigrationConfiguration> verificationBundle;
 
     /**
@@ -53,11 +53,11 @@ public class LoadFromVaultCommand extends EnvironmentCommand<DdVerifyFileMigrati
      *
      * @param application the application providing this command
      */
-    public LoadFromVaultCommand(
+    public LoadFromDataverseCommand(
         Application<DdVerifyFileMigrationConfiguration> application,
         HibernateBundle<DdVerifyFileMigrationConfiguration> verificationBundle
     ) {
-        super(application, "load-from-vault", "Load expected table with info from easy_files in fs-rdb and transformation rules");
+        super(application, "load-from-dataverse", "Load actual table with file info from dataverse");
         this.verificationBundle = verificationBundle;
     }
 

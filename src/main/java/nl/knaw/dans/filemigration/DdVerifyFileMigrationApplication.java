@@ -25,7 +25,7 @@ import nl.knaw.dans.filemigration.api.ActualFile;
 import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.cli.LoadFromFedoraCommand;
-import nl.knaw.dans.filemigration.cli.LoadFromVaultCommand;
+import nl.knaw.dans.filemigration.cli.LoadFromDataverseCommand;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
 
@@ -38,7 +38,8 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
 
       @Override
       public String name() {
-        // the default "hibernate" is apparently required for at least one bundle: the verificationBundle
+        // the default "hibernate" is apparently required for at least one bundle:
+        // the verificationBundle as that one is required by all subcommands
         return "easyBundle";
       }
     };
@@ -65,7 +66,7 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
         bootstrap.addBundle(easyBundle);
         bootstrap.addBundle(verificationBundle);
         bootstrap.addCommand(new LoadFromFedoraCommand(this, easyBundle, verificationBundle));
-        bootstrap.addCommand(new LoadFromVaultCommand(this, verificationBundle));
+        bootstrap.addCommand(new LoadFromDataverseCommand(this, verificationBundle));
     }
 
     @Override

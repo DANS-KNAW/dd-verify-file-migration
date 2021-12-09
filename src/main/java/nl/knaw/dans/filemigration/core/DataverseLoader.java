@@ -16,11 +16,16 @@
 package nl.knaw.dans.filemigration.core;
 
 import nl.knaw.dans.filemigration.api.ActualFile;
+import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.ActualFileDAO;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
+import nl.knaw.dans.lib.dataverse.DataverseResponse;
+import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
+import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.PersistenceException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,7 +33,7 @@ public class DataverseLoader {
   private static final Logger log = LoggerFactory.getLogger(DataverseLoader.class);
 
   private final ActualFileDAO actualFileDAO;
-  private DataverseClient client;
+  private final DataverseClient client;
 
   public DataverseLoader(DataverseClient client, ActualFileDAO actualFileDAO) {
     this.actualFileDAO = actualFileDAO;
@@ -41,7 +46,22 @@ public class DataverseLoader {
 
   public void loadFromDataset(String doi) {
     log.info("Loading DOI {}", doi);
-
-    // TODO
+    List<DatasetVersion> versions;
+    try {
+      versions = client.dataset(doi).getAllVersions().getData();
+    } catch (Exception e) {
+      log.error("Could not retrieve file metas for DOI: {}", doi, e);
+      throw new RuntimeException(e);
+    }
+    versions.sort(new DatasetVersionComparator());
+    int seqNum = 1;
+    for (DatasetVersion v : versions) {
+      int count = 0;
+      for (FileMeta f : v.getFiles()) {
+        ++count;
+        log.debug("Stored file, label: {}, directoryLabel: {}", f.getLabel(), f.getDirectoryLabel());
+      }
+      log.info("Stored {} basic file metas for DOI {}, Version seqNr {}", count, doi, seqNum);
+    }
   }
 }
