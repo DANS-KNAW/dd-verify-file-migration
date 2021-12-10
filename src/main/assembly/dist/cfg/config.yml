@@ -11,25 +11,22 @@ server:
       # Replace with port number unique for this service
       port: 20001
 
-
-
 easyDb:
-  # TODO: Modify for connecting to easy-db
-  driverClass: org.hsqldb.jdbcDriver
-    url: jdbc:hsqldb:hsql://localhost:9001/dd-manage-prestaging
-    logValidationErrors: true
-    # See: https://stackoverflow.com/questions/10684244/dbcp-validationquery-for-different-databases
-    validationQuery: SELECT * FROM INFORMATION_SCHEMA.SYSTEM_TABLES
-    properties:
-      hibernate.dialect: 'org.hibernate.dialect.HSQLDialect'
-      hibernate.hbm2ddl.auto: update
+  driverClass: org.postgresql.Driver
+  url: 'jdbc:postgresql://localhost:5432/easy_db'
+  logValidationErrors: true
+  user: easy_webui
+  password: changeme
+  properties:
+    hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
+    hibernate.hbm2ddl.auto: update
 
 verificationDatabase:
-  driverClass: org.hsqldb.jdbcDriver
-    url: jdbc:hsqldb:hsql://localhost:9001/dd-verify-file-migration
-    logValidationErrors: true
-    # See: https://stackoverflow.com/questions/10684244/dbcp-validationquery-for-different-databases
-    validationQuery: SELECT * FROM INFORMATION_SCHEMA.SYSTEM_TABLES
-    properties:
-      hibernate.dialect: 'org.hibernate.dialect.HSQLDialect'
-      hibernate.hbm2ddl.auto: update
+  driverClass: org.postgresql.Driver
+  url: 'jdbc:postgresql://localhost:5432/dd_verify_file_migration'
+  logValidationErrors: true
+  user: dd_verify_file_migration
+  password: changeme
+  properties:
+    hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
+    hibernate.hbm2ddl.auto: update

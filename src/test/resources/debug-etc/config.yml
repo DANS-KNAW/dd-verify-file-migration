@@ -17,7 +17,7 @@ server:
 logging:
   level: INFO
   loggers:
-    "dans.knaw.nl":
+    "nl.knaw.dans":
       level: TRACE
       additive: false
   appenders:
@@ -27,3 +27,24 @@ logging:
     - type: file
       archive: false
       currentLogFilename: data/dd-verify-file-migration.log
+
+easyDb:
+  driverClass: org.postgresql.Driver
+  url: 'jdbc:postgresql://deasy.dans.knaw.nl:5432/easy_db'
+  logValidationErrors: true
+  user: easy_webui
+  password: changeme
+  properties:
+    hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
+    hibernate.hbm2ddl.auto: update
+
+verificationDatabase:
+  driverClass: org.hsqldb.jdbcDriver
+  url: 'jdbc:hsqldb:hsql://localhost:9001/verificationDatabase'
+  logValidationErrors: true
+  # See: https://stackoverflow.com/questions/10684244/dbcp-validationquery-for-different-databases
+  validationQuery: SELECT * FROM INFORMATION_SCHEMA.SYSTEM_TABLES
+  properties:
+    hibernate.dialect: 'org.hibernate.dialect.HSQLDialect'
+    hibernate.hbm2ddl.auto: update
+

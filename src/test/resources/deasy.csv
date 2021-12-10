@@ -1,0 +1,3 @@
+easyDatasetId,uuid1,uuid2,doi,depositor,transformationType,comment
+easy-dataset:9,6391ee47-3e14-4b16-8023-912b9c8a4b88,00fab9df-0417-460b-bbb0-312aba55ed27,10.80270/test-nySe-x6f-kf66,user001,original-versioned,OK
+easy-dataset:0,,,,,original-versioned,FAILED for some reason
