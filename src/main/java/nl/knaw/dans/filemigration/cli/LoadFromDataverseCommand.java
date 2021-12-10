@@ -89,7 +89,7 @@ public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMig
         if (doi != null) proxy.loadFromDataset(doi);
         else {
             log.info("No DOI provided, loading all datasets");
-            Iterator<ResultItem> resultItems = client.search().iterator("*", datasetOption());
+            Iterator<ResultItem> resultItems = client.search().iterator("datasetVersionId:1", datasetOption());
             toDoiStream(resultItems).forEach(proxy::loadFromDataset);
         }
     }
