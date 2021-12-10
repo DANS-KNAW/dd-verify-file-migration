@@ -65,6 +65,6 @@ public class DataverseLoader {
     DataFile f = fileMeta.getDataFile();
     String dl = fileMeta.getDirectoryLabel();
     String actual_path = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
-    return new ActualFile(doi, actual_path, fileMeta.getVersion(), f.getChecksum().getValue(), f.getStorageIdentifier());
+    return new ActualFile(doi, actual_path, fileMeta.getDatasetVersionId(), f.getChecksum().getValue(), f.getStorageIdentifier());
   }
 }
