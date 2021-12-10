@@ -103,6 +103,11 @@ public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMig
     private Stream<String> toDoiStream(Iterator<ResultItem> itemIterator) {
         Spliterator<ResultItem> itemSpliterator = spliteratorUnknownSize(itemIterator, Spliterator.ORDERED);
         Stream<ResultItem> itemStream = stream(itemSpliterator, false);
-        return itemStream.map(ri -> ((DatasetResultItem) ri).getGlobalId());
+        return itemStream.map(ri -> getGlobalId((DatasetResultItem) ri));
+    }
+
+    private String getGlobalId(DatasetResultItem ri) {
+        log.debug("id={} versionId={} majorVersion={} minorVersion={} fileCount={}",ri.getGlobalId(), ri.getVersionId(), ri.getMajorVersion(), ri.getMinorVersion(),ri.getFileCount());
+        return ri.getGlobalId();
     }
 }

@@ -16,18 +16,14 @@
 package nl.knaw.dans.filemigration.core;
 
 import nl.knaw.dans.filemigration.api.ActualFile;
-import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.ActualFileDAO;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
-import nl.knaw.dans.lib.dataverse.DataverseResponse;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.PersistenceException;
-import java.util.Iterator;
 import java.util.List;
 
 public class DataverseLoader {
@@ -42,11 +38,12 @@ public class DataverseLoader {
   }
 
   public void saveActual(ActualFile actual) {
-      actualFileDAO.create(actual);
+    log.debug(actual.toString());
+    actualFileDAO.create(actual);
   }
 
   public void loadFromDataset(String doi) {
-    log.info("Loading DOI {}", doi);
+    log.info("Loading {}", doi);
     List<DatasetVersion> versions;
     try {
       versions = client.dataset(doi).getAllVersions().getData();
@@ -54,22 +51,20 @@ public class DataverseLoader {
       log.error("Could not retrieve file metas for DOI: {}", doi, e);
       throw new RuntimeException(e);
     }
-    versions.sort(new DatasetVersionComparator());
-    int seqNum = 1;
     for (DatasetVersion v : versions) {
-      int count = 0;
+      int fileCount = 0;
       for (FileMeta f : v.getFiles()) {
         saveActual(toActual(f, doi));
-        ++count;
-        log.debug("Stored file, label: {}, directoryLabel: {}", f.getLabel(), f.getDirectoryLabel());
+        ++fileCount;
       }
-      log.info("Stored {} basic file metas for DOI {}, Version seqNr {}", count, doi, seqNum);
+      log.info("Stored {} basic file metas for DOI {}, Version {}.{} State {}", fileCount, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
     }
   }
 
-  private ActualFile toActual(FileMeta f, String doi) {
-    DataFile dataFile = f.getDataFile();
-    String actual_path = f.getDirectoryLabel() + "/" + f.getLabel();
-    return new ActualFile(doi, actual_path, f.getVersion(),dataFile.getChecksum().getValue(), dataFile.getStorageIdentifier());
+  private ActualFile toActual(FileMeta fileMeta, String doi) {
+    DataFile f = fileMeta.getDataFile();
+    String dl = fileMeta.getDirectoryLabel();
+    String actual_path = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
+    return new ActualFile(doi, actual_path, fileMeta.getVersion(), f.getChecksum().getValue(), f.getStorageIdentifier());
   }
 }
