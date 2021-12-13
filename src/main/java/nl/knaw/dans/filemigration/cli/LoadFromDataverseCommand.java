@@ -109,8 +109,13 @@ public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMig
 
     private String getGlobalId(DatasetResultItem ri) {
         log.debug("id={} versionId={} majorVersion={} minorVersion={} fileCount={}",ri.getGlobalId(), ri.getVersionId(), ri.getMajorVersion(), ri.getMinorVersion(),ri.getFileCount());
-        if (1 == ri.getMajorVersion() && 0 == ri.getMinorVersion())
+        if (1 == ri.getMajorVersion() && 0 == ri.getMinorVersion()) {
+            log.info("{} files for {} {}.{}", ri.getFileCount(), ri.getGlobalId(), ri.getMajorVersion(), ri.getMinorVersion());
             return ri.getGlobalId(); // workaround for unique DOIs
-        else return null; // filtered by caller
+        }
+        else {
+            log.info("skipping {} {}.{} with {} files", ri.getGlobalId(), ri.getMajorVersion(), ri.getMinorVersion(), ri.getFileCount());
+            return null; // filtered by caller
+        }
     }
 }
