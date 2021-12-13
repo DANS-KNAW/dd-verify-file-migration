@@ -48,6 +48,7 @@ public class DataverseLoader {
   }
 
   public void loadFromDataset(String doi) {
+    if (doi == null) return; // workaround
     log.info("Reading {} from dataverse", doi);
     List<DatasetVersion> versions;
     try {

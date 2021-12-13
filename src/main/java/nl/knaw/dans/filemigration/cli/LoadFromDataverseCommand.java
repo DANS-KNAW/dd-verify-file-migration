@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Spliterator;
 import java.util.stream.Stream;
 
@@ -89,7 +90,7 @@ public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMig
         if (doi != null) proxy.loadFromDataset(doi);
         else {
             log.info("No DOI provided, loading all datasets");
-            Iterator<ResultItem> resultItems = client.search().iterator("datasetVersionId:1", datasetOption());
+            Iterator<ResultItem> resultItems = client.search().iterator("*", datasetOption());
             toDoiStream(resultItems).forEach(proxy::loadFromDataset);
         }
     }
@@ -103,11 +104,13 @@ public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMig
     private Stream<String> toDoiStream(Iterator<ResultItem> itemIterator) {
         Spliterator<ResultItem> itemSpliterator = spliteratorUnknownSize(itemIterator, Spliterator.ORDERED);
         Stream<ResultItem> itemStream = stream(itemSpliterator, false);
-        return itemStream.map(ri -> getGlobalId((DatasetResultItem) ri));
+        return itemStream.map(ri -> getGlobalId((DatasetResultItem) ri)).filter(Objects::nonNull);
     }
 
     private String getGlobalId(DatasetResultItem ri) {
         log.debug("id={} versionId={} majorVersion={} minorVersion={} fileCount={}",ri.getGlobalId(), ri.getVersionId(), ri.getMajorVersion(), ri.getMinorVersion(),ri.getFileCount());
-        return ri.getGlobalId();
+        if (1 == ri.getMajorVersion() && 0 == ri.getMinorVersion())
+            return ri.getGlobalId(); // workaround for unique DOIs
+        else return null; // filtered by caller
     }
 }
