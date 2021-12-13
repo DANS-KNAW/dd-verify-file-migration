@@ -16,6 +16,8 @@
 
 package nl.knaw.dans.filemigration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
@@ -65,6 +67,8 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
     public void initialize(final Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap) {
         bootstrap.addBundle(easyBundle);
         bootstrap.addBundle(verificationBundle);
+        bootstrap.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        bootstrap.getObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         bootstrap.addCommand(new LoadFromFedoraCommand(this, easyBundle, verificationBundle));
         bootstrap.addCommand(new LoadFromDataverseCommand(this, verificationBundle));
     }

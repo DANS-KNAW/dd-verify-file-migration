@@ -15,15 +15,20 @@
  */
 package nl.knaw.dans.filemigration.core;
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import nl.knaw.dans.filemigration.api.ActualFile;
 import nl.knaw.dans.filemigration.db.ActualFileDAO;
+import nl.knaw.dans.lib.dataverse.DatasetApi;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
+import nl.knaw.dans.lib.dataverse.DataverseException;
+import nl.knaw.dans.lib.dataverse.DataverseResponse;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 
 public class DataverseLoader {
@@ -43,10 +48,13 @@ public class DataverseLoader {
   }
 
   public void loadFromDataset(String doi) {
-    log.info("Loading {}", doi);
+    log.info("Reading {} from dataverse", doi);
     List<DatasetVersion> versions;
     try {
       versions = client.dataset(doi).getAllVersions().getData();
+    } catch (UnrecognizedPropertyException e) {
+      log.error("skipping {} {}", doi, e.getMessage());
+      return;
     } catch (Exception e) {
       log.error("Could not retrieve file metas for DOI: {}", doi, e);
       throw new RuntimeException(e);
