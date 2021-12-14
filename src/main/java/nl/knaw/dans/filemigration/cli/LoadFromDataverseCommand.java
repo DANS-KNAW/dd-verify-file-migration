@@ -20,29 +20,29 @@ import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Environment;
+import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
 import nl.knaw.dans.filemigration.core.DataverseLoader;
 import nl.knaw.dans.filemigration.core.DataverseLoaderImpl;
+import nl.knaw.dans.filemigration.core.FedoraToBagCsv;
 import nl.knaw.dans.filemigration.db.ActualFileDAO;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.SearchOptions;
 import nl.knaw.dans.lib.dataverse.model.search.DatasetResultItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 import nl.knaw.dans.lib.dataverse.model.search.SearchItemType;
+import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Objects;
-import java.util.Spliterator;
-import java.util.stream.Stream;
+import java.util.Set;
 
 import static java.util.Collections.singletonList;
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.StreamSupport.stream;
 
 public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
@@ -70,10 +70,15 @@ public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMig
             .required(true)
             .help("application configuration file");
 
-        subparser.addArgument("-d", "--doi")
+        MutuallyExclusiveGroup g = subparser.addMutuallyExclusiveGroup();
+        g.addArgument("-d", "--doi")
             .dest("doi")
-            .nargs("?")
-            .help("The DOI for which to load the files");
+            .help("The DOI for which to load the files, for example: 'doi:10.17026/dans-xtz-qa6j'");
+
+        g.addArgument("--csv")
+            .dest("csv")
+            .type(File.class)
+            .help("CSV file produced by easy-fedora-to-bag");
     }
 
     @Override
@@ -87,11 +92,19 @@ public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMig
                 new Object[] { client, new ActualFileDAO(verificationBundle.getSessionFactory()) }
             );
         String doi = namespace.getString("doi");
-        if (doi != null) proxy.loadFromDataset(doi);
-        else {
-            log.info("No DOI provided, loading all datasets");
+        String file = namespace.getString("csv");
+        if (doi != null)
+            proxy.loadFromDataset(doi);
+        else if (file == null) {
+            log.info("No DOI(s) provided, loading all datasets");
             Iterator<ResultItem> resultItems = client.search().iterator("*", datasetOption());
-            toDoiStream(resultItems).forEach(proxy::loadFromDataset);
+            toDoiSet(resultItems).forEach(proxy::loadFromDataset);
+        }
+        else {
+            log.info("Loading DOIs found in {}", file);
+            for(CSVRecord r: FedoraToBagCsv.parse(new File(file))) {
+                proxy.loadFromDataset("doi:"+new FedoraToBagCsv(r).getDoi());
+            }
         }
     }
 
@@ -101,21 +114,14 @@ public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMig
         return searchOptions;
     }
 
-    private Stream<String> toDoiStream(Iterator<ResultItem> itemIterator) {
-        Spliterator<ResultItem> itemSpliterator = spliteratorUnknownSize(itemIterator, Spliterator.ORDERED);
-        Stream<ResultItem> itemStream = stream(itemSpliterator, false);
-        return itemStream.map(ri -> getGlobalId((DatasetResultItem) ri)).filter(Objects::nonNull);
-    }
-
-    private String getGlobalId(DatasetResultItem ri) {
-        log.debug("id={} versionId={} majorVersion={} minorVersion={} fileCount={}",ri.getGlobalId(), ri.getVersionId(), ri.getMajorVersion(), ri.getMinorVersion(),ri.getFileCount());
-        if (1 == ri.getMajorVersion() && 0 == ri.getMinorVersion()) {
-            log.info("{} files for {} {}.{}", ri.getFileCount(), ri.getGlobalId(), ri.getMajorVersion(), ri.getMinorVersion());
-            return ri.getGlobalId(); // workaround for unique DOIs
+    private Set<String> toDoiSet(Iterator<ResultItem> itemIterator) {
+        Set<String> set = new HashSet<>();
+        while (itemIterator.hasNext()) {
+            DatasetResultItem ri = (DatasetResultItem) itemIterator.next();
+            String doi = ri.getGlobalId();
+            log.debug("id={} duplicate={} majorVersion={} minorVersion={} fileCount={} versionId={} ", doi, set.contains(doi), ri.getMajorVersion(), ri.getMinorVersion(), ri.getFileCount(), ri.getVersionId());
+            set.add(doi);
         }
-        else {
-            log.info("skipping {} {}.{} with {} files", ri.getGlobalId(), ri.getMajorVersion(), ri.getMinorVersion(), ri.getFileCount());
-            return null; // filtered by caller
-        }
+        return set;
     }
 }
