@@ -33,6 +33,7 @@ import nl.knaw.dans.lib.dataverse.SearchOptions;
 import nl.knaw.dans.lib.dataverse.model.search.DatasetResultItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 import nl.knaw.dans.lib.dataverse.model.search.SearchItemType;
+import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ import java.util.Set;
 
 import static java.util.Collections.singletonList;
 
-public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
+public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(LoadFromDataverseCommand.class);
     private final HibernateBundle<DdVerifyFileMigrationConfiguration> verificationBundle;
@@ -64,11 +65,7 @@ public class LoadFromDataverseCommand extends EnvironmentCommand<DdVerifyFileMig
 
     @Override
     public void configure(Subparser subparser) {
-        // mandatory variant of: super.configure(subparser);
-        subparser.addArgument("file")
-            .type(File.class)
-            .required(true)
-            .help("application configuration file");
+        super.configure(subparser);
 
         MutuallyExclusiveGroup g = subparser.addMutuallyExclusiveGroup();
         g.addArgument("-d", "--doi")
