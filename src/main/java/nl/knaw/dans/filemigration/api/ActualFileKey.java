@@ -21,7 +21,8 @@ import java.util.Objects;
 public class ActualFileKey implements Serializable {
   private String doi;
   private String actual_path;
-  private int version_nr;
+  private int major_version_nr;
+  private int minor_version_nr;
 
   @Override
   public boolean equals(Object o) {
@@ -30,11 +31,11 @@ public class ActualFileKey implements Serializable {
     if (o == null || getClass() != o.getClass())
       return false;
     ActualFileKey that = (ActualFileKey) o;
-    return version_nr == that.version_nr && Objects.equals(doi, that.doi) && Objects.equals(actual_path, that.actual_path);
+    return major_version_nr == that.major_version_nr && minor_version_nr == that.minor_version_nr && Objects.equals(doi, that.doi) && Objects.equals(actual_path, that.actual_path);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, actual_path, version_nr);
+    return Objects.hash(doi, actual_path, major_version_nr, minor_version_nr);
   }
 }

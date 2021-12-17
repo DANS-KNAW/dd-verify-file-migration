@@ -63,17 +63,17 @@ public class DataverseLoader {
     for (DatasetVersion v : versions) {
       int fileCount = 0;
       for (FileMeta f : v.getFiles()) {
-        saveActual(toActual(f, doi));
+        saveActual(toActual(f, doi, v.getVersionNumber(), v.getVersionMinorNumber()));
         ++fileCount;
       }
       log.info("Stored {} basic file metas for DOI {}, Version {}.{} State {}", fileCount, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
     }
   }
 
-  private ActualFile toActual(FileMeta fileMeta, String doi) {
+  private ActualFile toActual(FileMeta fileMeta, String doi, int majorVersion, int minorVersion) {
     DataFile f = fileMeta.getDataFile();
     String dl = fileMeta.getDirectoryLabel();
     String actual_path = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
-    return new ActualFile(doi, actual_path, fileMeta.getDatasetVersionId(), f.getChecksum().getValue(), f.getStorageIdentifier());
+    return new ActualFile(doi, actual_path, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
   }
 }
