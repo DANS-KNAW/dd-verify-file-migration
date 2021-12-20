@@ -19,10 +19,11 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class ManifestCsv {
 
@@ -33,7 +34,7 @@ public class ManifestCsv {
   private static final String PATH_COLUMN = "path";
   private static final String SHA1_COLUMN = "sha1";
 
-  public ManifestCsv(CSVRecord r) {
+  public ManifestCsv(CSVRecord r){
     sha1 = r.get(PATH_COLUMN);
     path = r.get(SHA1_COLUMN);
     this.r = r;
@@ -51,8 +52,9 @@ public class ManifestCsv {
       .withRecordSeparator('\n')
       .withAutoFlush(true);
 
-  static public CSVParser parse(InputStream inputStream) throws IOException {
-    return CSVParser.parse(inputStream, StandardCharsets.UTF_8, csvFormat);
+  static public Stream<ManifestCsv> parse(InputStream inputStream) throws IOException {
+    CSVParser parser = CSVParser.parse(inputStream, StandardCharsets.UTF_8, csvFormat);
+    return StreamSupport.stream(parser.spliterator(), false).map(ManifestCsv::new);
   }
 
   public String getPath() {

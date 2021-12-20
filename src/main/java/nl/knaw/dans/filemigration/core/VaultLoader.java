@@ -17,22 +17,19 @@ package nl.knaw.dans.filemigration.core;
 
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class VaultLoader {
 
@@ -52,15 +49,17 @@ public class VaultLoader {
   }
 
   public void loadFromVault(UUID uuid) {
-    for(CSVRecord r: readManifest(uuid)) {
-      ManifestCsv m = new ManifestCsv(r);
-      log.trace("{} {}", m.getSha1(), m.getPath());
-    }
+    // TODO why error: foreach not applicable
+    //  for(ManifestCsv r: readManifest(uuid)) { log.trace(""); }
+    readManifest(uuid).forEach(m -> log.trace("{} {}", m.getSha1(), m.getPath()));
     throw new NotYetImplementedException();
   }
 
-  private CSVParser readManifest(UUID uuid) {
-    URI uri = bagstoreBaseUri.resolve("bags/").resolve(uuid.toString() + "/").resolve("manifest-sha1.txt");
+  private Stream<ManifestCsv> readManifest(UUID uuid) {
+    URI uri = bagstoreBaseUri
+        .resolve("bags/")
+        .resolve(uuid.toString()+"/")
+        .resolve("manifest-sha1.txt");
     log.info("Reading {}", uri);
     try {
       HttpResponse r = client.execute(new HttpGet(uri));

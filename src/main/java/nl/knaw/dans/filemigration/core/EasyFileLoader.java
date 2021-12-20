@@ -53,7 +53,7 @@ public class EasyFileLoader {
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
 
-  void fedoraFiles(FedoraToBagCsv csv) {
+  private void fedoraFiles(FedoraToBagCsv csv) {
     log.trace(csv.toString());
     // read fedora files before adding expected migration files
     // thus we don't write anything when reading fails
