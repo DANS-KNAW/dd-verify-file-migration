@@ -19,11 +19,14 @@ package nl.knaw.dans.filemigration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
+import nl.knaw.dans.lib.util.DataverseClientFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 public class DdVerifyFileMigrationConfiguration extends Configuration {
+  @Valid
+  private DataverseClientFactory dataverse;
 
   @Valid
   @NotNull
@@ -43,11 +46,15 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
     return verificationDatabase;
   }
 
-  public void setEasyDb(DataSourceFactory dataSourceFactory) {
-    this.easyDb = dataSourceFactory;
-  }
-
   public void setverificationDatabase(DataSourceFactory dataSourceFactory) {
     this.verificationDatabase = dataSourceFactory;
+  }
+
+  public DataverseClientFactory getDataverse() {
+    return dataverse;
+  }
+
+  public void setDataverse(DataverseClientFactory dataverse) {
+    this.dataverse = dataverse;
   }
 }

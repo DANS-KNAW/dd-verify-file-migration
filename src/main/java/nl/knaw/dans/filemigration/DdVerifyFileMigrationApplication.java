@@ -16,14 +16,18 @@
 
 package nl.knaw.dans.filemigration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import nl.knaw.dans.filemigration.api.ActualFile;
 import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.cli.LoadFromFedoraCommand;
+import nl.knaw.dans.filemigration.cli.LoadFromDataverseCommand;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
 
@@ -33,19 +37,20 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
       public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
         return configuration.getEasyDb();
       }
+
+      @Override
+      public String name() {
+        // the default "hibernate" is apparently required for at least one bundle:
+        // the verificationBundle as that one is required by all subcommands
+        return "easyBundle";
+      }
     };
 
-    private final HibernateBundle<DdVerifyFileMigrationConfiguration> expectedBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(ExpectedFile.class) {
+    private final HibernateBundle<DdVerifyFileMigrationConfiguration> verificationBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(ExpectedFile.class, ActualFile.class) {
 
       @Override
       public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
         return configuration.getVerificationDatabase();
-      }
-
-      @Override
-      public String name() {
-        // the default "hibernate" is apparently required for at least one bundle: the easyBundle
-        return "expectedBundle";
       }
     };
 
@@ -61,12 +66,16 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
     @Override
     public void initialize(final Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap) {
         bootstrap.addBundle(easyBundle);
-        bootstrap.addBundle(expectedBundle);
-        bootstrap.addCommand(new LoadFromFedoraCommand(this, easyBundle, expectedBundle));
+        bootstrap.addBundle(verificationBundle);
+        bootstrap.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        bootstrap.getObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        bootstrap.addCommand(new LoadFromFedoraCommand(this, easyBundle, verificationBundle));
+        bootstrap.addCommand(new LoadFromDataverseCommand(this, verificationBundle));
     }
 
     @Override
     public void run(final DdVerifyFileMigrationConfiguration configuration, final Environment environment) {
       environment.healthChecks().unregister("hibernate");
+      environment.healthChecks().unregister("easyBundle");
     }
 }

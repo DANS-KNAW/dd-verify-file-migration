@@ -11,6 +11,10 @@ server:
       # Replace with port number unique for this service
       port: 20001
 
+dataverse:
+  baseUrl: 'http://localhost:8080/'
+  apiKey: changeme
+
 easyDb:
   driverClass: org.postgresql.Driver
   url: 'jdbc:postgresql://localhost:5432/easy_db'

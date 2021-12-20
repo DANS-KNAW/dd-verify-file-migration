@@ -16,26 +16,25 @@
 package nl.knaw.dans.filemigration.cli;
 
 import io.dropwizard.Application;
-import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Environment;
-import net.sourceforge.argparse4j.inf.Argument;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
+import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import nl.knaw.dans.filemigration.core.EasyFileLoaderImpl;
 import nl.knaw.dans.filemigration.core.FedoraToBagCsv;
-import nl.knaw.dans.filemigration.core.EasyFileLoader;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
+import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-public class LoadFromFedoraCommand extends EnvironmentCommand<DdVerifyFileMigrationConfiguration> {
+public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(LoadFromFedoraCommand.class);
     private final HibernateBundle<DdVerifyFileMigrationConfiguration> easyBundle;
@@ -51,19 +50,14 @@ public class LoadFromFedoraCommand extends EnvironmentCommand<DdVerifyFileMigrat
         HibernateBundle<DdVerifyFileMigrationConfiguration> easyBundle,
         HibernateBundle<DdVerifyFileMigrationConfiguration> expectedBundle
     ) {
-        super(application, "load-from-fedora", "Load expected table with info from easy_files in fs-rdb and transformation rules");
+        super(application, "load-from-fedora", "Load expected table with info from easy_files in fs-rdb and transformation rules", true);
         this.easyBundle = easyBundle;
         this.expectedBundle = expectedBundle;
     }
 
     @Override
     public void configure(Subparser subparser) {
-        // mandatory variant of: super.configure(subparser);
-        subparser.addArgument("file")
-            .type(File.class)
-            .required(true)
-            .help("application configuration file");
-
+        super.configure(subparser);
         subparser.addArgument("csv")
             .type(File.class)
             .nargs("+")
