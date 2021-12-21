@@ -23,8 +23,8 @@ import java.net.URI;
 
 public class VaultLoaderImpl extends VaultLoader {
 
-  public VaultLoaderImpl(ExpectedFileDAO expectedDAO, URI bagstoreBaseUri) {
-    super(expectedDAO, bagstoreBaseUri);
+  public VaultLoaderImpl(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
+    super(expectedDAO, bagStoreBaseUri, bagIndexBaseUri);
   }
 
   @UnitOfWork("hibernate")

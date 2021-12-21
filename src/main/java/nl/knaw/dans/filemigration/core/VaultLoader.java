@@ -21,11 +21,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
@@ -36,12 +36,14 @@ public class VaultLoader {
   private static final Logger log = LoggerFactory.getLogger(VaultLoader.class);
 
   private final ExpectedFileDAO expectedDAO;
-  private final URI bagstoreBaseUri;
+  private final URI bagStoreBaseUri;
+  private final URI bagIndexBaseUri;
   private final HttpClient client = HttpClients.createDefault();
 
-  public VaultLoader(ExpectedFileDAO expectedDAO, URI bagstoreBaseUri) {
+  public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
     this.expectedDAO = expectedDAO;
-    this.bagstoreBaseUri = bagstoreBaseUri;
+    this.bagStoreBaseUri = bagStoreBaseUri;
+    this.bagIndexBaseUri = bagIndexBaseUri;
   }
 
   public void saveExpected(ExpectedFile expected) {
@@ -49,33 +51,66 @@ public class VaultLoader {
   }
 
   public void loadFromVault(UUID uuid) {
-    // TODO why error: foreach not applicable
-    //  for(ManifestCsv r: readManifest(uuid)) { log.trace(""); }
-    readManifest(uuid).forEach(m -> log.trace("{} {}", m.getSha1(), m.getPath()));
+    readManifest(uuid).forEach(this::toExpected);
+    log.trace(readBagInfo(uuid));
+    log.trace(readBagSequence(uuid));
     throw new NotYetImplementedException();
   }
 
+  private void toExpected(ManifestCsv m) {
+    log.trace("{} {}", m.getSha1(), m.getPath());
+  }
+
   private Stream<ManifestCsv> readManifest(UUID uuid) {
-    URI uri = bagstoreBaseUri
+    URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid.toString()+"/")
         .resolve("manifest-sha1.txt");
-    log.info("Reading {}", uri);
     try {
-      HttpResponse r = client.execute(new HttpGet(uri));
-      int statusCode = r.getStatusLine().getStatusCode();
-      if (statusCode == 404) {
-        log.error("Could not find manifest of {}", uuid);
-        return ManifestCsv.parse(new ByteArrayInputStream(new byte[0]));
-      }
-      else if (statusCode < 200 || statusCode >= 300)
-        throw new IOException("not expected response code: " + statusCode);
-      else {
-        return ManifestCsv.parse(r.getEntity().getContent());
-      }
+      return ManifestCsv.parse(getRequest(uri, true));
     }
     catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private String readBagInfo(UUID uuid) {
+    URI uri = bagIndexBaseUri
+        .resolve("bags/")
+        .resolve(uuid.toString());
+    try {
+      return getRequest(uri, true);
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+
+  private String readBagSequence(UUID uuid) {
+    URI uri = bagIndexBaseUri
+        .resolve("bag-sequence/")
+        .resolve(uuid.toString());
+    try {
+      return getRequest(uri, false);
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private String getRequest(URI uri, boolean logNotFound) throws IOException {
+    log.info("Reading {}", uri);
+    HttpResponse r = client.execute(new HttpGet(uri));
+    int statusCode = r.getStatusLine().getStatusCode();
+    if (statusCode == 404) {
+      if (logNotFound)
+        log.error("Could not find {}", uri);
+      return "";
+    }
+    else if (statusCode < 200 || statusCode >= 300)
+      throw new IOException("not expected response code: " + statusCode);
+    else
+      return EntityUtils.toString(r.getEntity());
   }
 }

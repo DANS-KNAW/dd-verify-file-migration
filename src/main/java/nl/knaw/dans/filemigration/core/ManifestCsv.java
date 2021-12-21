@@ -52,8 +52,8 @@ public class ManifestCsv {
       .withRecordSeparator('\n')
       .withAutoFlush(true);
 
-  static public Stream<ManifestCsv> parse(InputStream inputStream) throws IOException {
-    CSVParser parser = CSVParser.parse(inputStream, StandardCharsets.UTF_8, csvFormat);
+  static public Stream<ManifestCsv> parse(String s) throws IOException {
+    CSVParser parser = CSVParser.parse(s, csvFormat);
     return StreamSupport.stream(parser.spliterator(), false).map(ManifestCsv::new);
   }
 

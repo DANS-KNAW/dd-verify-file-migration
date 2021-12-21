@@ -29,9 +29,14 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
   @Valid
   @NotNull
   private DataverseClientFactory dataverse;
+
   @Valid
   @NotNull
-  private URI bagstoreBaseUri;
+  private URI bagStoreBaseUri;
+
+  @Valid
+  @NotNull
+  private URI bagIndexBaseUri;
 
   @Valid
   @NotNull
@@ -63,11 +68,19 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
     this.dataverse = dataverse;
   }
 
-  public URI getBagstoreBaseUri() {
-    return bagstoreBaseUri;
+  public URI getBagStoreBaseUri() {
+    return bagStoreBaseUri;
   }
 
-  public void setBagstoreBaseUri(URI bagStoreUri) {
-    this.bagstoreBaseUri = bagStoreUri;
+  public void setBagStoreBaseUri(URI bagStoreUri) {
+    this.bagStoreBaseUri = bagStoreUri;
+  }
+
+  public URI getBagIndexBaseUri() {
+    return bagIndexBaseUri;
+  }
+
+  public void setBagIndexBaseUri(URI bagIndexBaseUri) {
+    this.bagIndexBaseUri = bagIndexBaseUri;
   }
 }

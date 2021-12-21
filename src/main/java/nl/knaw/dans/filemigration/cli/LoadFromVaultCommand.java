@@ -78,8 +78,8 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         VaultLoader proxy = new UnitOfWorkAwareProxyFactory(expectedBundle)
             .create(
                 VaultLoaderImpl.class,
-                new Class[] { ExpectedFileDAO.class, URI.class },
-                new Object[] { expectedDAO, configuration.getBagstoreBaseUri() }
+                new Class[] { ExpectedFileDAO.class, URI.class, URI.class },
+                new Object[] { expectedDAO, configuration.getBagStoreBaseUri(), configuration.getBagIndexBaseUri() }
             );
         String uuid = namespace.getString("uuid");
         String file = namespace.getString("uuids");
