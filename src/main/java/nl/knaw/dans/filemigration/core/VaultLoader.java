@@ -67,7 +67,10 @@ public class VaultLoader {
         .resolve(uuid.toString()+"/")
         .resolve("manifest-sha1.txt");
     try {
-      return ManifestCsv.parse(getRequest(uri, true));
+      String s = getRequest(uri, true)
+          .replaceAll(" *\n *","\n")
+          .replaceAll("[ \t]+","\t");
+      return ManifestCsv.parse(s);
     }
     catch (IOException e) {
       throw new RuntimeException(e);
