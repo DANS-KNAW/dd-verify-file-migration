@@ -77,9 +77,8 @@ public class VaultLoader {
     else {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
-      if (bagSeq.length == 0) {
+      if (bagSeq.length == 0)
         readManifest(uuid.toString()).forEach(this::toExpected);
-      }
       else
         for (String uuidInSeq : bagSeq) {
           readManifest(uuidInSeq).forEach(this::toExpected);
@@ -98,8 +97,8 @@ public class VaultLoader {
         .resolve("manifest-sha1.txt"); // TODO in next iteration a variant for metadata/files.xml
     try {
       String s = executeReq(new HttpGet(uri), true)
-          .replaceAll(" *\n *","\n")
-          .replaceAll("[ \t]+","\t");
+          .replaceAll(" *\n *", "\n")
+          .replaceAll("(?m)^([0-9a-zA-Z]+)[ \t]+","$1\t");
       return ManifestCsv.parse(s);
     }
     catch (IOException e) {
