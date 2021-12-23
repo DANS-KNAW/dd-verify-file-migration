@@ -27,11 +27,13 @@ import nl.knaw.dans.filemigration.core.VaultLoader;
 import nl.knaw.dans.filemigration.core.VaultLoaderImpl;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVerifyFileMigrationConfiguration> {
@@ -87,7 +89,10 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         if (uuid != null)
             proxy.loadFromVault(UUID.fromString(uuid));
         else if (file!=null) {
-            log.error("not yet implemented: uuids from file {}", new File(file));
+            String uuids = FileUtils.readFileToString(new File(file), Charset.defaultCharset());
+            for (String s : uuids.split("\n")) {
+                proxy.loadFromVault(UUID.fromString(s.trim()));
+            }
         } else {
             log.error("not yet implemented:loading from store {}", store);
         }
