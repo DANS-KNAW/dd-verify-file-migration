@@ -93,7 +93,7 @@ public class VaultLoader {
 
   private void createExpected(String uuid, String doi) {
     Arrays.stream(migrationFiles).iterator()
-        .forEachRemaining(f -> saveExpected(new ExpectedFile(doi, "easy_migration/" + f)));
+        .forEachRemaining(mf -> saveExpected(new ExpectedFile(doi, mf)));
     readManifest(uuid).forEach(m ->
         saveExpected(new ExpectedFile(doi, m.getSha1(), m.getPath(), "", false))
     );
