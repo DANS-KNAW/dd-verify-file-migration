@@ -15,15 +15,23 @@
  */
 package nl.knaw.dans.filemigration.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
+import nl.knaw.dans.lib.dataverse.DataverseItemDeserializer;
+import nl.knaw.dans.lib.dataverse.MetadataFieldDeserializer;
+import nl.knaw.dans.lib.dataverse.ResultItemDeserializer;
+import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
+import nl.knaw.dans.lib.dataverse.model.dataverse.DataverseItem;
+import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +50,20 @@ public class VaultLoader {
   private final URI bagIndexBaseUri;
   private final URI bagSeqUri;
   private final HttpClient client = HttpClients.createDefault();
+  private final ObjectMapper mapper;
 
   public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
     this.expectedDAO = expectedDAO;
     bagSeqUri = bagIndexBaseUri.resolve("bag-sequence");
     this.bagStoreBaseUri = bagStoreBaseUri;
     this.bagIndexBaseUri = bagIndexBaseUri;
+
+    mapper = new ObjectMapper();
+    SimpleModule module = new SimpleModule();
+    module.addDeserializer(MetadataField.class, new MetadataFieldDeserializer());
+    module.addDeserializer(DataverseItem.class, new DataverseItemDeserializer());
+    module.addDeserializer(ResultItem.class, new ResultItemDeserializer(mapper));
+    mapper.registerModule(module);
   }
 
   public void saveExpected(ExpectedFile expected) {
@@ -55,17 +71,27 @@ public class VaultLoader {
   }
 
   public void loadFromVault(UUID uuid) {
-    log.trace(readBagInfo(uuid)); // TODO skip if base-id != bag-id
-    log.trace(readBagSequence(uuid)); // TODO read manifests for the whole sequence
-    readManifest(uuid).forEach(this::toExpected);
-    throw new NotYetImplementedException();
+    BagInfo bagInfo = readBagInfo(uuid);
+    if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
+      log.info("Skipping {}, it is another version of {}", uuid, bagInfo.getBaseId());
+    else {
+      log.trace("Processing {}", bagInfo);
+      String[] bagSeq = readBagSequence(uuid);
+      if (bagSeq.length == 0) {
+        readManifest(uuid.toString()).forEach(this::toExpected);
+      }
+      else
+        for (String uuidInSeq : bagSeq) {
+          readManifest(uuidInSeq).forEach(this::toExpected);
+        }
+    }
   }
 
   private void toExpected(ManifestCsv m) {
     log.trace("{} {}", m.getSha1(), m.getPath());
   }
 
-  private Stream<ManifestCsv> readManifest(UUID uuid) {
+  private Stream<ManifestCsv> readManifest(String uuid) {
     URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid+"/")
@@ -81,12 +107,19 @@ public class VaultLoader {
     }
   }
 
-  private String readBagInfo(UUID uuid) {
+  private BagInfo readBagInfo(UUID uuid) {
     URI uri = bagIndexBaseUri
         .resolve("bags/")
         .resolve(uuid.toString());
     try {
-      return executeReq(new HttpGet(uri), true);
+      String s = executeReq(new HttpGet(uri), true);
+      try {
+        return mapper.readValue(s, BagInfoEnvelope.class).getResult().getBagInfo();
+      }
+      catch (JsonProcessingException e) {
+        log.error("Could not parse BagInfo of {} reason {} content {}", uuid, e.getMessage(), s);
+        return new BagInfo();
+      }
     }
     catch (IOException e) {
       throw new RuntimeException(e);
@@ -94,11 +127,11 @@ public class VaultLoader {
   }
 
 
-  private String readBagSequence(UUID uuid) {
+  private String[] readBagSequence(UUID uuid) {
     URIBuilder builder = new URIBuilder(bagSeqUri)
         .setParameter("contains", uuid.toString());
     try {
-      return executeReq(new HttpGet(builder.build()), false);
+      return executeReq(new HttpGet(builder.build()), false).split(System.lineSeparator());
     }
     catch (IOException | URISyntaxException e) {
       throw new RuntimeException(e);
