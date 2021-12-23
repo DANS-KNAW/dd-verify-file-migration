@@ -96,9 +96,9 @@ public class VaultLoader {
         .resolve(uuid+"/")
         .resolve("manifest-sha1.txt"); // TODO in next iteration a variant for metadata/files.xml
     try {
+      // trim line start and turn first sequence of white space into tabs
       String s = executeReq(new HttpGet(uri), true)
-          .replaceAll(" *\n *", "\n")
-          .replaceAll("(?m)^([0-9a-zA-Z]+)[ \t]+","$1\t");
+          .replaceAll("(?m)^ *([0-9a-zA-Z]+)[ \t]+","$1\t");
       return ManifestCsv.parse(s);
     }
     catch (IOException e) {
