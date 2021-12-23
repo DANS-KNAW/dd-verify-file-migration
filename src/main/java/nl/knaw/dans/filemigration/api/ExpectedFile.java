@@ -16,6 +16,7 @@
 package nl.knaw.dans.filemigration.api;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -25,6 +26,48 @@ public class ExpectedFile {
   // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 
   public ExpectedFile() {}
+
+  public ExpectedFile(String doi, String migrationFile) {
+    setDoi(doi);
+    setSha1_checksum("");
+    setEasy_file_id("");
+    setFs_rdb_path("");
+    setExpected_path("easy-migration/" + migrationFile);
+    setAdded_during_migration(true);
+    setRemoved_thumbnail(false);
+    setRemoved_original_directory(false);
+    setRemoved_duplicate_file_count(0);
+    setTransformed_name(false);
+  }
+
+  public ExpectedFile(String doi, String sha1, String easyPath, String easyFileId, boolean removeOriginal) {
+    final String path = removeOriginal
+        ? easyPath.replace("original/","")
+        : easyPath;
+    final String file = replaceForbidden(path.replaceAll(".*/",""), forbiddenInFileName);
+    final String folder = replaceForbidden(path.replaceAll("[^/]*$",""), forbiddenInFolders);
+    final String dvPath = folder + file;
+
+    setDoi(doi);
+    setSha1_checksum(sha1);
+    setEasy_file_id(easyFileId);
+    setFs_rdb_path(easyPath);
+    setExpected_path(dvPath);
+    setAdded_during_migration(false);
+    setRemoved_thumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
+    setRemoved_original_directory(removeOriginal);
+    setRemoved_duplicate_file_count(0);
+    setTransformed_name(!path.equals(dvPath));
+  }
+
+  private static final String forbidden = ":*?\"<>|;#";
+  private static final char[] forbiddenInFileName = ":*?\"<>|;#".toCharArray();
+  private static final char[] forbiddenInFolders = (forbidden + "'(),[]&+'").toCharArray();
+  private static String replaceForbidden (String s, char[] forbidden) {
+    for (char c: forbidden)
+      s = s.replace(c,'_');
+    return s;
+  }
 
   public ExpectedFile(String doi, String expected_path, int removed_duplicate_file_count, boolean removed_original_directory, String sha1_checksum, String easy_file_id, String fs_rdb_path, boolean added_during_migration, boolean removed_thumbnail, boolean transformed_name) {
     this.doi = doi;

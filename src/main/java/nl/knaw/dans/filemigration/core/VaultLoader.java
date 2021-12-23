@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -67,27 +68,35 @@ public class VaultLoader {
   }
 
   public void saveExpected(ExpectedFile expected) {
+    log.trace(expected.toString());
     expectedDAO.create(expected);
   }
 
   public void loadFromVault(UUID uuid) {
-    BagInfo bagInfo = readBagInfo(uuid);
+    final BagInfo bagInfo = readBagInfo(uuid);
     if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
       log.info("Skipping {}, it is another version of {}", uuid, bagInfo.getBaseId());
     else {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
       if (bagSeq.length == 0)
-        readManifest(uuid.toString()).forEach(this::toExpected);
+        createExpected(uuid.toString(), bagInfo.getDoi());
       else
         for (String uuidInSeq : bagSeq) {
-          readManifest(uuidInSeq).forEach(this::toExpected);
+          createExpected(uuidInSeq, readBagInfo(uuid).getDoi());
         }
     }
   }
 
-  private void toExpected(ManifestCsv m) {
-    log.trace("{} {}", m.getSha1(), m.getPath());
+  /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
+  private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
+
+  private void createExpected(String uuid, String doi) {
+    Arrays.stream(migrationFiles).iterator()
+        .forEachRemaining(f -> saveExpected(new ExpectedFile(doi, "easy_migration/" + f)));
+    readManifest(uuid).forEach(m ->
+        saveExpected(new ExpectedFile(doi, m.getSha1(), m.getPath(), "", false))
+    );
   }
 
   private Stream<ManifestCsv> readManifest(String uuid) {

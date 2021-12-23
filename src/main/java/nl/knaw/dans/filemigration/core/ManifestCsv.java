@@ -47,7 +47,7 @@ public class ManifestCsv {
 
   private static final CSVFormat csvFormat = CSVFormat
       .RFC4180
-      .withHeader(SHA1_COLUMN, PATH_COLUMN)
+      .withHeader(PATH_COLUMN, SHA1_COLUMN)
       .withDelimiter('\t')
       .withRecordSeparator('\n')
       .withAutoFlush(true);

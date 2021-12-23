@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.PersistenceException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 public class EasyFileLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
@@ -46,7 +45,7 @@ public class EasyFileLoader {
       if (!csv.getComment().contains("no payload"))
         fedoraFiles(csv);
       Arrays.stream(migrationFiles).iterator()
-          .forEachRemaining(f -> saveExpected(addedMigrationFile(csv, f)));
+          .forEachRemaining(f -> saveExpected(new ExpectedFile(csv.getDoi(), "easy_migration/"+f)));
     }
   }
 
@@ -60,7 +59,9 @@ public class EasyFileLoader {
     List<EasyFile> easyFiles = getByDatasetId(csv);
     for (EasyFile f: easyFiles) {
       // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
-      ExpectedFile expected = transformedFedoraFile(csv, f);
+      log.trace("EasyFile = {}" , f);
+      final boolean removeOriginal = csv.getTransformation().startsWith("original") && f.getPath().startsWith("original/");
+      ExpectedFile expected = new ExpectedFile(csv.getDoi(), f.getSha1checksum(), f.getPath(), f.getPid(),removeOriginal);
       try {
         saveExpected(expected);
       } catch(PersistenceException e){
@@ -87,45 +88,6 @@ public class EasyFileLoader {
 
   public void saveExpected(ExpectedFile expected) {
       expectedDAO.create(expected);
-  }
-
-  private static ExpectedFile addedMigrationFile(FedoraToBagCsv csv, String migrationFile) {
-    ExpectedFile expected = new ExpectedFile();
-    expected.setDoi(csv.getDoi());
-    expected.setSha1_checksum("");
-    expected.setEasy_file_id("");
-    expected.setFs_rdb_path("");
-    expected.setExpected_path("easy-migration/" + migrationFile);
-    expected.setAdded_during_migration(true);
-    expected.setRemoved_thumbnail(false);
-    expected.setRemoved_original_directory(false);
-    expected.setRemoved_duplicate_file_count(0);
-    expected.setTransformed_name(false);
-    return expected;
-  }
-
-  private static ExpectedFile transformedFedoraFile(FedoraToBagCsv csv, EasyFile ef) {
-    log.trace("EasyFile = {}" , ef);
-    final boolean removeOriginal = csv.getTransformation().startsWith("original") && ef.getPath().startsWith("original/");
-    final String path = removeOriginal
-        ? ef.getPath().replace("original/","")
-        : ef.getPath();
-    final String file = replaceForbidden(path.replaceAll(".*/",""), forbiddenInFileName);
-    final String folder = replaceForbidden(path.replaceAll("[^/]*$",""), forbiddenInFolders);
-    final String dvPath = folder + file;
-
-    ExpectedFile expected = new ExpectedFile();
-    expected.setDoi(csv.getDoi());
-    expected.setSha1_checksum(ef.getSha1checksum());
-    expected.setEasy_file_id(ef.getPid());
-    expected.setFs_rdb_path(ef.getPath());
-    expected.setExpected_path(dvPath);
-    expected.setAdded_during_migration(false);
-    expected.setRemoved_thumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
-    expected.setRemoved_original_directory(removeOriginal);
-    expected.setRemoved_duplicate_file_count(0);
-    expected.setTransformed_name(!path.equals(dvPath));
-    return expected;
   }
 
   private static final String forbidden = ":*?\"<>|;#";
