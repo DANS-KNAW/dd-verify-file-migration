@@ -45,7 +45,7 @@ public class EasyFileLoader {
       if (!csv.getComment().contains("no payload"))
         fedoraFiles(csv);
       Arrays.stream(migrationFiles).iterator()
-          .forEachRemaining(f -> saveExpected(new ExpectedFile(csv.getDoi(), "easy_migration/"+f)));
+          .forEachRemaining(f -> saveExpected(new ExpectedFile(csv.getDoi(), f)));
     }
   }
 
@@ -61,7 +61,7 @@ public class EasyFileLoader {
       // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
       log.trace("EasyFile = {}" , f);
       final boolean removeOriginal = csv.getTransformation().startsWith("original") && f.getPath().startsWith("original/");
-      ExpectedFile expected = new ExpectedFile(csv.getDoi(), f.getSha1checksum(), f.getPath(), f.getPid(),removeOriginal);
+      ExpectedFile expected = new ExpectedFile(csv.getDoi(), f.getSha1checksum(), f.getPath(), f.getPid(), removeOriginal);
       try {
         saveExpected(expected);
       } catch(PersistenceException e){
