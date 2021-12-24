@@ -118,19 +118,6 @@ public class VaultLoader extends ExpectedLoader {
     }
   }
 
-  private Stream<ManifestCsv> readFileMeta(String uuid) {
-    URI uri = bagStoreBaseUri
-        .resolve("bags/")
-        .resolve(uuid+"/")
-        .resolve("manifest-sha1.txt"); // TODO in next iteration a variant for metadata/files.xml
-    try {
-      return ManifestCsv.parse(executeReq(new HttpGet(uri), true));
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   private BagInfo readBagInfo(String uuid) {
     URI uri = bagIndexBaseUri
         .resolve("bags/")
