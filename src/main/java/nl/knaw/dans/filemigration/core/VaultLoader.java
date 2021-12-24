@@ -39,14 +39,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public class VaultLoader {
+public class VaultLoader extends ExpectedLoader {
 
   private static final Logger log = LoggerFactory.getLogger(VaultLoader.class);
 
-  private final ExpectedFileDAO expectedDAO;
   private final URI bagStoreBaseUri;
   private final URI bagIndexBaseUri;
   private final URI bagSeqUri;
@@ -54,7 +56,7 @@ public class VaultLoader {
   private final ObjectMapper mapper;
 
   public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
-    this.expectedDAO = expectedDAO;
+    super(expectedDAO);
     bagSeqUri = bagIndexBaseUri.resolve("bag-sequence");
     this.bagStoreBaseUri = bagStoreBaseUri;
     this.bagIndexBaseUri = bagIndexBaseUri;
@@ -67,13 +69,9 @@ public class VaultLoader {
     mapper.registerModule(module);
   }
 
-  public void saveExpected(ExpectedFile expected) {
-    log.trace(expected.toString());
-    expectedDAO.create(expected);
-  }
-
   public void loadFromVault(UUID uuid) {
-    final BagInfo bagInfo = readBagInfo(uuid);
+    final BagInfo bagInfo = readBagInfo(uuid.toString());
+    log.trace("from input {}", bagInfo);
     if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
       log.info("Skipping {}, it is another version of {}", uuid, bagInfo.getBaseId());
     else {
@@ -81,10 +79,17 @@ public class VaultLoader {
       String[] bagSeq = readBagSequence(uuid);
       if (bagSeq.length == 0)
         createExpected(uuid.toString(), bagInfo.getDoi());
-      else
-        for (String uuidInSeq : bagSeq) {
-          createExpected(uuidInSeq, readBagInfo(uuid).getDoi());
+      else {
+        List<BagInfo> bagInfos= StreamSupport
+            .stream(Arrays.stream(bagSeq).spliterator(), false)
+            .map(this::readBagInfo)
+            .sorted(new BagInfoComparator()).collect(Collectors.toList());
+        int count = 0;
+        for (BagInfo info : bagInfos) {
+          log.trace("{} from sequence {}", ++count, info);
+          createExpected(info.getBaseId(), info.getDoi());
         }
+      }
     }
   }
 
@@ -92,10 +97,9 @@ public class VaultLoader {
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
   private void createExpected(String uuid, String doi) {
-    Arrays.stream(migrationFiles).iterator()
-        .forEachRemaining(mf -> saveExpected(new ExpectedFile(doi, mf)));
+    expectedMigrationFiles(doi, migrationFiles);
     readManifest(uuid).forEach(m ->
-        saveExpected(new ExpectedFile(doi, m.getSha1(), m.getPath(), "", false))
+        retriedSave(new ExpectedFile(doi, m.getSha1(), m.getPath(), "", false))
     );
   }
 
@@ -115,7 +119,7 @@ public class VaultLoader {
     }
   }
 
-  private BagInfo readBagInfo(UUID uuid) {
+  private BagInfo readBagInfo(String uuid) {
     URI uri = bagIndexBaseUri
         .resolve("bags/")
         .resolve(uuid.toString());

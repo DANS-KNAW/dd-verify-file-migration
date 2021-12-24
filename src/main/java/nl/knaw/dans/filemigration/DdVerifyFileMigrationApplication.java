@@ -72,7 +72,7 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
         bootstrap.getObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         bootstrap.addCommand(new LoadFromFedoraCommand(this, easyBundle, verificationBundle));
         bootstrap.addCommand(new LoadFromDataverseCommand(this, verificationBundle));
-        bootstrap.addCommand(new LoadFromVaultCommand(this, easyBundle));
+        bootstrap.addCommand(new LoadFromVaultCommand(this, verificationBundle));
     }
 
     @Override

@@ -11,9 +11,9 @@ server:
       # Replace with port number unique for this service
       port: 20001
 
-bagStoreBaseUri: 'http://localhost:20110'
+bagStoreBaseUri: 'http://localhost:20110/'
 
-bagIndexBaseUri: 'http://localhost:20120'
+bagIndexBaseUri: 'http://localhost:20120/'
 
 dataverse:
   baseUrl: 'http://localhost:8080/'
@@ -27,7 +27,7 @@ easyDb:
   password: changeme
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
-    hibernate.hbm2ddl.auto: update
+    hibernate.hbm2ddl.auto: validate
 
 verificationDatabase:
   driverClass: org.postgresql.Driver
@@ -37,4 +37,4 @@ verificationDatabase:
   password: changeme
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
-    hibernate.hbm2ddl.auto: update
+    hibernate.hbm2ddl.auto: validate

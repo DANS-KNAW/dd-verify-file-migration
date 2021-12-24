@@ -19,22 +19,18 @@ import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
-import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.PersistenceException;
-import java.util.Arrays;
 import java.util.List;
 
-public class EasyFileLoader {
+public class EasyFileLoader extends ExpectedLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
   private final EasyFileDAO easyFileDAO;
-  private final ExpectedFileDAO expectedDAO;
 
   public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO) {
-    this.expectedDAO = expectedDAO;
+    super(expectedDAO);
     this.easyFileDAO = easyFileDAO;
   }
 
@@ -44,8 +40,7 @@ public class EasyFileLoader {
     else {
       if (!csv.getComment().contains("no payload"))
         fedoraFiles(csv);
-      Arrays.stream(migrationFiles).iterator()
-          .forEachRemaining(f -> saveExpected(new ExpectedFile(csv.getDoi(), f)));
+      expectedMigrationFiles(csv.getDoi(),migrationFiles);
     }
   }
 
@@ -62,40 +57,11 @@ public class EasyFileLoader {
       log.trace("EasyFile = {}" , f);
       final boolean removeOriginal = csv.getTransformation().startsWith("original") && f.getPath().startsWith("original/");
       ExpectedFile expected = new ExpectedFile(csv.getDoi(), f.getSha1checksum(), f.getPath(), f.getPid(), removeOriginal);
-      try {
-        saveExpected(expected);
-      } catch(PersistenceException e){
-        // logged as error by org.hibernate.engine.jdbc.spi.SqlExceptionHelper
-        if (!(e.getCause() instanceof ConstraintViolationException))
-          throw e;
-        else {
-          if (expected.getRemoved_duplicate_file_count() > 10) {
-            // TODO temporary safe guard?
-            log.error("too many retries on duplicate file, skipping: {}", expected);
-          }
-          else {
-            expected.incRemoved_duplicate_file_count();
-            saveExpected(expected);
-          }
-        }
-      }
+      retriedSave(expected);
     }
   }
 
   public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {
     return easyFileDAO.findByDatasetId(csv.getDatasetId());
-  }
-
-  public void saveExpected(ExpectedFile expected) {
-      expectedDAO.create(expected);
-  }
-
-  private static final String forbidden = ":*?\"<>|;#";
-  private static final char[] forbiddenInFileName = ":*?\"<>|;#".toCharArray();
-  private static final char[] forbiddenInFolders = (forbidden + "'(),[]&+'").toCharArray();
-  private static String replaceForbidden (String s, char[] forbidden) {
-    for (char c: forbidden)
-      s = s.replace(c,'_');
-    return s;
   }
 }

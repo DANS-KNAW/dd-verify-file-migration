@@ -27,19 +27,6 @@ public class ExpectedFile {
 
   public ExpectedFile() {}
 
-  public ExpectedFile(String doi, String migrationFile) {
-    setDoi(doi);
-    setSha1_checksum("");
-    setEasy_file_id("");
-    setFs_rdb_path("");
-    setExpected_path("easy-migration/" + migrationFile);
-    setAdded_during_migration(true);
-    setRemoved_thumbnail(false);
-    setRemoved_original_directory(false);
-    setRemoved_duplicate_file_count(0);
-    setTransformed_name(false);
-  }
-
   public ExpectedFile(String doi, String sha1, String easyPath, String easyFileId, boolean removeOriginal) {
     final String path = removeOriginal
         ? easyPath.replace("original/","")
