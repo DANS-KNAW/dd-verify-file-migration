@@ -34,10 +34,18 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -54,6 +62,7 @@ public class VaultLoader extends ExpectedLoader {
   private final URI bagSeqUri;
   private final HttpClient client = HttpClients.createDefault();
   private final ObjectMapper mapper;
+  private final DocumentBuilderFactory factory; // never forget this!
 
   public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
     super(expectedDAO);
@@ -67,6 +76,9 @@ public class VaultLoader extends ExpectedLoader {
     module.addDeserializer(DataverseItem.class, new DataverseItemDeserializer());
     module.addDeserializer(ResultItem.class, new ResultItemDeserializer(mapper));
     mapper.registerModule(module);
+
+    factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(true); // never forget this!
   }
 
   public void loadFromVault(UUID uuid) {
@@ -100,7 +112,9 @@ public class VaultLoader extends ExpectedLoader {
 
   private void createExpected(String uuid, String doi) {
     expectedMigrationFiles(doi, migrationFiles);
-    readManifest(uuid).forEach(m ->
+    FilesXml filesXml = readFileMeta(uuid);
+    Stream<ManifestCsv> manifestCsvStream = readManifest(uuid);
+    manifestCsvStream.forEach(m ->
         retriedSave(new ExpectedFile(doi, m.getSha1(), m.getPath(), "", false))
     );
   }
@@ -109,11 +123,25 @@ public class VaultLoader extends ExpectedLoader {
     URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid+"/")
-        .resolve("manifest-sha1.txt"); // TODO in next iteration a variant for metadata/files.xml
+        .resolve("manifest-sha1.txt");
     try {
       return ManifestCsv.parse(executeReq(new HttpGet(uri), true));
     }
     catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private FilesXml readFileMeta(String uuid) {
+    URI uri = bagStoreBaseUri
+        .resolve("bags/")
+        .resolve(uuid+"/")
+        .resolve("metadata/")
+        .resolve("files.xml");
+    try {
+      return new FilesXml(executeReq(new HttpGet(uri), true));
+    }
+    catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
       throw new RuntimeException(e);
     }
   }
