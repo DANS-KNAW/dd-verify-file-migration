@@ -72,7 +72,9 @@ public class VaultLoader extends ExpectedLoader {
   public void loadFromVault(UUID uuid) {
     final BagInfo bagInfo = readBagInfo(uuid.toString());
     log.trace("from input {}", bagInfo);
-    if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
+    if (bagInfo.getBagId() == null)
+      log.trace("skipping: not found/parsed");
+    else if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
       log.info("Skipping {}, it is another version of {}", uuid, bagInfo.getBaseId());
     else {
       log.trace("Processing {}", bagInfo);
@@ -109,10 +111,7 @@ public class VaultLoader extends ExpectedLoader {
         .resolve(uuid+"/")
         .resolve("manifest-sha1.txt"); // TODO in next iteration a variant for metadata/files.xml
     try {
-      // trim line start and turn first sequence of white space into tabs
-      String s = executeReq(new HttpGet(uri), true)
-          .replaceAll("(?m)^ *([0-9a-zA-Z]+)[ \t]+","$1\t");
-      return ManifestCsv.parse(s);
+      return ManifestCsv.parse(executeReq(new HttpGet(uri), true));
     }
     catch (IOException e) {
       throw new RuntimeException(e);
@@ -125,7 +124,8 @@ public class VaultLoader extends ExpectedLoader {
         .resolve(uuid.toString());
     try {
       String s = executeReq(new HttpGet(uri), true);
-      try {
+      if ("".equals(s)) return new BagInfo(); // not found
+      else try {
         return mapper.readValue(s, BagInfoEnvelope.class).getResult().getBagInfo();
       }
       catch (JsonProcessingException e) {
@@ -162,6 +162,6 @@ public class VaultLoader extends ExpectedLoader {
     else if (statusCode < 200 || statusCode >= 300)
       throw new IOException("not expected response code: " + statusCode);
     else
-      return EntityUtils.toString(resp.getEntity());
+      return EntityUtils.toString(resp.getEntity()); // max size 2147483647L
   }
 }

@@ -18,6 +18,7 @@ package nl.knaw.dans.filemigration.core;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.http.client.methods.HttpGet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,11 +50,14 @@ public class ManifestCsv {
       .RFC4180
       .withHeader(PATH_COLUMN, SHA1_COLUMN)
       .withDelimiter('\t')
-      .withRecordSeparator('\n')
+      .withRecordSeparator(System.lineSeparator())
       .withAutoFlush(true);
 
   static public Stream<ManifestCsv> parse(String s) throws IOException {
-    CSVParser parser = CSVParser.parse(s, csvFormat);
+    // trim line start and turn first sequence of white space into tabs
+    String tabSeparated = s.replaceAll("(?m)^ *([0-9a-zA-Z]+)[ \t]+","$1\t");
+
+    CSVParser parser = CSVParser.parse(tabSeparated, csvFormat);
     return StreamSupport.stream(parser.spliterator(), false).map(ManifestCsv::new);
   }
 

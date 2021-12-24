@@ -90,7 +90,7 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
             proxy.loadFromVault(UUID.fromString(uuid));
         else if (file!=null) {
             String uuids = FileUtils.readFileToString(new File(file), Charset.defaultCharset());
-            for (String s : uuids.split("\n")) {
+            for (String s : uuids.split(System.lineSeparator())) {
                 proxy.loadFromVault(UUID.fromString(s.trim()));
             }
         } else {
