@@ -45,6 +45,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static jdk.internal.org.jline.utils.Colors.s;
+
 public class VaultLoader extends ExpectedLoader {
 
   private static final Logger log = LoggerFactory.getLogger(VaultLoader.class);
@@ -124,14 +126,14 @@ public class VaultLoader extends ExpectedLoader {
         .resolve(uuid.toString());
     try {
       String s = executeReq(new HttpGet(uri), true);
-      if ("".equals(s)) return new BagInfo(); // not found
-      else try {
+      if ("".equals(s))
+        return new BagInfo(); // not found
+      else
         return mapper.readValue(s, BagInfoEnvelope.class).getResult().getBagInfo();
-      }
-      catch (JsonProcessingException e) {
-        log.error("Could not parse BagInfo of {} reason {} content {}", uuid, e.getMessage(), s);
-        return new BagInfo();
-      }
+    }
+    catch (JsonProcessingException e) {
+      log.error("Could not parse BagInfo of {} reason {} content {}", uuid, e.getMessage(), s);
+      return new BagInfo();
     }
     catch (IOException e) {
       throw new RuntimeException(e);
