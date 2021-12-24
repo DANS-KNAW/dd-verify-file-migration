@@ -45,8 +45,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static jdk.internal.org.jline.utils.Colors.s;
-
 public class VaultLoader extends ExpectedLoader {
 
   private static final Logger log = LoggerFactory.getLogger(VaultLoader.class);
@@ -120,20 +118,33 @@ public class VaultLoader extends ExpectedLoader {
     }
   }
 
+  private Stream<ManifestCsv> readFileMeta(String uuid) {
+    URI uri = bagStoreBaseUri
+        .resolve("bags/")
+        .resolve(uuid+"/")
+        .resolve("manifest-sha1.txt"); // TODO in next iteration a variant for metadata/files.xml
+    try {
+      return ManifestCsv.parse(executeReq(new HttpGet(uri), true));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private BagInfo readBagInfo(String uuid) {
     URI uri = bagIndexBaseUri
         .resolve("bags/")
         .resolve(uuid.toString());
     try {
       String s = executeReq(new HttpGet(uri), true);
-      if ("".equals(s))
-        return new BagInfo(); // not found
-      else
+      if ("".equals(s)) return new BagInfo(); // not found
+      else try {
         return mapper.readValue(s, BagInfoEnvelope.class).getResult().getBagInfo();
-    }
-    catch (JsonProcessingException e) {
-      log.error("Could not parse BagInfo of {} reason {} content {}", uuid, e.getMessage(), s);
-      return new BagInfo();
+      }
+      catch (JsonProcessingException e) {
+        log.error("Could not parse BagInfo of {} reason {} content {}", uuid, e.getMessage(), s);
+        return new BagInfo();
+      }
     }
     catch (IOException e) {
       throw new RuntimeException(e);
