@@ -112,7 +112,7 @@ public class VaultLoader extends ExpectedLoader {
 
   private void createExpected(String uuid, String doi) {
     expectedMigrationFiles(doi, migrationFiles);
-    FilesXml filesXml = readFileMeta(uuid);
+//    FilesXml filesXml = readFileMeta(uuid);
     Stream<ManifestCsv> manifestCsvStream = readManifest(uuid);
     manifestCsvStream.forEach(m ->
         retriedSave(new ExpectedFile(doi, m.getSha1(), m.getPath(), "", false))
