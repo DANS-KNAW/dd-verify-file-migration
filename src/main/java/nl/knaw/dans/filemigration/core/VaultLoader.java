@@ -34,19 +34,22 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static nl.knaw.dans.filemigration.core.FileRightsHandler.parseRights;
 
 public class VaultLoader extends ExpectedLoader {
 
@@ -102,16 +105,14 @@ public class VaultLoader extends ExpectedLoader {
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
   private void processBag(String uuid, String doi) {
-    FilesXml filesXml = readFileMeta(uuid);
+    Map<String, FileRights> filesXml = readFileMeta(uuid);
     readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml));
     expectedMigrationFiles(doi, migrationFiles);
   }
 
-  private void createExpected(String doi, ManifestCsv m, FilesXml filesXml) {
+  private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap) {
     String path = m.getPath();
-    String accessibleTo = filesXml.get(path, "accessible");
-    String visibleTo = filesXml.get(path,"visible");
-    log.trace("accessibleTo={} visibleTo={}", accessibleTo, visibleTo);
+    log.trace("{} {}", path, fileRightsMap.get(path));
     retriedSave(new ExpectedFile(doi, m.getSha1(), path, "", false));
   }
 
@@ -128,16 +129,17 @@ public class VaultLoader extends ExpectedLoader {
     }
   }
 
-  private FilesXml readFileMeta(String uuid) {
+  private Map<String, FileRights> readFileMeta(String uuid) {
     URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid+"/")
         .resolve("metadata/")
         .resolve("files.xml");
     try {
-      return new FilesXml(executeReq(new HttpGet(uri), true));
+      String xmlString = executeReq(new HttpGet(uri), true);
+      return parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
     }
-    catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
+    catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
