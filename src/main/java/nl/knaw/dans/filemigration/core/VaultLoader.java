@@ -107,12 +107,11 @@ public class VaultLoader extends ExpectedLoader {
     expectedMigrationFiles(doi, migrationFiles);
   }
 
-  private final FilesXmlXpaths fileXmlXpaths = new FilesXmlXpaths();
-
   private void createExpected(String doi, ManifestCsv m, FilesXml filesXml) {
     String path = m.getPath();
-    String accessibleTo = filesXml.get(path, fileXmlXpaths.accessibleTo);
-    String visibleTo = filesXml.get(path,fileXmlXpaths.visibleTo);
+    String accessibleTo = filesXml.get(path, "accessible");
+    String visibleTo = filesXml.get(path,"visible");
+    log.trace("accessibleTo={} visibleTo={}", accessibleTo, visibleTo);
     retriedSave(new ExpectedFile(doi, m.getSha1(), path, "", false));
   }
 
