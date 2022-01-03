@@ -19,12 +19,11 @@ import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 
-import javax.xml.xpath.XPathExpressionException;
 import java.net.URI;
 
 public class VaultLoaderImpl extends VaultLoader {
 
-  public VaultLoaderImpl(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) throws XPathExpressionException {
+  public VaultLoaderImpl(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
     super(expectedDAO, bagStoreBaseUri, bagIndexBaseUri);
   }
 
