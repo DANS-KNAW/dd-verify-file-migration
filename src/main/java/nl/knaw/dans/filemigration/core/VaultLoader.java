@@ -34,18 +34,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -62,9 +57,8 @@ public class VaultLoader extends ExpectedLoader {
   private final URI bagSeqUri;
   private final HttpClient client = HttpClients.createDefault();
   private final ObjectMapper mapper;
-  private final DocumentBuilderFactory factory; // never forget this!
 
-  public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
+  public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) throws XPathExpressionException {
     super(expectedDAO);
     bagSeqUri = bagIndexBaseUri.resolve("bag-sequence");
     this.bagStoreBaseUri = bagStoreBaseUri;
@@ -76,9 +70,6 @@ public class VaultLoader extends ExpectedLoader {
     module.addDeserializer(DataverseItem.class, new DataverseItemDeserializer());
     module.addDeserializer(ResultItem.class, new ResultItemDeserializer(mapper));
     mapper.registerModule(module);
-
-    factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true); // never forget this!
   }
 
   public void loadFromVault(UUID uuid) {
@@ -92,7 +83,7 @@ public class VaultLoader extends ExpectedLoader {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
       if (bagSeq.length == 0)
-        createExpected(uuid.toString(), bagInfo.getDoi());
+        processBag(uuid.toString(), bagInfo.getDoi());
       else {
         List<BagInfo> bagInfos= StreamSupport
             .stream(Arrays.stream(bagSeq).spliterator(), false)
@@ -101,7 +92,7 @@ public class VaultLoader extends ExpectedLoader {
         int count = 0;
         for (BagInfo info : bagInfos) {
           log.trace("{} from sequence {}", ++count, info);
-          createExpected(info.getBaseId(), info.getDoi());
+          processBag(info.getBaseId(), info.getDoi());
         }
       }
     }
@@ -110,13 +101,19 @@ public class VaultLoader extends ExpectedLoader {
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
-  private void createExpected(String uuid, String doi) {
-    expectedMigrationFiles(doi, migrationFiles);
+  private void processBag(String uuid, String doi) {
     FilesXml filesXml = readFileMeta(uuid);
-    Stream<ManifestCsv> manifestCsvStream = readManifest(uuid);
-    manifestCsvStream.forEach(m ->
-        retriedSave(new ExpectedFile(doi, m.getSha1(), m.getPath(), "", false))
-    );
+    readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml));
+    expectedMigrationFiles(doi, migrationFiles);
+  }
+
+  private final FilesXmlXpaths fileXmlXpaths = new FilesXmlXpaths();
+
+  private void createExpected(String doi, ManifestCsv m, FilesXml filesXml) {
+    String path = m.getPath();
+    String accessibleTo = filesXml.get(path, fileXmlXpaths.accessibleTo);
+    String visibleTo = filesXml.get(path,fileXmlXpaths.visibleTo);
+    retriedSave(new ExpectedFile(doi, m.getSha1(), path, "", false));
   }
 
   private Stream<ManifestCsv> readManifest(String uuid) {
@@ -149,7 +146,7 @@ public class VaultLoader extends ExpectedLoader {
   private BagInfo readBagInfo(String uuid) {
     URI uri = bagIndexBaseUri
         .resolve("bags/")
-        .resolve(uuid.toString());
+        .resolve(uuid);
     try {
       String s = executeReq(new HttpGet(uri), true);
       if ("".equals(s)) return new BagInfo(); // not found
