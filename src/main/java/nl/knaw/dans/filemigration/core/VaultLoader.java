@@ -112,8 +112,9 @@ public class VaultLoader extends ExpectedLoader {
 
   private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap) {
     String path = m.getPath();
-    log.trace("{} {}", path, fileRightsMap.get(path));
-    retriedSave(new ExpectedFile(doi, m.getSha1(), path, "", false));
+    FileRights fileRights = fileRightsMap.get(path);
+    log.trace("{} {}", path, fileRights);
+    retriedSave(new ExpectedFile(doi, m, fileRights));
   }
 
   private Stream<ManifestCsv> readManifest(String uuid) {

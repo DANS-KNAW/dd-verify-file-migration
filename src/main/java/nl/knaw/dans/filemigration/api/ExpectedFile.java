@@ -15,6 +15,9 @@
  */
 package nl.knaw.dans.filemigration.api;
 
+import nl.knaw.dans.filemigration.core.FileRights;
+import nl.knaw.dans.filemigration.core.ManifestCsv;
+
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
@@ -27,24 +30,49 @@ public class ExpectedFile {
 
   public ExpectedFile() {}
 
-  public ExpectedFile(String doi, String sha1, String easyPath, String easyFileId, boolean removeOriginal) {
+  public ExpectedFile(String doi, EasyFile easyFile, boolean removeOriginal) {
     final String path = removeOriginal
-        ? easyPath.replace("original/","")
-        : easyPath;
-    final String file = replaceForbidden(path.replaceAll(".*/",""), forbiddenInFileName);
-    final String folder = replaceForbidden(path.replaceAll("[^/]*$",""), forbiddenInFolders);
-    final String dvPath = folder + file;
+        ? easyFile.getPath().replace("original/","")
+        : easyFile.getPath();
+    final String dvPath = dvPath(path);
 
     setDoi(doi);
-    setSha1_checksum(sha1);
-    setEasy_file_id(easyFileId);
-    setFs_rdb_path(easyPath);
+    setSha1_checksum(easyFile.getSha1checksum());
+    setEasy_file_id(easyFile.getPid());
+    setFs_rdb_path(easyFile.getPath());
     setExpected_path(dvPath);
+    setAccessibleTo(easyFile.getAccessible_to());
+    setVisibleTo(easyFile.getVisible_to());
     setAdded_during_migration(false);
     setRemoved_thumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
     setRemoved_original_directory(removeOriginal);
     setRemoved_duplicate_file_count(0);
     setTransformed_name(!path.equals(dvPath));
+  }
+
+  public ExpectedFile(String doi, ManifestCsv manifestCsv, FileRights fileRights) {
+    final String path = manifestCsv.getPath();
+    final String dvPath = dvPath(path);
+
+    setDoi(doi);
+    setSha1_checksum(manifestCsv.getSha1());
+    setEasy_file_id("");
+    setFs_rdb_path(manifestCsv.getPath());
+    setExpected_path(dvPath);
+    setAccessibleTo(fileRights.getAccessibleTo());
+    setVisibleTo(fileRights.getVisibleTo());
+    setAdded_during_migration(false);
+    setRemoved_thumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
+    setRemoved_original_directory(false);
+    setRemoved_duplicate_file_count(0);
+    setTransformed_name(!path.equals(dvPath));
+  }
+
+  private String dvPath(String path) {
+    final String file = replaceForbidden(path.replaceAll(".*/",""), forbiddenInFileName);
+    final String folder = replaceForbidden(path.replaceAll("[^/]*$",""), forbiddenInFolders);
+    final String dvPath = folder + file;
+    return dvPath;
   }
 
   private static final String forbidden = ":*?\"<>|;#";
@@ -56,7 +84,7 @@ public class ExpectedFile {
     return s;
   }
 
-  public ExpectedFile(String doi, String expected_path, int removed_duplicate_file_count, boolean removed_original_directory, String sha1_checksum, String easy_file_id, String fs_rdb_path, boolean added_during_migration, boolean removed_thumbnail, boolean transformed_name) {
+  public ExpectedFile(String doi, String expected_path, int removed_duplicate_file_count, boolean removed_original_directory, String sha1_checksum, String easy_file_id, String fs_rdb_path, boolean added_during_migration, boolean removed_thumbnail, boolean transformed_name, String accessibleTo, String visibleTo) {
     this.doi = doi;
     this.expected_path = expected_path;
     this.removed_duplicate_file_count = removed_duplicate_file_count;
@@ -67,6 +95,8 @@ public class ExpectedFile {
     this.added_during_migration = added_during_migration;
     this.removed_thumbnail = removed_thumbnail;
     this.transformed_name = transformed_name;
+    this.accessibleTo = accessibleTo;
+    this.visibleTo = visibleTo;
   }
 
   // most lengths from easy-dtap/provisioning/roles/easy-fs-rdb/templates/create-easy-db-tables.sql
@@ -105,9 +135,15 @@ public class ExpectedFile {
   @Column()
   private boolean transformed_name;
 
+  @Column()
+  private String accessibleTo;
+
+  @Column()
+  private String visibleTo;
+
   @Override
   public String toString() {
-    return "ExpectedFile{" + "doi='" + doi + '\'' + ", expected_path='" + expected_path + '\'' + ", removed_duplicate_file_count=" + removed_duplicate_file_count + ", removed_original_directory=" + removed_original_directory + ", sha1_checksum='" + sha1_checksum + '\'' + ", easy_file_id='" + easy_file_id + '\'' + ", fs_rdb_path='" + fs_rdb_path + '\'' + ", added_during_migration=" + added_during_migration + ", removed_thumbnail=" + removed_thumbnail + ", transformed_name=" + transformed_name + '}';
+    return "ExpectedFile{" + "doi='" + doi + '\'' + ", expected_path='" + expected_path + '\'' + ", removed_duplicate_file_count=" + removed_duplicate_file_count + ", removed_original_directory=" + removed_original_directory + ", sha1_checksum='" + sha1_checksum + '\'' + ", easy_file_id='" + easy_file_id + '\'' + ", fs_rdb_path='" + fs_rdb_path + '\'' + ", added_during_migration=" + added_during_migration + ", removed_thumbnail=" + removed_thumbnail + ", transformed_name=" + transformed_name + ", accessibleTo='" + accessibleTo + '\'' + ", visibleTo='" + visibleTo + '\'' + '}';
   }
 
   public boolean isTransformed_name() {
@@ -194,6 +230,22 @@ public class ExpectedFile {
     this.doi = doi;
   }
 
+  public String getAccessibleTo() {
+    return accessibleTo;
+  }
+
+  public void setAccessibleTo(String accessibleTo) {
+    this.accessibleTo = accessibleTo;
+  }
+
+  public String getVisibleTo() {
+    return visibleTo;
+  }
+
+  public void setVisibleTo(String visibleTo) {
+    this.visibleTo = visibleTo;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o)
@@ -201,11 +253,11 @@ public class ExpectedFile {
     if (o == null || getClass() != o.getClass())
       return false;
     ExpectedFile that = (ExpectedFile) o;
-    return removed_duplicate_file_count == that.removed_duplicate_file_count && removed_original_directory == that.removed_original_directory && added_during_migration == that.added_during_migration && removed_thumbnail == that.removed_thumbnail && transformed_name == that.transformed_name && Objects.equals(doi, that.doi) && Objects.equals(expected_path, that.expected_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(easy_file_id, that.easy_file_id) && Objects.equals(fs_rdb_path, that.fs_rdb_path);
+    return removed_duplicate_file_count == that.removed_duplicate_file_count && removed_original_directory == that.removed_original_directory && added_during_migration == that.added_during_migration && removed_thumbnail == that.removed_thumbnail && transformed_name == that.transformed_name && Objects.equals(doi, that.doi) && Objects.equals(expected_path, that.expected_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(easy_file_id, that.easy_file_id) && Objects.equals(fs_rdb_path, that.fs_rdb_path) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, expected_path, removed_duplicate_file_count, removed_original_directory, sha1_checksum, easy_file_id, fs_rdb_path, added_during_migration, removed_thumbnail, transformed_name);
+    return Objects.hash(doi, expected_path, removed_duplicate_file_count, removed_original_directory, sha1_checksum, easy_file_id, fs_rdb_path, added_during_migration, removed_thumbnail, transformed_name, accessibleTo, visibleTo);
   }
 }
