@@ -15,10 +15,16 @@
  */
 package nl.knaw.dans.filemigration.core;
 
+import org.hsqldb.lib.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.util.Objects;
 
 public class FileRights implements Serializable {
+  private static final Logger log = LoggerFactory.getLogger(FileRights.class);
+
   private String accessibleTo;
   private String visibleTo;
 
@@ -36,6 +42,39 @@ public class FileRights implements Serializable {
 
   public void setVisibleTo(String visibleTo) {
     this.visibleTo = visibleTo;
+  }
+
+  public FileRights() {}
+
+  public FileRights(String datasetAccessRights) {
+    switch (datasetAccessRights) {
+      case "OPEN_ACCESS":
+        setAccessibleTo("ANONYMOUS");
+        setVisibleTo("ANONYMOUS");
+        break;
+      case "OPEN_ACCESS_FOR_REGISTERED_USERS":
+        setAccessibleTo("KNOWN");
+        setVisibleTo("KNOWN");
+        break;
+      case "REQUEST_PERMISSION":
+        setAccessibleTo("RESTRICTED_REQUEST");
+        setVisibleTo("RESTRICTED_REQUEST");
+        break;
+      default:
+        if (!"NO_ACCESS".equals(datasetAccessRights))
+          log.warn("dataset rights not known: {}", datasetAccessRights);
+        setAccessibleTo("NONE");
+        setVisibleTo("NONE");
+        break;
+    }
+  }
+
+  public FileRights applyDefaults(FileRights defaultRights){
+    if(StringUtil.isEmpty(getAccessibleTo()))
+      setAccessibleTo(defaultRights.getAccessibleTo());
+    if(StringUtil.isEmpty(getVisibleTo()))
+      setVisibleTo(defaultRights.getVisibleTo());
+    return this;
   }
 
   @Override

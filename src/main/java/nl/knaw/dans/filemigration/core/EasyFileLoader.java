@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class EasyFileLoader extends ExpectedLoader {
+
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
   private final EasyFileDAO easyFileDAO;
@@ -42,7 +43,8 @@ public class EasyFileLoader extends ExpectedLoader {
       // thus we don't write anything when reading fails
       if (!csv.getComment().contains("no payload"))
         fedoraFiles(csv);
-      expectedMigrationFiles(csv.getDoi(),migrationFiles);
+      FileRights fileRights = new FileRights("OPEN_ACCESS"); // TODO from dataset.xml <accessRight>?
+      expectedMigrationFiles(csv.getDoi(), migrationFiles, fileRights);
     }
   }
 
@@ -52,9 +54,9 @@ public class EasyFileLoader extends ExpectedLoader {
   private void fedoraFiles(FedoraToBagCsv csv) {
     log.trace(csv.toString());
     List<EasyFile> easyFiles = getByDatasetId(csv);
-    for (EasyFile f: easyFiles) {
+    for (EasyFile f : easyFiles) {
       // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
-      log.trace("EasyFile = {}" , f);
+      log.trace("EasyFile = {}", f);
       final boolean removeOriginal = csv.getTransformation().startsWith("original") && f.getPath().startsWith("original/");
       ExpectedFile expected = new ExpectedFile(csv.getDoi(), f, removeOriginal);
       expected.setAccessibleTo(f.getAccessible_to());

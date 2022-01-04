@@ -154,6 +154,8 @@ public class EasyFileLoaderTest {
       expectedFile.setExpected_path("easy-migration/" + f);
       expectedFile.setAdded_during_migration(true);
       expectedFiles.add(expectedFile);
+      expectedFile.setAccessibleTo("ANONYMOUS");
+      expectedFile.setVisibleTo("ANONYMOUS");
     }
     return expectedFiles;
   }

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-
 package nl.knaw.dans.filemigration.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -25,45 +26,39 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
-public class FileRightsHandler extends DefaultHandler {
+public class DatasetRightsHandler extends DefaultHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(DatasetRightsHandler.class);
 
   private static final SAXParserFactory parserFactory = configureFactory();
-  private final Map<String, FileRights> map = new HashMap<>();
   private StringBuilder chars; // collected since the last startElement
-  private FileRights fileRights; // collected since startElement of the last <file>
+  private FileRights defaultFileRights; // collected since startElement of the last <file>
 
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes) {
-
-    if ("file".equalsIgnoreCase(qName)) {
-      String path = attributes.getValue("filepath");
-      fileRights = new FileRights();
-      map.put(path, fileRights);
-    }
     chars = new StringBuilder();
   }
 
   @Override
   public void endElement(String uri, String localName, String qName) {
 
-    if ("accessibleToRights".equalsIgnoreCase(qName)) {
-      fileRights.setAccessibleTo(chars.toString());
-    }
-    else if ("visibleToRights".equalsIgnoreCase(qName)) {
-      fileRights.setVisibleTo(chars.toString());
+    if ("accessRights".equalsIgnoreCase(localName)) {
+      defaultFileRights = new FileRights(chars.toString().toUpperCase());
     }
   }
 
   @Override
-  public void characters(char[] ch, int start, int length) {
+  public void characters(char[] ch, int start, int length) throws SAXException {
     chars.append(new String(ch, start, length));
   }
 
-  private Map<String, FileRights> get() {
-    return map;
+  private FileRights get() {
+    if (defaultFileRights==null) {
+      log.warn("accessRights not found in dataset.xml");
+      return new FileRights("NO_ACCESS");
+    }
+    return defaultFileRights;
   }
 
   static public SAXParserFactory configureFactory() {
@@ -74,10 +69,10 @@ public class FileRightsHandler extends DefaultHandler {
 
   /**
    * @return key: filepath attribute of file elements
-   *         value: content of the elements: accessibleToRights and visibleToRights
+   * value: content of the elements: accessibleToRights and visibleToRights
    */
-  static public Map<String, FileRights> parseRights(InputStream xml) {
-    FileRightsHandler handler = new FileRightsHandler();
+  static public FileRights parseRights(InputStream xml) {
+    DatasetRightsHandler handler = new DatasetRightsHandler();
     try {
       parserFactory.newSAXParser().parse(xml, handler);
       return handler.get();

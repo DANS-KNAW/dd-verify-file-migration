@@ -32,6 +32,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.hsqldb.lib.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +49,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static nl.knaw.dans.filemigration.core.FileRightsHandler.parseRights;
 
 public class VaultLoader extends ExpectedLoader {
 
@@ -106,13 +105,14 @@ public class VaultLoader extends ExpectedLoader {
 
   private void processBag(String uuid, String doi) {
     Map<String, FileRights> filesXml = readFileMeta(uuid);
-    readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml));
-    expectedMigrationFiles(doi, migrationFiles);
+    FileRights defaultFileRights = readDefaultRights(uuid);
+    readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml, defaultFileRights));
+    expectedMigrationFiles(doi, migrationFiles, defaultFileRights);
   }
 
-  private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap) {
+  private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
     String path = m.getPath();
-    FileRights fileRights = fileRightsMap.get(path);
+    FileRights fileRights = fileRightsMap.get(path).applyDefaults(defaultFileRights);
     log.trace("{} {}", path, fileRights);
     retriedSave(new ExpectedFile(doi, m, fileRights));
   }
@@ -138,7 +138,22 @@ public class VaultLoader extends ExpectedLoader {
         .resolve("files.xml");
     try {
       String xmlString = executeReq(new HttpGet(uri), true);
-      return parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+      return FileRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private FileRights readDefaultRights(String uuid) {
+    URI uri = bagStoreBaseUri
+        .resolve("bags/")
+        .resolve(uuid+"/")
+        .resolve("metadata/")
+        .resolve("dataset.xml");
+    try {
+      String xmlString = executeReq(new HttpGet(uri), true);
+      return DatasetRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
     }
     catch (IOException e) {
       throw new RuntimeException(e);
