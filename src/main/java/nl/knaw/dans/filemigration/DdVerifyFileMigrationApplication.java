@@ -26,33 +26,33 @@ import io.dropwizard.setup.Environment;
 import nl.knaw.dans.filemigration.api.ActualFile;
 import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
-import nl.knaw.dans.filemigration.cli.LoadFromFedoraCommand;
 import nl.knaw.dans.filemigration.cli.LoadFromDataverseCommand;
+import nl.knaw.dans.filemigration.cli.LoadFromFedoraCommand;
 import nl.knaw.dans.filemigration.cli.LoadFromVaultCommand;
 
 public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMigrationConfiguration> {
 
     private final HibernateBundle<DdVerifyFileMigrationConfiguration> easyBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(EasyFile.class) {
 
-      @Override
-      public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
-        return configuration.getEasyDb();
-      }
+        @Override
+        public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
+            return configuration.getEasyDb();
+        }
 
-      @Override
-      public String name() {
-        // the default "hibernate" is apparently required for at least one bundle:
-        // the verificationBundle as that one is required by all subcommands
-        return "easyBundle";
-      }
+        @Override
+        public String name() {
+            // the default "hibernate" is apparently required for at least one bundle:
+            // the verificationBundle as that one is required by all subcommands
+            return "easyBundle";
+        }
     };
 
     private final HibernateBundle<DdVerifyFileMigrationConfiguration> verificationBundle = new HibernateBundle<DdVerifyFileMigrationConfiguration>(ExpectedFile.class, ActualFile.class) {
 
-      @Override
-      public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
-        return configuration.getVerificationDatabase();
-      }
+        @Override
+        public DataSourceFactory getDataSourceFactory(DdVerifyFileMigrationConfiguration configuration) {
+            return configuration.getVerificationDatabase();
+        }
     };
 
     public static void main(final String[] args) throws Exception {
@@ -77,7 +77,7 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
 
     @Override
     public void run(final DdVerifyFileMigrationConfiguration configuration, final Environment environment) {
-      environment.healthChecks().unregister("hibernate");
-      environment.healthChecks().unregister("easyBundle");
+        environment.healthChecks().unregister("hibernate");
+        environment.healthChecks().unregister("easyBundle");
     }
 }

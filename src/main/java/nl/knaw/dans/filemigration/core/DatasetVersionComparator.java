@@ -23,7 +23,9 @@ public class DatasetVersionComparator implements Comparator<DatasetVersion> {
     @Override
     public int compare(DatasetVersion v1, DatasetVersion v2) {
         int major = Integer.compare(v1.getVersionNumber(), v2.getVersionNumber());
-        if (major != 0) return major;
-        else return Integer.compare(v1.getVersionMinorNumber(), v2.getVersionMinorNumber());
+        if (major != 0)
+            return major;
+        else
+            return Integer.compare(v1.getVersionMinorNumber(), v2.getVersionMinorNumber());
     }
 }
