@@ -77,7 +77,8 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
                 new Object[] { easyFileDAO, expectedDAO }
             );
         for (File file : namespace.<File>getList("csv")) {
-            if (file.getName().toLowerCase(Locale.getDefault()).endsWith("csv")) { // TODO workaround to skip config.yml
+            // TODO workaround in case config.yml was the first argument without preceding "-c" flag
+            if (file.getName().toLowerCase(Locale.getDefault()).endsWith("csv")) {
                 log.info(file.toString());
                 for (CSVRecord r : FedoraToBagCsv.parse(file)) {
                     proxy.loadFromCsv(new FedoraToBagCsv(r));
