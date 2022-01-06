@@ -19,7 +19,7 @@ easyDb:
   driverClass: org.postgresql.Driver
   url: 'jdbc:postgresql://localhost:5432/easy_db'
   logValidationErrors: true
-  user: easy_webui
+  user: easy_tool
   password: changeme
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
