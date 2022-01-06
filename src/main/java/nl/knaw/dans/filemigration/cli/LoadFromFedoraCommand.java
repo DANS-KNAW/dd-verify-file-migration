@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Locale;
 
 public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
@@ -76,9 +77,11 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
                 new Object[] { easyFileDAO, expectedDAO }
             );
         for (File file : namespace.<File>getList("csv")) {
-            log.info(file.toString());
-            for(CSVRecord r: FedoraToBagCsv.parse(file)) {
-                proxy.loadFromCsv(new FedoraToBagCsv(r));
+            if (file.getName().toLowerCase(Locale.getDefault()).endsWith("csv")) { // TODO workaround to skip config.yml
+                log.info(file.toString());
+                for (CSVRecord r : FedoraToBagCsv.parse(file)) {
+                    proxy.loadFromCsv(new FedoraToBagCsv(r));
+                }
             }
         }
     }
