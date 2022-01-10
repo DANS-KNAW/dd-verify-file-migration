@@ -55,7 +55,7 @@ public class FedoraToBagCsv {
       .withHeader(DATASET_ID_COLUMN, "uuid1", "uuid2", DOI_COLUMN, "depositor", TRANSFORMATION_TYPE_COLUMN, COMMENT_COLUMN)
       .withDelimiter(',')
       .withFirstRecordAsHeader()
-      .withRecordSeparator('\n')
+      .withRecordSeparator(System.lineSeparator())
       .withAutoFlush(true);
 
   static public CSVParser parse(File file) throws IOException {

@@ -23,10 +23,20 @@ import nl.knaw.dans.lib.util.DataverseClientFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.net.URI;
 
 public class DdVerifyFileMigrationConfiguration extends Configuration {
   @Valid
+  @NotNull
   private DataverseClientFactory dataverse;
+
+  @Valid
+  @NotNull
+  private URI bagStoreBaseUri;
+
+  @Valid
+  @NotNull
+  private URI bagIndexBaseUri;
 
   @Valid
   @NotNull
@@ -56,5 +66,21 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
 
   public void setDataverse(DataverseClientFactory dataverse) {
     this.dataverse = dataverse;
+  }
+
+  public URI getBagStoreBaseUri() {
+    return bagStoreBaseUri;
+  }
+
+  public void setBagStoreBaseUri(URI bagStoreUri) {
+    this.bagStoreBaseUri = bagStoreUri;
+  }
+
+  public URI getBagIndexBaseUri() {
+    return bagIndexBaseUri;
+  }
+
+  public void setBagIndexBaseUri(URI bagIndexBaseUri) {
+    this.bagIndexBaseUri = bagIndexBaseUri;
   }
 }
