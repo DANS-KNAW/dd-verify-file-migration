@@ -65,7 +65,7 @@ public class DataverseLoader {
                 saveActual(toActual(f, doi, v.getVersionNumber(), v.getVersionMinorNumber()));
                 ++fileCount;
             }
-            log.info("Stored {} basic file metas for DOI {}, Version {}.{} State {}", fileCount, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
+            log.info("Stored {} actual files for DOI {}, Version {}.{} State {}", fileCount, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
         }
     }
 
