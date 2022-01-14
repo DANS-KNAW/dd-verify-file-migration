@@ -60,7 +60,7 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
     return verificationDatabase;
   }
 
-  public void setverificationDatabase(DataSourceFactory dataSourceFactory) {
+  public void setVerificationDatabase(DataSourceFactory dataSourceFactory) {
     this.verificationDatabase = dataSourceFactory;
   }
 
