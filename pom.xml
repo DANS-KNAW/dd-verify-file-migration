@@ -29,7 +29,7 @@
     <artifactId>dd-verify-file-migration</artifactId>
     <version>0.0.2-SNAPSHOT</version>
 
-    <name>Dd Verify File Migration</name>
+    <name>DD Verify File Migration</name>
     <url>https://github.com/DANS-KNAW/dd-verify-file-migration</url>
     <description>Database for comparing expected and actual files after migration to data station</description>
     <inceptionYear>2021</inceptionYear>
