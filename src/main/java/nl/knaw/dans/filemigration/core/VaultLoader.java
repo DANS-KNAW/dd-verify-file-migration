@@ -35,11 +35,14 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -80,7 +83,7 @@ public class VaultLoader extends ExpectedLoader {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
       if (bagSeq.length == 0)
-        createExpected(uuid.toString(), bagInfo.getDoi());
+        processBag(uuid.toString(), bagInfo.getDoi());
       else {
         List<BagInfo> bagInfos= StreamSupport
             .stream(Arrays.stream(bagSeq).spliterator(), false)
@@ -89,7 +92,7 @@ public class VaultLoader extends ExpectedLoader {
         int count = 0;
         for (BagInfo info : bagInfos) {
           log.trace("{} from sequence {}", ++count, info);
-          createExpected(info.getBaseId(), info.getDoi());
+          processBag(info.getBaseId(), info.getDoi());
         }
       }
     }
@@ -98,20 +101,57 @@ public class VaultLoader extends ExpectedLoader {
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
-  private void createExpected(String uuid, String doi) {
-    expectedMigrationFiles(doi, migrationFiles);
-    readManifest(uuid).forEach(m ->
-        retriedSave(new ExpectedFile(doi, m.getSha1(), m.getPath(), "", false))
-    );
+  private void processBag(String uuid, String doi) {
+    Map<String, FileRights> filesXml = readFileMeta(uuid);
+    FileRights defaultFileRights = readDefaultRights(uuid);
+    readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml, defaultFileRights));
+    expectedMigrationFiles(doi, migrationFiles, defaultFileRights);
+  }
+
+  private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
+    String path = m.getPath();
+    FileRights fileRights = fileRightsMap.get(path).applyDefaults(defaultFileRights);
+    log.trace("{} {}", path, fileRights);
+    retriedSave(new ExpectedFile(doi, m, fileRights));
   }
 
   private Stream<ManifestCsv> readManifest(String uuid) {
     URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid+"/")
-        .resolve("manifest-sha1.txt"); // TODO in next iteration a variant for metadata/files.xml
+        .resolve("manifest-sha1.txt");
     try {
       return ManifestCsv.parse(executeReq(new HttpGet(uri), true));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private Map<String, FileRights> readFileMeta(String uuid) {
+    URI uri = bagStoreBaseUri
+        .resolve("bags/")
+        .resolve(uuid+"/")
+        .resolve("metadata/")
+        .resolve("files.xml");
+    try {
+      String xmlString = executeReq(new HttpGet(uri), true);
+      return FileRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private FileRights readDefaultRights(String uuid) {
+    URI uri = bagStoreBaseUri
+        .resolve("bags/")
+        .resolve(uuid+"/")
+        .resolve("metadata/")
+        .resolve("dataset.xml");
+    try {
+      String xmlString = executeReq(new HttpGet(uri), true);
+      return DatasetRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
     }
     catch (IOException e) {
       throw new RuntimeException(e);
@@ -121,7 +161,7 @@ public class VaultLoader extends ExpectedLoader {
   private BagInfo readBagInfo(String uuid) {
     URI uri = bagIndexBaseUri
         .resolve("bags/")
-        .resolve(uuid.toString());
+        .resolve(uuid);
     try {
       String s = executeReq(new HttpGet(uri), true);
       if ("".equals(s)) return new BagInfo(); // not found

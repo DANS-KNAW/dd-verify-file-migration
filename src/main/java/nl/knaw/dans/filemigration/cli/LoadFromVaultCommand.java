@@ -67,7 +67,7 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
             .dest("uuid")
             .type(String.class)
             .help("UUID of a bag in the vault");
-        group.addArgument("-s","--store")
+        group.addArgument("-s", "--store")
             .type(String.class)
             .help("name of a bag store in the vault");
     }
@@ -88,12 +88,13 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         String store = namespace.getString("store");
         if (uuid != null)
             proxy.loadFromVault(UUID.fromString(uuid));
-        else if (file!=null) {
+        else if (file != null) {
             String uuids = FileUtils.readFileToString(new File(file), Charset.defaultCharset());
             for (String s : uuids.split(System.lineSeparator())) {
                 proxy.loadFromVault(UUID.fromString(s.trim()));
             }
-        } else {
+        }
+        else {
             log.error("not yet implemented:loading from store {}", store);
         }
     }

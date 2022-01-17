@@ -51,12 +51,16 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
     return easyDb;
   }
 
+  public void setEasyDb(DataSourceFactory easyDb) {
+    this.easyDb = easyDb;
+  }
+
   @JsonProperty("verificationDatabase")
   public DataSourceFactory getVerificationDatabase() {
     return verificationDatabase;
   }
 
-  public void setverificationDatabase(DataSourceFactory dataSourceFactory) {
+  public void setVerificationDatabase(DataSourceFactory dataSourceFactory) {
     this.verificationDatabase = dataSourceFactory;
   }
 

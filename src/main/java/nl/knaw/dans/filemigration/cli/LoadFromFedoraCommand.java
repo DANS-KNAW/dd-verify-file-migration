@@ -75,9 +75,9 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
                 new Class[] { EasyFileDAO.class, ExpectedFileDAO.class },
                 new Object[] { easyFileDAO, expectedDAO }
             );
-        for (File file : namespace.<File>getList("csv")) {
+        for (File file : namespace.<File> getList("csv")) {
             log.info(file.toString());
-            for(CSVRecord r: FedoraToBagCsv.parse(file)) {
+            for (CSVRecord r : FedoraToBagCsv.parse(file)) {
                 proxy.loadFromCsv(new FedoraToBagCsv(r));
             }
         }

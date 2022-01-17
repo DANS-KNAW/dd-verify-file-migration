@@ -47,6 +47,8 @@ easyDb:
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
     hibernate.hbm2ddl.auto: update
+  # on datastation (read systems without easy_db) use auto:none
+  # load-from-fedora will fail on those systems
 
 verificationDatabase:
   driverClass: org.hsqldb.jdbcDriver
