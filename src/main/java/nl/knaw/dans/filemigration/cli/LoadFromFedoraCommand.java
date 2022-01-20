@@ -18,6 +18,7 @@ package nl.knaw.dans.filemigration.cli;
 import io.dropwizard.Application;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -62,6 +63,12 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
             .type(File.class)
             .nargs("+")
             .help("CSV file produced by easy-fedora-to-bag");
+    }
+
+    @Override
+    protected void run(Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
+        bootstrap.addBundle(easyBundle);
+        super.run(bootstrap, namespace, configuration);
     }
 
     @Override

@@ -66,10 +66,9 @@ public class DdVerifyFileMigrationApplication extends Application<DdVerifyFileMi
 
     @Override
     public void initialize(final Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap) {
-        bootstrap.addBundle(easyBundle);
-        bootstrap.addBundle(verificationBundle);
         bootstrap.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
         bootstrap.getObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        bootstrap.addBundle(verificationBundle);// easyBundle is added by LoadFromFedoraCommand
         bootstrap.addCommand(new LoadFromFedoraCommand(this, easyBundle, verificationBundle));
         bootstrap.addCommand(new LoadFromDataverseCommand(this, verificationBundle));
         bootstrap.addCommand(new LoadFromVaultCommand(this, verificationBundle));
