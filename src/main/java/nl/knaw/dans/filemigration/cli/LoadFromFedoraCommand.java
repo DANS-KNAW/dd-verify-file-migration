@@ -33,6 +33,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.ConfigurationException;
 import java.io.File;
 
 public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVerifyFileMigrationConfiguration> {
@@ -67,6 +68,8 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
 
     @Override
     protected void run(Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
+        if (configuration.getEasyDb() == null)
+            throw new ConfigurationException(getName() +" not possible: no easyDb configured");
         bootstrap.addBundle(easyBundle);
         super.run(bootstrap, namespace, configuration);
     }
