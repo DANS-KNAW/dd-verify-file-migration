@@ -11,16 +11,17 @@ server:
       # Replace with port number unique for this service
       port: 20001
 
+# for load-from-vault
 bagStoreBaseUri: 'http://localhost:20110/'
-
 bagIndexBaseUri: 'http://localhost:20120/'
 
+#for load-from-dataverse
 dataverse:
   baseUrl: 'http://localhost:8080/'
   apiKey: changeme
 
+# for load-from-fedora, null on a datastation (read system without easy_db)
 easyDb:
-  # details can be omitted on a datastation (read systems without easy_db)
   driverClass: org.postgresql.Driver
   url: 'jdbc:postgresql://localhost:5432/easy_db'
   logValidationErrors: true
@@ -30,6 +31,7 @@ easyDb:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
     hibernate.hbm2ddl.auto: validate
 
+# for all load-from commands
 verificationDatabase:
   driverClass: org.postgresql.Driver
   url: 'jdbc:postgresql://localhost:5432/dd_verify_file_migration'
