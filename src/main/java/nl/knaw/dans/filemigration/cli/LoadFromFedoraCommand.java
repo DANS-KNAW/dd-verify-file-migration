@@ -68,10 +68,15 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
 
     @Override
     protected void run(Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
+        // TODO move up to DefaultConfigEnvironmentCommand in dans-java-utils with generic <T>
+        initialize(bootstrap, namespace, configuration);
+        super.run(bootstrap, namespace, configuration); // calls the abstract run(environment, namespace, configuration)
+    }
+
+    public void initialize(Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
         if (configuration.getEasyDb() == null)
-            throw new ConfigurationException(getName() +" not possible: no easyDb configured");
+            throw new ConfigurationException(getName() + " requires easyDb parameters in " + namespace.get("file"));
         bootstrap.addBundle(easyBundle);
-        super.run(bootstrap, namespace, configuration);
     }
 
     @Override
