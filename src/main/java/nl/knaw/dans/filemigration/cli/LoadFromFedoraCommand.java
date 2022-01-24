@@ -68,9 +68,13 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
 
     @Override
     protected void run(Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
-        // TODO move up to DefaultConfigEnvironmentCommand in dans-java-utils with generic <T>
+        // TODO move up to DefaultConfigEnvironmentCommand in dans-java-utils with generic <T> ?
         initialize(bootstrap, namespace, configuration);
-        super.run(bootstrap, namespace, configuration); // calls the abstract run(environment, namespace, configuration)
+        // super calls (among others)
+        // - bundle.run for all bootstrap.configuredBundles (via bootstrap.run)
+        //   to register UnitOfWorkListener for the DB entities and healtCheck
+        // - run(environment, namespace, configuration)
+        super.run(bootstrap, namespace, configuration);
     }
 
     public void initialize(Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
