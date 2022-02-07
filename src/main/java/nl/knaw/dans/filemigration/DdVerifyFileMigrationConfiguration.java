@@ -21,6 +21,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import nl.knaw.dans.lib.util.DataverseClientFactory;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
@@ -39,7 +40,7 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
   private URI bagIndexBaseUri;
 
   @Valid
-  @NotNull
+  @Nullable
   private DataSourceFactory easyDb = new DataSourceFactory();
 
   @Valid

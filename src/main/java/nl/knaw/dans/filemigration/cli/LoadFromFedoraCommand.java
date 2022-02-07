@@ -18,6 +18,7 @@ package nl.knaw.dans.filemigration.cli;
 import io.dropwizard.Application;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -32,6 +33,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.ConfigurationException;
 import java.io.File;
 
 public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVerifyFileMigrationConfiguration> {
@@ -62,6 +64,23 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
             .type(File.class)
             .nargs("+")
             .help("CSV file produced by easy-fedora-to-bag");
+    }
+
+    @Override
+    protected void run(Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
+        // TODO move up to DefaultConfigEnvironmentCommand in dans-java-utils with generic <T> ?
+        initialize(bootstrap, namespace, configuration);
+        // super calls (among others)
+        // - bundle.run for all bootstrap.configuredBundles (via bootstrap.run)
+        //   to register UnitOfWorkListener for the DB entities and healtCheck
+        // - run(environment, namespace, configuration)
+        super.run(bootstrap, namespace, configuration);
+    }
+
+    public void initialize(Bootstrap<DdVerifyFileMigrationConfiguration> bootstrap, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
+        if (configuration.getEasyDb() == null)
+            throw new ConfigurationException(getName() + " requires easyDb parameters in " + namespace.get("file"));
+        bootstrap.addBundle(easyBundle);
     }
 
     @Override
