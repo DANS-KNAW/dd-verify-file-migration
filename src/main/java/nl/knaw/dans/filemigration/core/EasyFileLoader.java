@@ -100,9 +100,9 @@ public class EasyFileLoader extends ExpectedLoader {
       log.trace("EasyFile = {}", f);
       final boolean removeOriginal = csv.getTransformation().startsWith("original") && f.getPath().startsWith("original/");
       ExpectedFile expected = new ExpectedFile(csv.getDoi(), f, removeOriginal);
-      expected.setAccessibleTo(f.getAccessible_to());
-      expected.setVisibleTo(f.getVisible_to());
-      expected.setEmbargo_date(embargoDate);
+      expected.setAccessibleTo(f.getAccessibleTo());
+      expected.setVisibleTo(f.getVisibleTo());
+      expected.setEmbargoDate(embargoDate);
       retriedSave(expected);
     }
   }

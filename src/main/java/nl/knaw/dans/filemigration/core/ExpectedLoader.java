@@ -36,18 +36,18 @@ public class ExpectedLoader {
     for (String f: migrationFiles) {
       ExpectedFile expectedFile = new ExpectedFile();
       expectedFile.setDoi(doi);
-      expectedFile.setSha1_checksum("");
-      expectedFile.setEasy_file_id("");
-      expectedFile.setFs_rdb_path("");
-      expectedFile.setExpected_path("easy-migration/" + f);
-      expectedFile.setAdded_during_migration(true);
-      expectedFile.setRemoved_thumbnail(false);
-      expectedFile.setRemoved_original_directory(false);
-      expectedFile.setRemoved_duplicate_file_count(0);
-      expectedFile.setTransformed_name(false);
+      expectedFile.setSha1Checksum("");
+      expectedFile.setEasyFileId("");
+      expectedFile.setFsRdbPath("");
+      expectedFile.setExpectedPath("easy-migration/" + f);
+      expectedFile.setAddedDuringMigration(true);
+      expectedFile.setRemovedThumbnail(false);
+      expectedFile.setRemovedOriginalDirectory(false);
+      expectedFile.setRemovedDuplicateFileCount(0);
+      expectedFile.setTransformedName(false);
       expectedFile.setVisibleTo(datasetRights.getVisibleTo());
       expectedFile.setAccessibleTo(datasetRights.getAccessibleTo());
-      expectedFile.setEmbargo_date(datasetRights.getEmbargoDate());
+      expectedFile.setEmbargoDate(datasetRights.getEmbargoDate());
       retriedSave(expectedFile);
     }
   }
@@ -60,7 +60,7 @@ public class ExpectedLoader {
       if (!(e.getCause() instanceof ConstraintViolationException))
         throw e;
       else {
-        if (expected.getRemoved_duplicate_file_count() > 10) {
+        if (expected.getRemovedDuplicateFileCount() > 10) {
           // TODO temporary safe guard?
           log.error("too many retries on duplicate file, skipping: {}", expected);
         }
