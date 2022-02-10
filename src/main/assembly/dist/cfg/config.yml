@@ -54,6 +54,6 @@ logging:
       logFormat: "%-5p [%d{ISO8601}] [%t] %c: %m%n%rEx"
     - type: file
       archive: false
-      currentLogFilename: data/dd-verify-file-migration.log
+      currentLogFilename: dd-verify-file-migration.log
       archivedLogFilenamePattern: /var/log/dd-verify-file-migration-%d.log.gz
       archivedFileCount: 5
