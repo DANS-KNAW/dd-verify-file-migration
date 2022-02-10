@@ -48,12 +48,13 @@ verificationDatabase:
 logging:
   level: INFO
   loggers:
-   "org.hibernate.engine.internal.StatisticalLoggingSessionEventListener": WARN
+    "org.hibernate.engine.internal.StatisticalLoggingSessionEventListener": WARN
   appenders:
     - type: console
       logFormat: "%-5p [%d{ISO8601}] [%t] %c: %m%n%rEx"
     - type: file
-      archive: false
-      currentLogFilename: dd-verify-file-migration.log
-      archivedLogFilenamePattern: /var/log/dd-verify-file-migration-%d.log.gz
+      archive: true
+      logFormat: "%-5p [%d{ISO8601}] [%t] %c: %m%n%rEx"
+      currentLogFilename: /var/opt/dans.knaw.nl/log/dd-verify-file-migration/dd-verify-file-migration.log
+      archivedLogFilenamePattern: /var/opt/dans.knaw.nl/log/dd-verify-file-migration/dd-verify-file-migration-%d.log
       archivedFileCount: 5
