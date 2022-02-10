@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Locale;
 
 public class DataverseLoader {
     private static final Logger log = LoggerFactory.getLogger(DataverseLoader.class);
@@ -57,7 +58,10 @@ public class DataverseLoader {
             return;
         }
         catch (Exception e) {
-            log.error("Could not retrieve file metas for DOI: {}", doi, e);
+            if (e.getMessage().toLowerCase().contains("not found"))
+                log.error("{} {} {}", doi, e.getClass(), e.getMessage());
+            else
+                log.error("Could not retrieve file metas for DOI: {}", doi, e);
             return;
         }
         for (DatasetVersion v : versions) {
