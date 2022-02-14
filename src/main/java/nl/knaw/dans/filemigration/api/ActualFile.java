@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.filemigration.api;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -63,6 +64,10 @@ public class ActualFile {
   @Column(length = 60)
   private String storage_id = "";
 
+  @Nullable
+  @Column()
+  private String embargo_date;
+
   public int getMajor_version_nr() {
     return major_version_nr;
   }
@@ -103,6 +108,15 @@ public class ActualFile {
     this.sha1_checksum = sha1_checksum;
   }
 
+  @Nullable
+  public String getEmbargo_date() {
+    return embargo_date;
+  }
+
+  public void setEmbargo_date(@Nullable String embargo_date) {
+    this.embargo_date = embargo_date;
+  }
+
   public String getDoi() {
     return doi;
   }
@@ -113,21 +127,27 @@ public class ActualFile {
 
   @Override
   public String toString() {
-    return "ActualFile{" + "doi='" + doi + '\'' + ", actual_path='" + actual_path + '\'' + ", major_version_nr=" + major_version_nr + ", minor_version_nr=" + minor_version_nr + ", sha1_checksum='" + sha1_checksum + '\'' + ", storage_id='" + storage_id + '\'' + '}';
+    return "ActualFile{" +
+            "doi='" + doi + '\'' +
+            ", actual_path='" + actual_path + '\'' +
+            ", major_version_nr=" + major_version_nr +
+            ", minor_version_nr=" + minor_version_nr +
+            ", sha1_checksum='" + sha1_checksum + '\'' +
+            ", storage_id='" + storage_id + '\'' +
+            ", embargo_date='" + embargo_date + '\'' +
+            '}';
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     ActualFile that = (ActualFile) o;
-    return major_version_nr == that.major_version_nr && minor_version_nr == that.minor_version_nr && Objects.equals(doi, that.doi) && Objects.equals(actual_path, that.actual_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(storage_id, that.storage_id);
+    return major_version_nr == that.major_version_nr && minor_version_nr == that.minor_version_nr && Objects.equals(doi, that.doi) && Objects.equals(actual_path, that.actual_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(storage_id, that.storage_id) && Objects.equals(embargo_date, that.embargo_date);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, actual_path, major_version_nr, minor_version_nr, sha1_checksum, storage_id);
+    return Objects.hash(doi, actual_path, major_version_nr, minor_version_nr, sha1_checksum, storage_id, embargo_date);
   }
 }

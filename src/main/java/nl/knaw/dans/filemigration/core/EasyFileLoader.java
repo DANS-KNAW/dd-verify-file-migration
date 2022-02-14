@@ -43,7 +43,8 @@ public class EasyFileLoader extends ExpectedLoader {
       // thus we don't write anything when reading fails
       if (!csv.getComment().contains("no payload"))
         fedoraFiles(csv);
-      FileRights fileRights = new FileRights("OPEN_ACCESS"); // TODO from dataset.xml <accessRight>?
+      FileRights fileRights = new FileRights();
+      fileRights.setFileRights("OPEN_ACCESS");// TODO from dataset.xml <accessRight> or solr?
       expectedMigrationFiles(csv.getDoi(), migrationFiles, fileRights);
     }
   }

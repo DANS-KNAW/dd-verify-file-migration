@@ -27,6 +27,15 @@ public class FileRights implements Serializable {
 
   private String accessibleTo;
   private String visibleTo;
+  private String embargoDate;
+
+  public String getEmbargoDate() {
+    return embargoDate;
+  }
+
+  public void setEmbargoDate(String embargoDate) {
+    this.embargoDate = embargoDate;
+  }
 
   public String getAccessibleTo() {
     return accessibleTo;
@@ -46,7 +55,7 @@ public class FileRights implements Serializable {
 
   public FileRights() {}
 
-  public FileRights(String datasetAccessRights) {
+  public void setFileRights(String datasetAccessRights) {
     switch (datasetAccessRights) {
       case "OPEN_ACCESS":
         setAccessibleTo("ANONYMOUS");
@@ -74,26 +83,29 @@ public class FileRights implements Serializable {
       setAccessibleTo(defaultRights.getAccessibleTo());
     if(StringUtil.isEmpty(getVisibleTo()))
       setVisibleTo(defaultRights.getVisibleTo());
+    setEmbargoDate(defaultRights.getEmbargoDate());
     return this;
   }
 
   @Override
   public String toString() {
-    return "FileMetadata{" + "accessibleTo='" + accessibleTo + '\'' + ", visibleTo='" + visibleTo + '\'' + '}';
+    return "FileRights{" +
+            "accessibleTo='" + accessibleTo + '\'' +
+            ", visibleTo='" + visibleTo + '\'' +
+            ", embargoDate='" + embargoDate + '\'' +
+            '}';
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     FileRights that = (FileRights) o;
-    return Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo);
+    return Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo) && Objects.equals(embargoDate, that.embargoDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(accessibleTo, visibleTo);
+    return Objects.hash(accessibleTo, visibleTo, embargoDate);
   }
 }
