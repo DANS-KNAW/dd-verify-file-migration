@@ -22,6 +22,8 @@ import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
+import org.hsqldb.lib.StringUtil;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +75,10 @@ public class DataverseLoader {
         DataFile f = fileMeta.getDataFile();
         String dl = fileMeta.getDirectoryLabel();
         String actual_path = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
-        return new ActualFile(doi, actual_path, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
+        ActualFile actualFile = new ActualFile(doi, actual_path, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
+        String dateAvailable = f.getEmbargo().getDateAvailable();
+        if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
+            actualFile.setEmbargo_date(dateAvailable);
+        return actualFile;
     }
 }
