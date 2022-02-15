@@ -21,6 +21,7 @@ import nl.knaw.dans.filemigration.db.ActualFileDAO;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
+import nl.knaw.dans.lib.dataverse.model.file.Embargo;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.hsqldb.lib.StringUtil;
 import org.joda.time.DateTime;
@@ -76,7 +77,9 @@ public class DataverseLoader {
         String dl = fileMeta.getDirectoryLabel();
         String actual_path = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
         ActualFile actualFile = new ActualFile(doi, actual_path, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
-        actualFile.setEmbargo_date(f.getEmbargo().getDateAvailable());
+        Embargo embargo = f.getEmbargo();
+        if (embargo != null)
+            actualFile.setEmbargo_date(embargo.getDateAvailable());
         return actualFile;
     }
 }
