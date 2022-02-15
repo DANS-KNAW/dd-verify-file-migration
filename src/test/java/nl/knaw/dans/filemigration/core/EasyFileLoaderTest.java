@@ -21,6 +21,7 @@ import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 import org.easymock.EasyMock;
 import org.hibernate.exception.ConstraintViolationException;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.PersistenceException;
@@ -38,7 +39,20 @@ import static org.easymock.EasyMock.verify;
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
   private static final String doi = "10.80270/test-nySe-x6f-kf66";
-  private static final URI solrBaseURI = solrBaseUri();
+  
+  private static class Loader extends EasyFileLoader {
+
+    public Loader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO) {
+      super(easyFileDAO, expectedDAO, solrBaseUri());
+    }
+
+    @Override
+    protected @NotNull FileRights getDatasetRights(String datasetId) {
+      FileRights fileRights = new FileRights();
+      fileRights.setFileRights("NO_ACCESS");
+      return fileRights;
+    }
+  }
 
   static URI solrBaseUri(){
     try {
@@ -59,7 +73,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, expectedFileDAO, easyFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
+    new Loader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, expectedFileDAO, easyFileDAO);
   }
 
@@ -71,7 +85,7 @@ public class EasyFileLoaderTest {
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
     EasyFileDAO easyFileDAO = createMock(EasyFileDAO.class);
     replay(csv, expectedFileDAO, easyFileDAO);
-    new EasyFileLoader(null, null, solrBaseURI).loadFromCsv(csv);
+    new Loader(null, null).loadFromCsv(csv);
     verify(csv, expectedFileDAO, easyFileDAO);
   }
 
@@ -85,7 +99,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
+    new Loader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -105,7 +119,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
+    new Loader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -125,7 +139,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
+    new Loader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -143,7 +157,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
+    new Loader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -166,8 +180,8 @@ public class EasyFileLoaderTest {
       expectedFile.setExpected_path("easy-migration/" + f);
       expectedFile.setAdded_during_migration(true);
       expectedFiles.add(expectedFile);
-      expectedFile.setAccessibleTo("ANONYMOUS");
-      expectedFile.setVisibleTo("ANONYMOUS");
+      expectedFile.setAccessibleTo("NONE");
+      expectedFile.setVisibleTo("NONE");
     }
     return expectedFiles;
   }

@@ -39,7 +39,7 @@ public class EasyFileLoader extends ExpectedLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
   private final EasyFileDAO easyFileDAO;
-  private URI solrUri;
+  private final URI solrUri;
 
   public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO, URI solrBaseUri) {
     super(expectedDAO);
@@ -61,7 +61,7 @@ public class EasyFileLoader extends ExpectedLoader {
   }
 
   @NotNull
-  private FileRights getDatasetRights(String datasetId) {
+  protected FileRights getDatasetRights(String datasetId) {
     URIBuilder builder = new URIBuilder(solrUri)
             .setParameter("q", "sid:\""+datasetId+"\"")
             .setParameter("fl", "emd_date_available_formatted,dc_rights")
