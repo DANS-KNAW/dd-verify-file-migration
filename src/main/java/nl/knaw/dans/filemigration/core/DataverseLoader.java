@@ -76,9 +76,7 @@ public class DataverseLoader {
         String dl = fileMeta.getDirectoryLabel();
         String actual_path = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
         ActualFile actualFile = new ActualFile(doi, actual_path, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
-        String dateAvailable = f.getEmbargo().getDateAvailable();
-        if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
-            actualFile.setEmbargo_date(dateAvailable);
+        actualFile.setEmbargo_date(f.getEmbargo().getDateAvailable());
         return actualFile;
     }
 }

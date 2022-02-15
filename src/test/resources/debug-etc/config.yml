@@ -48,6 +48,8 @@ easyDb:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
     hibernate.hbm2ddl.auto: update
 
+solrBaseUri: 'http://deasy.dans.knaw.nl:8080/solr'
+
 verificationDatabase:
   driverClass: org.hsqldb.jdbcDriver
   url: 'jdbc:hsqldb:hsql://localhost:9001/verificationDatabase'

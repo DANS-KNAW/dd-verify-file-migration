@@ -24,6 +24,8 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.PersistenceException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +38,16 @@ import static org.easymock.EasyMock.verify;
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
   private static final String doi = "10.80270/test-nySe-x6f-kf66";
+  private static final URI solrBaseURI = solrBaseUri();
+
+  static URI solrBaseUri(){
+    try {
+      return new URI("http://does.not.exist.dans.knaw.nl:8080/solr/");
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
 
   @Test
   public void skipNoPayload() {
@@ -47,7 +59,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, expectedFileDAO, easyFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
     verify(csv, expectedFileDAO, easyFileDAO);
   }
 
@@ -59,7 +71,7 @@ public class EasyFileLoaderTest {
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
     EasyFileDAO easyFileDAO = createMock(EasyFileDAO.class);
     replay(csv, expectedFileDAO, easyFileDAO);
-    new EasyFileLoader(null, null).loadFromCsv(csv);
+    new EasyFileLoader(null, null, solrBaseURI).loadFromCsv(csv);
     verify(csv, expectedFileDAO, easyFileDAO);
   }
 
@@ -73,7 +85,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -93,7 +105,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -113,7 +125,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -131,7 +143,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new EasyFileLoader(easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new EasyFileLoader(easyFileDAO, expectedFileDAO, solrBaseURI).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 

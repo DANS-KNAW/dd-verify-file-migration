@@ -15,6 +15,9 @@
  */
 package nl.knaw.dans.filemigration.api;
 
+import org.hsqldb.lib.StringUtil;
+import org.joda.time.DateTime;
+
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -113,8 +116,9 @@ public class ActualFile {
     return embargo_date;
   }
 
-  public void setEmbargo_date(@Nullable String embargo_date) {
-    this.embargo_date = embargo_date;
+  public void setEmbargo_date(@Nullable String dateAvailable) {
+    if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
+      this.embargo_date = dateAvailable;
   }
 
   public String getDoi() {

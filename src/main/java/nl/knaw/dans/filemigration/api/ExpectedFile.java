@@ -17,6 +17,8 @@ package nl.knaw.dans.filemigration.api;
 
 import nl.knaw.dans.filemigration.core.FileRights;
 import nl.knaw.dans.filemigration.core.ManifestCsv;
+import org.hsqldb.lib.StringUtil;
+import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
 import javax.persistence.*;
@@ -256,8 +258,9 @@ public class ExpectedFile {
         return embargo_date;
     }
 
-    public void setEmbargo_date(@Nullable String embargo_date) {
-        this.embargo_date = embargo_date;
+    public void setEmbargo_date(@Nullable String dateAvailable) {
+        if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
+            this.embargo_date = dateAvailable;
     }
 
     public String getAccessibleTo() {

@@ -16,9 +16,11 @@
 package nl.knaw.dans.filemigration.core;
 
 import org.hsqldb.lib.StringUtil;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -33,8 +35,9 @@ public class FileRights implements Serializable {
     return embargoDate;
   }
 
-  public void setEmbargoDate(String embargoDate) {
-    this.embargoDate = embargoDate;
+  public void setEmbargoDate(@Nullable String dateAvailable) {
+    if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
+      this.embargoDate = dateAvailable;
   }
 
   public String getAccessibleTo() {

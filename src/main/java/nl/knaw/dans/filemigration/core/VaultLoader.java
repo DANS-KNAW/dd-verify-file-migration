@@ -48,6 +48,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static nl.knaw.dans.filemigration.core.HttpHelper.executeReq;
+
 public class VaultLoader extends ExpectedLoader {
 
   private static final Logger log = LoggerFactory.getLogger(VaultLoader.class);
@@ -55,7 +57,6 @@ public class VaultLoader extends ExpectedLoader {
   private final URI bagStoreBaseUri;
   private final URI bagIndexBaseUri;
   private final URI bagSeqUri;
-  private final HttpClient client = HttpClients.createDefault();
   private final ObjectMapper mapper;
 
   public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
@@ -188,20 +189,5 @@ public class VaultLoader extends ExpectedLoader {
     catch (IOException | URISyntaxException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private String executeReq(HttpGet req, boolean logNotFound) throws IOException {
-    log.info("{}", req);
-    HttpResponse resp = client.execute(req);
-    int statusCode = resp.getStatusLine().getStatusCode();
-    if (statusCode == 404) {
-      if (logNotFound)
-        log.error("Could not find {}", req.getURI());
-      return "";
-    }
-    else if (statusCode < 200 || statusCode >= 300)
-      throw new IOException("not expected response code: " + statusCode);
-    else
-      return EntityUtils.toString(resp.getEntity()); // max size 2147483647L
   }
 }
