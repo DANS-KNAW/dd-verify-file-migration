@@ -78,7 +78,7 @@ public class EasyFileLoader extends ExpectedLoader {
               .replaceAll("\"$","") // strip trailing quote
               .replaceAll(",.*",""); // strip licence URL and rights holder
       FileRights fileRights = new FileRights();
-      fileRights.setEmbargoDate(dateAvailable);
+      fileRights.setEmbargoDate(dateAvailable.trim());
       fileRights.setFileRights(rights);
       return fileRights;
     } catch (IOException | URISyntaxException e) {

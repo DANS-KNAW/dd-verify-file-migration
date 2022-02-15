@@ -52,7 +52,7 @@ public class DatasetRightsHandler extends DefaultHandler {
     else if ("available".equalsIgnoreCase(localName)) {
       String dateAvailable = chars.toString();
       if (DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
-        defaultFileRights.setEmbargoDate(dateAvailable);
+        defaultFileRights.setEmbargoDate(dateAvailable.trim());
     }
   }
 
