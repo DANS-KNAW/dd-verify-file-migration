@@ -67,6 +67,9 @@ public class ActualFile {
   @Column(length = 60)
   private String storage_id = "";
 
+  @Column()
+  private String accessibleTo;
+
   @Nullable
   @Column()
   private String embargo_date;
@@ -111,6 +114,18 @@ public class ActualFile {
     this.sha1_checksum = sha1_checksum;
   }
 
+  public String getAccessibleTo() {
+    return accessibleTo;
+  }
+
+  public void setAccessibleTo(boolean fileIsRestricted, boolean datasetHasAccessRequestEnabled) {
+    if (!fileIsRestricted)
+      this.accessibleTo = "ANONYMOUS";
+    else if (datasetHasAccessRequestEnabled)
+      this.accessibleTo = "RESTRICTED_REQUEST";
+    else this.accessibleTo = "NONE";
+  }
+
   @Nullable
   public String getEmbargo_date() {
     return embargo_date;
@@ -138,6 +153,7 @@ public class ActualFile {
             ", minor_version_nr=" + minor_version_nr +
             ", sha1_checksum='" + sha1_checksum + '\'' +
             ", storage_id='" + storage_id + '\'' +
+            ", accessibleTo='" + accessibleTo + '\'' +
             ", embargo_date='" + embargo_date + '\'' +
             '}';
   }
@@ -147,11 +163,11 @@ public class ActualFile {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ActualFile that = (ActualFile) o;
-    return major_version_nr == that.major_version_nr && minor_version_nr == that.minor_version_nr && Objects.equals(doi, that.doi) && Objects.equals(actual_path, that.actual_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(storage_id, that.storage_id) && Objects.equals(embargo_date, that.embargo_date);
+    return major_version_nr == that.major_version_nr && minor_version_nr == that.minor_version_nr && Objects.equals(doi, that.doi) && Objects.equals(actual_path, that.actual_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(storage_id, that.storage_id) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(embargo_date, that.embargo_date);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, actual_path, major_version_nr, minor_version_nr, sha1_checksum, storage_id, embargo_date);
+    return Objects.hash(doi, actual_path, major_version_nr, minor_version_nr, sha1_checksum, storage_id, accessibleTo, embargo_date);
   }
 }
