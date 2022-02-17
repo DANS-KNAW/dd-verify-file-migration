@@ -47,6 +47,7 @@ public class ExpectedLoader {
       expectedFile.setTransformed_name(false);
       expectedFile.setVisibleTo(datasetRights.getVisibleTo());
       expectedFile.setAccessibleTo(datasetRights.getAccessibleTo());
+      expectedFile.setEmbargo_date(datasetRights.getEmbargoDate());
       retriedSave(expectedFile);
     }
   }
@@ -72,6 +73,7 @@ public class ExpectedLoader {
   }
 
   public void saveExpected(ExpectedFile expected) {
+      log.trace(expected.toString());
       expectedDAO.create(expected);
   }
 }
