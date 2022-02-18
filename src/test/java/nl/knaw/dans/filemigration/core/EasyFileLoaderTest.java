@@ -24,7 +24,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.PersistenceException;
-import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
@@ -47,10 +48,12 @@ public class EasyFileLoaderTest {
     }
 
     @Override
-    protected @NotNull FileRights getDatasetRights(String datasetId) {
-      FileRights fileRights = new FileRights();
-      fileRights.setFileRights("NO_ACCESS");
-      return fileRights;
+    protected SolrFields getSolrFields(String datasetId) {
+      try {
+        return new SolrFields("2020-01-01,ANONYMOUS,somebody");
+      } catch (IOException e) {
+        return fail("Not expected exception on mocked test data");
+      }
     }
   }
 

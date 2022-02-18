@@ -26,7 +26,7 @@ import java.util.Objects;
 
 // order by in decreasing numeric order, thus earlier versions become duplicates
 @NamedQueries({ @NamedQuery(name = "EasyFile.findByDatasetId",
-                            query = "SELECT ef FROM EasyFile ef WHERE ef.dataset_sid = :dataset_sid ORDER BY length(ef.pid) desc, ef.pid desc",
+                            query = "SELECT ef FROM EasyFile ef WHERE ef.datasetSid = :datasetSid ORDER BY length(ef.pid) desc, ef.pid desc",
                             hints = {
                                 @QueryHint(
                                     name = "org.hibernate.readOnly",
@@ -39,7 +39,7 @@ import java.util.Objects;
 @Table(name = "easy_files")
 public class EasyFile {
     public static final String FIND_BY_DATASET_ID = "EasyFile.findByDatasetId";
-    public static final String DATASET_ID = "dataset_sid";
+    public static final String DATASET_ID = "datasetSid";
 
     public EasyFile() {
     }
@@ -90,7 +90,7 @@ public class EasyFile {
     @Column(name="accessible_to",nullable = false)
     private String accessibleTo = "";
 
-    @Column(name="sha1_checksum")
+    @Column(name="sha1checksum")
     private String sha1Checksum = "";
 
     @Override

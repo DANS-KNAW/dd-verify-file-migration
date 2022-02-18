@@ -32,7 +32,7 @@ public class ExpectedLoader {
     this.expectedDAO = expectedDAO;
   }
 
-  public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights) {
+  public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights, String creator) {
     for (String f: migrationFiles) {
       ExpectedFile expectedFile = new ExpectedFile();
       expectedFile.setDoi(doi);
@@ -48,6 +48,7 @@ public class ExpectedLoader {
       expectedFile.setVisibleTo(datasetRights.getVisibleTo());
       expectedFile.setAccessibleTo(datasetRights.getAccessibleTo());
       expectedFile.setEmbargoDate(datasetRights.getEmbargoDate());
+      expectedFile.setDepositor(creator);
       retriedSave(expectedFile);
     }
   }

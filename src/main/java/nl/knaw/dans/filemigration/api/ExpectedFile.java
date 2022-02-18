@@ -116,6 +116,10 @@ public class ExpectedFile {
     private String expectedPath;
 
     @Id
+    @Column()
+    private String depositor;
+
+    @Id
     @Column(name="removed_duplicate_file_count")
     private int removedDuplicateFileCount;
 
@@ -147,14 +151,15 @@ public class ExpectedFile {
     private String visibleTo;
 
     @Nullable
-    @Column()
-    private String embargo_date;
+    @Column(name="embargo_date")
+    private String embargoDate;
 
     @Override
     public String toString() {
         return "ExpectedFile{" +
                 "doi='" + doi + '\'' +
                 ", expectedPath='" + expectedPath + '\'' +
+                ", depositor='" + depositor + '\'' +
                 ", removedDuplicateFileCount=" + removedDuplicateFileCount +
                 ", removedOriginalDirectory=" + removedOriginalDirectory +
                 ", sha1Checksum='" + sha1Checksum + '\'' +
@@ -165,7 +170,7 @@ public class ExpectedFile {
                 ", transformedName=" + transformedName +
                 ", accessibleTo='" + accessibleTo + '\'' +
                 ", visibleTo='" + visibleTo + '\'' +
-                ", embargo_date='" + embargo_date + '\'' +
+                ", embargoDate='" + embargoDate + '\'' +
                 '}';
     }
 
@@ -253,14 +258,22 @@ public class ExpectedFile {
         this.doi = doi;
     }
 
+    public String getDepositor() {
+        return depositor;
+    }
+
+    public void setDepositor(String depositor) {
+        this.depositor = depositor;
+    }
+
     @Nullable
-    public String getEmbargo_date() {
-        return embargo_date;
+    public String getEmbargoDate() {
+        return embargoDate;
     }
 
     public void setEmbargoDate(@Nullable String dateAvailable) {
         if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
-            this.embargo_date = dateAvailable;
+            this.embargoDate = dateAvailable;
     }
 
     public String getAccessibleTo() {
@@ -284,11 +297,11 @@ public class ExpectedFile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ExpectedFile that = (ExpectedFile) o;
-        return removedDuplicateFileCount == that.removedDuplicateFileCount && removedOriginalDirectory == that.removedOriginalDirectory && addedDuringMigration == that.addedDuringMigration && removedThumbnail == that.removedThumbnail && transformedName == that.transformedName && Objects.equals(doi, that.doi) && Objects.equals(expectedPath, that.expectedPath) && Objects.equals(sha1Checksum, that.sha1Checksum) && Objects.equals(easyFileId, that.easyFileId) && Objects.equals(fsRdbPath, that.fsRdbPath) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo) && Objects.equals(embargo_date, that.embargo_date);
+        return removedDuplicateFileCount == that.removedDuplicateFileCount && removedOriginalDirectory == that.removedOriginalDirectory && addedDuringMigration == that.addedDuringMigration && removedThumbnail == that.removedThumbnail && transformedName == that.transformedName && Objects.equals(doi, that.doi) && Objects.equals(expectedPath, that.expectedPath) && Objects.equals(depositor, that.depositor) && Objects.equals(sha1Checksum, that.sha1Checksum) && Objects.equals(easyFileId, that.easyFileId) && Objects.equals(fsRdbPath, that.fsRdbPath) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo) && Objects.equals(embargoDate, that.embargoDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(doi, expectedPath, removedDuplicateFileCount, removedOriginalDirectory, sha1Checksum, easyFileId, fsRdbPath, addedDuringMigration, removedThumbnail, transformedName, accessibleTo, visibleTo, embargo_date);
+        return Objects.hash(doi, expectedPath, depositor, removedDuplicateFileCount, removedOriginalDirectory, sha1Checksum, easyFileId, fsRdbPath, addedDuringMigration, removedThumbnail, transformedName, accessibleTo, visibleTo, embargoDate);
     }
 }

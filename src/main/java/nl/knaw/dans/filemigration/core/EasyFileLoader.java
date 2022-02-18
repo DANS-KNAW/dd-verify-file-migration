@@ -24,7 +24,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -51,34 +50,27 @@ public class EasyFileLoader extends ExpectedLoader {
     else {
       // read fedora files before adding expected migration files
       // thus we don't write anything when reading fails
-      FileRights datasetRights = getDatasetRights(csv.getDatasetId());
+      SolrFields solrFields = getSolrFields(csv.getDatasetId());
+      FileRights datasetRights = new FileRights();
+      FileRights fileRights = new FileRights();
+      fileRights.setEmbargoDate(solrFields.available.trim());
+      fileRights.setFileRights(solrFields.rights);
       if (!csv.getComment().contains("no payload"))
         fedoraFiles(csv, datasetRights.getEmbargoDate());
-      expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights);
+      expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights, solrFields.creator);
     }
   }
 
-  @NotNull
-  protected FileRights getDatasetRights(String datasetId) {
+  protected SolrFields getSolrFields(String datasetId) {
     URIBuilder builder = new URIBuilder(solrUri)
             .setParameter("q", "sid:\""+datasetId+"\"")
-            .setParameter("fl", "emd_date_available_formatted,dc_rights")
+            .setParameter("fl", SolrFields.requestedFields)
             .setParameter("wt", "csv")
             .setParameter("csv.header", "false")
             .setParameter("version", "2.2");
     try {
       String line = executeReq(new HttpGet(builder.build()), false);
-      String dateAvailable = line
-              .replaceAll(",.*","");
-      String rights = line
-              .replaceAll("^[^,]*,","") // strip date
-              .replaceAll("^\"","") // strip leading quote
-              .replaceAll("\"$","") // strip trailing quote
-              .replaceAll(",.*",""); // strip licence URL and rights holder
-      FileRights fileRights = new FileRights();
-      fileRights.setEmbargoDate(dateAvailable.trim());
-      fileRights.setFileRights(rights);
-      return fileRights;
+      return new SolrFields(line);
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal
       throw new IllegalStateException(e.getMessage(), e);

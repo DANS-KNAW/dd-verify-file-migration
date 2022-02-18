@@ -106,7 +106,7 @@ public class VaultLoader extends ExpectedLoader {
     Map<String, FileRights> filesXml = readFileMeta(uuid);
     FileRights defaultFileRights = readDefaultRights(uuid);
     readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml, defaultFileRights));
-    expectedMigrationFiles(doi, migrationFiles, defaultFileRights);
+    expectedMigrationFiles(doi, migrationFiles, defaultFileRights,""); // TODO creator
   }
 
   private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
