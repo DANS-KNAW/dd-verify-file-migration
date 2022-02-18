@@ -32,7 +32,7 @@ public class ExpectedLoader {
     this.expectedDAO = expectedDAO;
   }
 
-  public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights fileRights) {
+  public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights) {
     for (String f: migrationFiles) {
       ExpectedFile expectedFile = new ExpectedFile();
       expectedFile.setDoi(doi);
@@ -45,8 +45,9 @@ public class ExpectedLoader {
       expectedFile.setRemoved_original_directory(false);
       expectedFile.setRemoved_duplicate_file_count(0);
       expectedFile.setTransformed_name(false);
-      expectedFile.setVisibleTo(fileRights.getVisibleTo());
-      expectedFile.setAccessibleTo(fileRights.getAccessibleTo());
+      expectedFile.setVisibleTo(datasetRights.getVisibleTo());
+      expectedFile.setAccessibleTo(datasetRights.getAccessibleTo());
+      expectedFile.setEmbargo_date(datasetRights.getEmbargoDate());
       retriedSave(expectedFile);
     }
   }
@@ -72,6 +73,7 @@ public class ExpectedLoader {
   }
 
   public void saveExpected(ExpectedFile expected) {
+      log.trace(expected.toString());
       expectedDAO.create(expected);
   }
 }

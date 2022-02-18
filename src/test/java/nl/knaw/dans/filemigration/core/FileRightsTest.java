@@ -20,16 +20,53 @@ import org.junit.jupiter.api.Test;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import static nl.knaw.dans.filemigration.core.FileRightsHandler.parseRights;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class FileRightsTest {
 
-  @Test
-  public void canParse() throws IOException {
-    FileInputStream xml = new FileInputStream("src/test/resources/files.xml");
-    FileRights fileRights = parseRights(xml).get("data/secret.txt");
-    assertEquals("NONE", fileRights.getAccessibleTo());
-    assertEquals("NONE", fileRights.getVisibleTo());
-  }
+    @Test
+    public void parseEmbargoedDdm() throws IOException {
+        FileRights datasetRights = DatasetRightsHandler
+                .parseRights(new FileInputStream("src/test/resources/ddm/embargoed.xml"));
+        assertEquals("ANONYMOUS", datasetRights.getAccessibleTo());
+        assertEquals("ANONYMOUS", datasetRights.getVisibleTo());
+        assertEquals("2062-02-14", datasetRights.getEmbargoDate());
+    }
+
+    @Test
+    public void parseRestrictedDdm() throws IOException {
+        FileRights datasetRights = DatasetRightsHandler
+                .parseRights(new FileInputStream("src/test/resources/ddm/restricted.xml"));
+        assertEquals("RESTRICTED_REQUEST", datasetRights.getAccessibleTo());
+        assertEquals("RESTRICTED_REQUEST", datasetRights.getVisibleTo());
+        assertNull(datasetRights.getEmbargoDate());
+    }
+
+    @Test
+    public void applyEmbargoed() throws IOException {
+        FileRights fileRights = FileRightsHandler
+                .parseRights(new FileInputStream("src/test/resources/files.xml"))
+                .get("data/secret.txt")
+                .applyDefaults(DatasetRightsHandler
+                        .parseRights(new FileInputStream("src/test/resources/ddm/embargoed.xml"))
+                );
+        assertEquals("NONE", fileRights.getAccessibleTo());
+        assertEquals("NONE", fileRights.getVisibleTo());
+        assertEquals("2062-02-14", fileRights.getEmbargoDate());
+    }
+
+    @Test
+    public void applyRestricted() throws IOException {
+        FileRights fileRights = FileRightsHandler
+                .parseRights(new FileInputStream("src/test/resources/files.xml"))
+                .get("data/secret.txt")
+                .applyDefaults(DatasetRightsHandler
+                        .parseRights(new FileInputStream("src/test/resources/ddm/restricted.xml"))
+                );
+        // note the priority for individual file rights over dataset rights
+        assertEquals("NONE", fileRights.getAccessibleTo());
+        assertEquals("NONE", fileRights.getVisibleTo());
+        assertNull(fileRights.getEmbargoDate());
+    }
 }

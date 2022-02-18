@@ -21,13 +21,14 @@ import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 
+import java.net.URI;
 import java.util.List;
 
-public class EasyFileLoaderImpl extends EasyFileLoader{
+public class EasyFileLoaderImpl extends EasyFileLoader {
 
-  public EasyFileLoaderImpl(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO) {
-    super(easyFileDAO,expectedDAO);
-  }
+    public EasyFileLoaderImpl(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO, URI solrBaseUri) {
+        super(easyFileDAO, expectedDAO, solrBaseUri);
+    }
 
   @UnitOfWork("easyBundle")
   public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {

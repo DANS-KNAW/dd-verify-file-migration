@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.naming.ConfigurationException;
 import java.io.File;
+import java.net.URI;
 
 public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVerifyFileMigrationConfiguration> {
 
@@ -91,8 +92,8 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle)
             .create(
                 EasyFileLoaderImpl.class,
-                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class },
-                new Object[] { easyFileDAO, expectedDAO }
+                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, URI.class},
+                new Object[] { easyFileDAO, expectedDAO, configuration.getSolrBaseUri()}
             );
         for (File file : namespace.<File> getList("csv")) {
             log.info(file.toString());

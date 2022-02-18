@@ -16,6 +16,8 @@
 
 package nl.knaw.dans.filemigration.core;
 
+import org.apache.http.client.utils.DateUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -26,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 public class DatasetRightsHandler extends DefaultHandler {
 
@@ -33,7 +36,7 @@ public class DatasetRightsHandler extends DefaultHandler {
 
   private static final SAXParserFactory parserFactory = configureFactory();
   private StringBuilder chars; // collected since the last startElement
-  private FileRights defaultFileRights; // collected since startElement of the last <file>
+  private final FileRights defaultFileRights = new FileRights();
 
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes) {
@@ -44,7 +47,12 @@ public class DatasetRightsHandler extends DefaultHandler {
   public void endElement(String uri, String localName, String qName) {
 
     if ("accessRights".equalsIgnoreCase(localName)) {
-      defaultFileRights = new FileRights(chars.toString().toUpperCase());
+      defaultFileRights.setFileRights(chars.toString().toUpperCase());
+    }
+    else if ("available".equalsIgnoreCase(localName)) {
+      String dateAvailable = chars.toString();
+      if (DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
+        defaultFileRights.setEmbargoDate(dateAvailable.trim());
     }
   }
 
@@ -54,9 +62,9 @@ public class DatasetRightsHandler extends DefaultHandler {
   }
 
   private FileRights get() {
-    if (defaultFileRights==null) {
-      log.warn("accessRights not found in dataset.xml");
-      return new FileRights("NO_ACCESS");
+    if (defaultFileRights.getAccessibleTo()==null) {
+      // note that embargoDate==null does not mean there was no date available
+      throw new IllegalArgumentException("Invalid dataset.xml: no accessRights");
     }
     return defaultFileRights;
   }
