@@ -24,7 +24,6 @@ import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.Embargo;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.hsqldb.lib.StringUtil;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ public class DataverseLoader {
     }
 
     public void loadFromDataset(String doi) {
-        if (doi == null)
+        if (StringUtil.isEmpty(doi))
             return; // workaround
         log.info("Reading {} from dataverse", doi);
         List<DatasetVersion> versions;
@@ -55,12 +54,15 @@ public class DataverseLoader {
             versions = client.dataset(doi).getAllVersions().getData();
         }
         catch (UnrecognizedPropertyException e) {
-            log.error("skipping {} {}", doi, e.getMessage());
+            log.error("Skipping {} {}", doi, e.getMessage());
             return;
         }
         catch (Exception e) {
-            log.error("Could not retrieve file metas for DOI: {}", doi, e);
-            throw new RuntimeException(e);
+            if (e.getMessage().toLowerCase().contains("not found"))
+                log.error("{} {} {}", doi, e.getClass(), e.getMessage());
+            else
+                log.error("Could not retrieve file metas for DOI: {}", doi, e);
+            return;
         }
         for (DatasetVersion v : versions) {
             int fileCount = 0;

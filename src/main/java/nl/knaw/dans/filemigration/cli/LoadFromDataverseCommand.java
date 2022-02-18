@@ -100,7 +100,9 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         else {
             log.info("Loading DOIs found in {}", file);
             for(CSVRecord r: FedoraToBagCsv.parse(new File(file))) {
-                proxy.loadFromDataset("doi:"+new FedoraToBagCsv(r).getDoi());
+                FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
+                if (fedoraToBagCsv.getComment().contains("OK"))
+                    proxy.loadFromDataset("doi:"+ fedoraToBagCsv.getDoi());
             }
         }
     }
