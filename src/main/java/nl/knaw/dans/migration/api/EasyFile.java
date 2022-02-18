@@ -26,7 +26,7 @@ import java.util.Objects;
 
 // order by in decreasing numeric order, thus earlier versions become duplicates
 @NamedQueries({ @NamedQuery(name = "EasyFile.findByDatasetId",
-                            query = "SELECT ef FROM EasyFile ef WHERE ef.dataset_sid = :dataset_sid ORDER BY length(ef.pid) desc, ef.pid desc",
+                            query = "SELECT ef FROM EasyFile ef WHERE ef.datasetSid = :datasetSid ORDER BY length(ef.pid) desc, ef.pid desc",
                             hints = {
                                 @QueryHint(
                                     name = "org.hibernate.readOnly",
@@ -39,35 +39,35 @@ import java.util.Objects;
 @Table(name = "easy_files")
 public class EasyFile {
     public static final String FIND_BY_DATASET_ID = "EasyFile.findByDatasetId";
-    public static final String DATASET_ID = "dataset_sid";
+    public static final String DATASET_ID = "datasetSid";
 
     public EasyFile() {
     }
 
-    public EasyFile(String pid, String parent_sid, String dataset_sid, String path, String filename, long size, String mimetype, String creator_role, String visible_to, String accessible_to,
+    public EasyFile(String pid, String parentSid, String datasetSid, String path, String filename, long size, String mimetype, String creatorRole, String visibleTo, String accessibleTo,
         String sha1checksum) {
         this.pid = pid;
-        this.parent_sid = parent_sid;
-        this.dataset_sid = dataset_sid;
+        this.parentSid = parentSid;
+        this.datasetSid = datasetSid;
         this.path = path;
         this.filename = filename;
         this.size = size;
         this.mimetype = mimetype;
-        this.creator_role = creator_role;
-        this.visible_to = visible_to;
-        this.accessible_to = accessible_to;
-        this.sha1checksum = sha1checksum;
+        this.creatorRole = creatorRole;
+        this.visibleTo = visibleTo;
+        this.accessibleTo = accessibleTo;
+        this.sha1Checksum = sha1checksum;
     }
 
     @Id
     @Column(nullable = false)
     private String pid = "";
 
-    @Column(nullable = false)
-    private String parent_sid = "";
+    @Column(name="parent_sid",nullable = false)
+    private String parentSid = "";
 
-    @Column(nullable = false)
-    private String dataset_sid = "";
+    @Column(name="dataset_sid",nullable = false)
+    private String datasetSid = "";
 
     @Column()
     private String path = "";
@@ -81,55 +81,65 @@ public class EasyFile {
     @Column(nullable = false)
     private String mimetype = "";
 
-    @Column(nullable = false)
-    private String creator_role = "";
+    @Column(name="creator_role",nullable = false)
+    private String creatorRole = "";
 
-    @Column(nullable = false)
-    private String visible_to = "";
+    @Column(name="visible_to",nullable = false)
+    private String visibleTo = "";
 
-    @Column(nullable = false)
-    private String accessible_to = "";
+    @Column(name="accessible_to",nullable = false)
+    private String accessibleTo = "";
 
-    @Column()
-    private String sha1checksum = "";
+    @Column(name="sha1checksum")
+    private String sha1Checksum = "";
 
     @Override
     public String toString() {
-        return "EasyFile{" + "pid='" + pid + '\'' + ", parent_sid='" + parent_sid + '\'' + ", dataset_sid='" + dataset_sid + '\'' + ", path='" + path + '\'' + ", filename='" + filename + '\''
-            + ", size=" + size + ", mimetype='" + mimetype + '\'' + ", creator_role='" + creator_role + '\'' + ", visible_to='" + visible_to + '\'' + ", accessible_to='" + accessible_to + '\''
-            + ", sha1checksum='" + sha1checksum + '\'' + '}';
+        return "EasyFile{" +
+                "pid='" + pid + '\'' +
+                ", parentSid='" + parentSid + '\'' +
+                ", datasetSid='" + datasetSid + '\'' +
+                ", path='" + path + '\'' +
+                ", filename='" + filename + '\'' +
+                ", size=" + size +
+                ", mimetype='" + mimetype + '\'' +
+                ", creatorRole='" + creatorRole + '\'' +
+                ", visibleTo='" + visibleTo + '\'' +
+                ", accessibleTo='" + accessibleTo + '\'' +
+                ", sha1Checksum='" + sha1Checksum + '\'' +
+                '}';
     }
 
-    public String getSha1checksum() {
-        return sha1checksum;
+    public String getSha1Checksum() {
+        return sha1Checksum;
     }
 
-    public void setSha1checksum(String sha1checksum) {
-        this.sha1checksum = sha1checksum;
+    public void setSha1Checksum(String sha1Checksum) {
+        this.sha1Checksum = sha1Checksum;
     }
 
-    public String getAccessible_to() {
-        return accessible_to;
+    public String getAccessibleTo() {
+        return accessibleTo;
     }
 
-    public void setAccessible_to(String accessible_to) {
-        this.accessible_to = accessible_to;
+    public void setAccessibleTo(String accessibleTo) {
+        this.accessibleTo = accessibleTo;
     }
 
-    public String getVisible_to() {
-        return visible_to;
+    public String getVisibleTo() {
+        return visibleTo;
     }
 
-    public void setVisible_to(String visible_to) {
-        this.visible_to = visible_to;
+    public void setVisibleTo(String visibleTo) {
+        this.visibleTo = visibleTo;
     }
 
-    public String getCreator_role() {
-        return creator_role;
+    public String getCreatorRole() {
+        return creatorRole;
     }
 
-    public void setCreator_role(String creator_role) {
-        this.creator_role = creator_role;
+    public void setCreatorRole(String creatorRole) {
+        this.creatorRole = creatorRole;
     }
 
     public String getMimetype() {
@@ -164,20 +174,20 @@ public class EasyFile {
         this.path = path;
     }
 
-    public String getDataset_sid() {
-        return dataset_sid;
+    public String getDatasetSid() {
+        return datasetSid;
     }
 
-    public void setDataset_sid(String dataset_sid) {
-        this.dataset_sid = dataset_sid;
+    public void setDatasetSid(String datasetSid) {
+        this.datasetSid = datasetSid;
     }
 
-    public String getParent_sid() {
-        return parent_sid;
+    public String getParentSid() {
+        return parentSid;
     }
 
-    public void setParent_sid(String parent_sid) {
-        this.parent_sid = parent_sid;
+    public void setParentSid(String parentSid) {
+        this.parentSid = parentSid;
     }
 
     public String getPid() {
@@ -190,18 +200,14 @@ public class EasyFile {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         EasyFile easyFile = (EasyFile) o;
-        return size == easyFile.size && Objects.equals(pid, easyFile.pid) && Objects.equals(parent_sid, easyFile.parent_sid) && Objects.equals(dataset_sid, easyFile.dataset_sid) && Objects.equals(
-            path, easyFile.path) && Objects.equals(filename, easyFile.filename) && Objects.equals(mimetype, easyFile.mimetype) && Objects.equals(creator_role, easyFile.creator_role) && Objects.equals(
-            visible_to, easyFile.visible_to) && Objects.equals(accessible_to, easyFile.accessible_to) && Objects.equals(sha1checksum, easyFile.sha1checksum);
+        return size == easyFile.size && Objects.equals(pid, easyFile.pid) && Objects.equals(parentSid, easyFile.parentSid) && Objects.equals(datasetSid, easyFile.datasetSid) && Objects.equals(path, easyFile.path) && Objects.equals(filename, easyFile.filename) && Objects.equals(mimetype, easyFile.mimetype) && Objects.equals(creatorRole, easyFile.creatorRole) && Objects.equals(visibleTo, easyFile.visibleTo) && Objects.equals(accessibleTo, easyFile.accessibleTo) && Objects.equals(sha1Checksum, easyFile.sha1Checksum);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pid, parent_sid, dataset_sid, path, filename, size, mimetype, creator_role, visible_to, accessible_to, sha1checksum);
+        return Objects.hash(pid, parentSid, datasetSid, path, filename, size, mimetype, creatorRole, visibleTo, accessibleTo, sha1Checksum);
     }
 }

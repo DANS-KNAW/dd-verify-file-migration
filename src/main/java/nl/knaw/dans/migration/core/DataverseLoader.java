@@ -77,12 +77,12 @@ public class DataverseLoader {
     private ActualFile toActual(FileMeta fileMeta, String doi, int majorVersion, int minorVersion, boolean datasetHasAccessRequestEnabled) {
         DataFile f = fileMeta.getDataFile();
         String dl = fileMeta.getDirectoryLabel();
-        String actual_path = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
-        ActualFile actualFile = new ActualFile(doi, actual_path, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
+        String actualPath = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
+        ActualFile actualFile = new ActualFile(doi, actualPath, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
         actualFile.setAccessibleTo(fileMeta.getRestricted(), datasetHasAccessRequestEnabled);
         Embargo embargo = f.getEmbargo();
         if (embargo != null)
-            actualFile.setEmbargo_date(embargo.getDateAvailable());
+            actualFile.setEmbargoDate(embargo.getDateAvailable());
         return actualFile;
     }
 }

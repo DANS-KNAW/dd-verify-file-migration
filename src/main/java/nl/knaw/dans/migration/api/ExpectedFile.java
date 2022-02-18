@@ -40,17 +40,17 @@ public class ExpectedFile {
         final String dvPath = dvPath(path);
 
         setDoi(doi);
-        setSha1_checksum(easyFile.getSha1checksum());
-        setEasy_file_id(easyFile.getPid());
-        setFs_rdb_path(easyFile.getPath());
-        setExpected_path(dvPath);
-        setAccessibleTo(easyFile.getAccessible_to());
-        setVisibleTo(easyFile.getVisible_to());
-        setAdded_during_migration(false);
-        setRemoved_thumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
-        setRemoved_original_directory(removeOriginal);
-        setRemoved_duplicate_file_count(0);
-        setTransformed_name(!path.equals(dvPath));
+        setSha1Checksum(easyFile.getSha1Checksum());
+        setEasyFileId(easyFile.getPid());
+        setFsRdbPath(easyFile.getPath());
+        setExpectedPath(dvPath);
+        setAccessibleTo(easyFile.getAccessibleTo());
+        setVisibleTo(easyFile.getVisibleTo());
+        setAddedDuringMigration(false);
+        setRemovedThumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
+        setRemovedOriginalDirectory(removeOriginal);
+        setRemovedDuplicateFileCount(0);
+        setTransformedName(!path.equals(dvPath));
     }
 
     public ExpectedFile(String doi, ManifestCsv manifestCsv, FileRights fileRights) {
@@ -58,17 +58,17 @@ public class ExpectedFile {
         final String dvPath = dvPath(path);
 
         setDoi(doi);
-        setSha1_checksum(manifestCsv.getSha1());
-        setEasy_file_id("");
-        setFs_rdb_path(manifestCsv.getPath());
-        setExpected_path(dvPath);
+        setSha1Checksum(manifestCsv.getSha1());
+        setEasyFileId("");
+        setFsRdbPath(manifestCsv.getPath());
+        setExpectedPath(dvPath);
         setAccessibleTo(fileRights.getAccessibleTo());
         setVisibleTo(fileRights.getVisibleTo());
-        setAdded_during_migration(false);
-        setRemoved_thumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
-        setRemoved_original_directory(false);
-        setRemoved_duplicate_file_count(0);
-        setTransformed_name(!path.equals(dvPath));
+        setAddedDuringMigration(false);
+        setRemovedThumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
+        setRemovedOriginalDirectory(false);
+        setRemovedDuplicateFileCount(0);
+        setTransformedName(!path.equals(dvPath));
     }
 
     private String dvPath(String path) {
@@ -88,18 +88,18 @@ public class ExpectedFile {
         return s;
     }
 
-    public ExpectedFile(String doi, String expected_path, int removed_duplicate_file_count, boolean removed_original_directory, String sha1_checksum, String easy_file_id, String fs_rdb_path,
-        boolean added_during_migration, boolean removed_thumbnail, boolean transformed_name, String accessibleTo, String visibleTo) {
+    public ExpectedFile(String doi, String expectedPath, int removedDuplicateFileCount, boolean removedOriginalDirectory, String sha1Checksum, String easyFileId, String fsRdbPath,
+        boolean addedDuringMigration, boolean removedThumbnail, boolean transformedName, String accessibleTo, String visibleTo) {
         this.doi = doi;
-        this.expected_path = expected_path;
-        this.removed_duplicate_file_count = removed_duplicate_file_count;
-        this.removed_original_directory = removed_original_directory;
-        this.sha1_checksum = sha1_checksum;
-        this.easy_file_id = easy_file_id;
-        this.fs_rdb_path = fs_rdb_path;
-        this.added_during_migration = added_during_migration;
-        this.removed_thumbnail = removed_thumbnail;
-        this.transformed_name = transformed_name;
+        this.expectedPath = expectedPath;
+        this.removedDuplicateFileCount = removedDuplicateFileCount;
+        this.removedOriginalDirectory = removedOriginalDirectory;
+        this.sha1Checksum = sha1Checksum;
+        this.easyFileId = easyFileId;
+        this.fsRdbPath = fsRdbPath;
+        this.addedDuringMigration = addedDuringMigration;
+        this.removedThumbnail = removedThumbnail;
+        this.transformedName = transformedName;
         this.accessibleTo = accessibleTo;
         this.visibleTo = visibleTo;
     }
@@ -112,137 +112,137 @@ public class ExpectedFile {
     private String doi;
 
     @Id
-    @Column(length = 1024) // TODO basic_file_meta has only 1000
-    private String expected_path;
+    @Column(name="expected_path", length = 1024) // TODO basic_file_meta has only 1000
+    private String expectedPath;
 
     @Id
-    @Column()
-    private int removed_duplicate_file_count;
+    @Column(name="removed_duplicate_file_count")
+    private int removedDuplicateFileCount;
 
-    @Column()
-    private boolean removed_original_directory;
+    @Column(name="removed_original_directory")
+    private boolean removedOriginalDirectory;
 
-    @Column(length = 40)
-    private String sha1_checksum = "";
+    @Column(name="sha1_checksum", length = 40)
+    private String sha1Checksum = "";
 
-    @Column(length = 64)
-    private String easy_file_id = "";
+    @Column(name="easy_file_id", length = 64)
+    private String easyFileId = "";
 
-    @Column(length = 1024)
-    private String fs_rdb_path = "";
+    @Column(name="fs_rdb_path", length = 1024)
+    private String fsRdbPath = "";
 
-    @Column()
-    private boolean added_during_migration;
+    @Column(name="added_during_migration")
+    private boolean addedDuringMigration;
 
-    @Column()
-    private boolean removed_thumbnail;
+    @Column(name="removed_thumbnail")
+    private boolean removedThumbnail;
 
-    @Column()
-    private boolean transformed_name;
+    @Column(name="transformed_name")
+    private boolean transformedName;
 
-    @Column()
+    @Column(name="accessible_to")
     private String accessibleTo;
 
-    @Column()
+    @Column(name="visible_to")
     private String visibleTo;
 
     @Nullable
-    @Column()
-    private String embargo_date;
+    @Column(name="embargo_date")
+    private String embargoDate;
 
     @Override
     public String toString() {
         return "ExpectedFile{" +
                 "doi='" + doi + '\'' +
-                ", expected_path='" + expected_path + '\'' +
-                ", removed_duplicate_file_count=" + removed_duplicate_file_count +
-                ", removed_original_directory=" + removed_original_directory +
-                ", sha1_checksum='" + sha1_checksum + '\'' +
-                ", easy_file_id='" + easy_file_id + '\'' +
-                ", fs_rdb_path='" + fs_rdb_path + '\'' +
-                ", added_during_migration=" + added_during_migration +
-                ", removed_thumbnail=" + removed_thumbnail +
-                ", transformed_name=" + transformed_name +
+                ", expectedPath='" + expectedPath + '\'' +
+                ", removedDuplicateFileCount=" + removedDuplicateFileCount +
+                ", removedOriginalDirectory=" + removedOriginalDirectory +
+                ", sha1Checksum='" + sha1Checksum + '\'' +
+                ", easyFileId='" + easyFileId + '\'' +
+                ", fsRdbPath='" + fsRdbPath + '\'' +
+                ", addedDuringMigration=" + addedDuringMigration +
+                ", removedThumbnail=" + removedThumbnail +
+                ", transformedName=" + transformedName +
                 ", accessibleTo='" + accessibleTo + '\'' +
                 ", visibleTo='" + visibleTo + '\'' +
-                ", embargo_date='" + embargo_date + '\'' +
+                ", embargoDate='" + embargoDate + '\'' +
                 '}';
     }
 
-    public boolean isTransformed_name() {
-        return transformed_name;
+    public boolean isTransformedName() {
+        return transformedName;
     }
 
-    public void setTransformed_name(boolean transformed_name) {
-        this.transformed_name = transformed_name;
+    public void setTransformedName(boolean transformedName) {
+        this.transformedName = transformedName;
     }
 
-    public int getRemoved_duplicate_file_count() {
-        return removed_duplicate_file_count;
+    public int getRemovedDuplicateFileCount() {
+        return removedDuplicateFileCount;
     }
 
-    public void setRemoved_duplicate_file_count(int removed_duplicate_file_count) {
-        this.removed_duplicate_file_count = removed_duplicate_file_count;
+    public void setRemovedDuplicateFileCount(int removedDuplicateFileCount) {
+        this.removedDuplicateFileCount = removedDuplicateFileCount;
     }
 
     public void incRemoved_duplicate_file_count() {
-        this.removed_duplicate_file_count += 1;
+        this.removedDuplicateFileCount += 1;
     }
 
-    public boolean isRemoved_original_directory() {
-        return removed_original_directory;
+    public boolean isRemovedOriginalDirectory() {
+        return removedOriginalDirectory;
     }
 
-    public void setRemoved_original_directory(boolean removed_original_directory) {
-        this.removed_original_directory = removed_original_directory;
+    public void setRemovedOriginalDirectory(boolean removedOriginalDirectory) {
+        this.removedOriginalDirectory = removedOriginalDirectory;
     }
 
-    public boolean isRemoved_thumbnail() {
-        return removed_thumbnail;
+    public boolean isRemovedThumbnail() {
+        return removedThumbnail;
     }
 
-    public void setRemoved_thumbnail(boolean removed_thumbnail) {
-        this.removed_thumbnail = removed_thumbnail;
+    public void setRemovedThumbnail(boolean removedThumbnail) {
+        this.removedThumbnail = removedThumbnail;
     }
 
-    public boolean isAdded_during_migration() {
-        return added_during_migration;
+    public boolean isAddedDuringMigration() {
+        return addedDuringMigration;
     }
 
-    public void setAdded_during_migration(boolean added_during_migration) {
-        this.added_during_migration = added_during_migration;
+    public void setAddedDuringMigration(boolean addedDuringMigration) {
+        this.addedDuringMigration = addedDuringMigration;
     }
 
-    public String getExpected_path() {
-        return expected_path;
+    public String getExpectedPath() {
+        return expectedPath;
     }
 
-    public void setExpected_path(String expected_path) {
-        this.expected_path = expected_path;
+    public void setExpectedPath(String expectedPath) {
+        this.expectedPath = expectedPath;
     }
 
-    public String getFs_rdb_path() {
-        return fs_rdb_path;
+    public String getFsRdbPath() {
+        return fsRdbPath;
     }
 
-    public void setFs_rdb_path(String fs_rdb_path) {
-        this.fs_rdb_path = fs_rdb_path;
+    public void setFsRdbPath(String fsRdbPath) {
+        this.fsRdbPath = fsRdbPath;
     }
 
-    public String getEasy_file_id() {
-        return easy_file_id;
+    public String getEasyFileId() {
+        return easyFileId;
     }
 
-    public void setEasy_file_id(String easy_file_id) {
-        this.easy_file_id = easy_file_id;
+    public void setEasyFileId(String easyFileId) {
+        this.easyFileId = easyFileId;
     }
 
-    public String getSha1_checksum() {
-        return sha1_checksum;
+    public String getSha1Checksum() {
+        return sha1Checksum;
     }
 
-    public void setSha1_checksum(String sha1_checksum) {
-        this.sha1_checksum = sha1_checksum;
+    public void setSha1Checksum(String sha1Checksum) {
+        this.sha1Checksum = sha1Checksum;
     }
 
     public String getDoi() {
@@ -254,13 +254,13 @@ public class ExpectedFile {
     }
 
     @Nullable
-    public String getEmbargo_date() {
-        return embargo_date;
+    public String getEmbargoDate() {
+        return embargoDate;
     }
 
-    public void setEmbargo_date(@Nullable String dateAvailable) {
+    public void setEmbargoDate(@Nullable String dateAvailable) {
         if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
-            this.embargo_date = dateAvailable;
+            this.embargoDate = dateAvailable;
     }
 
     public String getAccessibleTo() {
@@ -284,11 +284,11 @@ public class ExpectedFile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ExpectedFile that = (ExpectedFile) o;
-        return removed_duplicate_file_count == that.removed_duplicate_file_count && removed_original_directory == that.removed_original_directory && added_during_migration == that.added_during_migration && removed_thumbnail == that.removed_thumbnail && transformed_name == that.transformed_name && Objects.equals(doi, that.doi) && Objects.equals(expected_path, that.expected_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(easy_file_id, that.easy_file_id) && Objects.equals(fs_rdb_path, that.fs_rdb_path) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo) && Objects.equals(embargo_date, that.embargo_date);
+        return removedDuplicateFileCount == that.removedDuplicateFileCount && removedOriginalDirectory == that.removedOriginalDirectory && addedDuringMigration == that.addedDuringMigration && removedThumbnail == that.removedThumbnail && transformedName == that.transformedName && Objects.equals(doi, that.doi) && Objects.equals(expectedPath, that.expectedPath) && Objects.equals(sha1Checksum, that.sha1Checksum) && Objects.equals(easyFileId, that.easyFileId) && Objects.equals(fsRdbPath, that.fsRdbPath) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo) && Objects.equals(embargoDate, that.embargoDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(doi, expected_path, removed_duplicate_file_count, removed_original_directory, sha1_checksum, easy_file_id, fs_rdb_path, added_during_migration, removed_thumbnail, transformed_name, accessibleTo, visibleTo, embargo_date);
+        return Objects.hash(doi, expectedPath, removedDuplicateFileCount, removedOriginalDirectory, sha1Checksum, easyFileId, fsRdbPath, addedDuringMigration, removedThumbnail, transformedName, accessibleTo, visibleTo, embargoDate);
     }
 }

@@ -34,13 +34,13 @@ public class ActualFile {
 
   public ActualFile() {}
 
-  public ActualFile(String doi, String actual_path, int major_version_nr, int minor_version_nr, String sha1_checksum, String storage_id) {
+  public ActualFile(String doi, String actualPath, int majorVersionNr, int minorVersionNr, String sha1Checksum, String storageId) {
     this.doi = doi;
-    this.actual_path = actual_path;
-    this.major_version_nr = major_version_nr;
-    this.minor_version_nr = minor_version_nr;
-    this.sha1_checksum = sha1_checksum;
-    this.storage_id = storage_id;
+    this.actualPath = actualPath;
+    this.majorVersionNr = majorVersionNr;
+    this.minorVersionNr = minorVersionNr;
+    this.sha1Checksum = sha1Checksum;
+    this.storageId = storageId;
   }
   // most lengths from easy-dtap/provisioning/roles/easy-fs-rdb/templates/create-easy-db-tables.sql
   // doi length as in dd-dtap/shared-code/dataverse/scripts/database/create/create_v*.sql
@@ -50,68 +50,68 @@ public class ActualFile {
   private String doi;
 
   @Id
-  @Column(length = 1024) // TODO basic_file_meta has only 1000
-  private String actual_path;
+  @Column(name="actual_path",length = 1024) // TODO basic_file_meta has only 1000
+  private String actualPath;
 
   @Id
-  @Column()
-  private int major_version_nr;
+  @Column(name="major_version_nr")
+  private int majorVersionNr;
 
   @Id
-  @Column()
-  private int minor_version_nr;
+  @Column(name="minor_version_nr")
+  private int minorVersionNr;
 
-  @Column(length = 40)
-  private String sha1_checksum = "";
+  @Column(name="sha1_checksum",length = 40)
+  private String sha1Checksum = "";
 
-  @Column(length = 60)
-  private String storage_id = "";
+  @Column(name="storage_id",length = 60)
+  private String storageId = "";
 
-  @Column()
+  @Column(name="accessible_to")
   private String accessibleTo;
 
   @Nullable
-  @Column()
-  private String embargo_date;
+  @Column(name="embargo_date")
+  private String embargoDate;
 
-  public int getMajor_version_nr() {
-    return major_version_nr;
+  public int getMajorVersionNr() {
+    return majorVersionNr;
   }
 
-  public void setMajor_version_nr(int major_version_nr) {
-    this.major_version_nr = major_version_nr;
+  public void setMajorVersionNr(int majorVersionNr) {
+    this.majorVersionNr = majorVersionNr;
   }
 
-  public void setMinor_version_nr(int minor_version_nr) {
-    this.minor_version_nr = minor_version_nr;
+  public void setMinorVersionNr(int minorVersionNr) {
+    this.minorVersionNr = minorVersionNr;
   }
 
-  public int getMinor_version_nr() {
-    return minor_version_nr;
+  public int getMinorVersionNr() {
+    return minorVersionNr;
   }
 
-  public String getActual_path() {
-    return actual_path;
+  public String getActualPath() {
+    return actualPath;
   }
 
-  public void setActual_path(String actual_path) {
-    this.actual_path = actual_path;
+  public void setActualPath(String actualPath) {
+    this.actualPath = actualPath;
   }
 
-  public String getStorage_id() {
-    return storage_id;
+  public String getStorageId() {
+    return storageId;
   }
 
-  public void setStorage_id(String storage_id) {
-    this.storage_id = storage_id;
+  public void setStorageId(String storageId) {
+    this.storageId = storageId;
   }
 
-  public String getSha1_checksum() {
-    return sha1_checksum;
+  public String getSha1Checksum() {
+    return sha1Checksum;
   }
 
-  public void setSha1_checksum(String sha1_checksum) {
-    this.sha1_checksum = sha1_checksum;
+  public void setSha1Checksum(String sha1Checksum) {
+    this.sha1Checksum = sha1Checksum;
   }
 
   public String getAccessibleTo() {
@@ -127,13 +127,13 @@ public class ActualFile {
   }
 
   @Nullable
-  public String getEmbargo_date() {
-    return embargo_date;
+  public String getEmbargoDate() {
+    return embargoDate;
   }
 
-  public void setEmbargo_date(@Nullable String dateAvailable) {
+  public void setEmbargoDate(@Nullable String dateAvailable) {
     if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
-      this.embargo_date = dateAvailable;
+      this.embargoDate = dateAvailable;
   }
 
   public String getDoi() {
@@ -148,13 +148,13 @@ public class ActualFile {
   public String toString() {
     return "ActualFile{" +
             "doi='" + doi + '\'' +
-            ", actual_path='" + actual_path + '\'' +
-            ", major_version_nr=" + major_version_nr +
-            ", minor_version_nr=" + minor_version_nr +
-            ", sha1_checksum='" + sha1_checksum + '\'' +
-            ", storage_id='" + storage_id + '\'' +
+            ", actualPath='" + actualPath + '\'' +
+            ", majorVersionNr=" + majorVersionNr +
+            ", minorVersionNr=" + minorVersionNr +
+            ", sha1Checksum='" + sha1Checksum + '\'' +
+            ", storageId='" + storageId + '\'' +
             ", accessibleTo='" + accessibleTo + '\'' +
-            ", embargo_date='" + embargo_date + '\'' +
+            ", embargoDate='" + embargoDate + '\'' +
             '}';
   }
 
@@ -163,11 +163,11 @@ public class ActualFile {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ActualFile that = (ActualFile) o;
-    return major_version_nr == that.major_version_nr && minor_version_nr == that.minor_version_nr && Objects.equals(doi, that.doi) && Objects.equals(actual_path, that.actual_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(storage_id, that.storage_id) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(embargo_date, that.embargo_date);
+    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(actualPath, that.actualPath) && Objects.equals(sha1Checksum, that.sha1Checksum) && Objects.equals(storageId, that.storageId) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(embargoDate, that.embargoDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, actual_path, major_version_nr, minor_version_nr, sha1_checksum, storage_id, accessibleTo, embargo_date);
+    return Objects.hash(doi, actualPath, majorVersionNr, minorVersionNr, sha1Checksum, storageId, accessibleTo, embargoDate);
   }
 }

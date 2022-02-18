@@ -20,22 +20,20 @@ import java.util.Objects;
 
 public class ActualFileKey implements Serializable {
   private String doi;
-  private String actual_path;
-  private int major_version_nr;
-  private int minor_version_nr;
+  private String actualPath;
+  private int majorVersionNr;
+  private int minorVersionNr;
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     ActualFileKey that = (ActualFileKey) o;
-    return major_version_nr == that.major_version_nr && minor_version_nr == that.minor_version_nr && Objects.equals(doi, that.doi) && Objects.equals(actual_path, that.actual_path);
+    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(actualPath, that.actualPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, actual_path, major_version_nr, minor_version_nr);
+    return Objects.hash(doi, actualPath, majorVersionNr, minorVersionNr);
   }
 }

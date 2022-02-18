@@ -203,8 +203,8 @@ public class EasyFileLoaderTest {
     for (String f : new String[] { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" }) {
       ExpectedFile expectedFile = new ExpectedFile();
       expectedFile.setDoi(doi);
-      expectedFile.setExpected_path("easy-migration/" + f);
-      expectedFile.setAdded_during_migration(true);
+      expectedFile.setExpectedPath("easy-migration/" + f);
+      expectedFile.setAddedDuringMigration(true);
       expectedFiles.add(expectedFile);
       expectedFile.setAccessibleTo(rights);
       expectedFile.setVisibleTo("ANONYMOUS");
