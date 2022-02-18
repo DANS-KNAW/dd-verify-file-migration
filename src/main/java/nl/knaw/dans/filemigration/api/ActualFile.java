@@ -61,6 +61,9 @@ public class ActualFile {
   @Column(name="minor_version_nr")
   private int minorVersionNr;
 
+  @Column()
+  private String curator;
+
   @Column(name="sha1_checksum",length = 40)
   private String sha1Checksum = "";
 
@@ -73,6 +76,18 @@ public class ActualFile {
   @Nullable
   @Column(name="embargo_date")
   private String embargoDate;
+
+  public String getCurator() {
+    return curator;
+  }
+
+  public void setCurator(String curator) {
+    this.curator = curator;
+  }
+
+  public void setAccessibleTo(String accessibleTo) {
+    this.accessibleTo = accessibleTo;
+  }
 
   public int getMajorVersionNr() {
     return majorVersionNr;
@@ -151,6 +166,7 @@ public class ActualFile {
             ", actualPath='" + actualPath + '\'' +
             ", majorVersionNr=" + majorVersionNr +
             ", minorVersionNr=" + minorVersionNr +
+            ", curator='" + curator + '\'' +
             ", sha1Checksum='" + sha1Checksum + '\'' +
             ", storageId='" + storageId + '\'' +
             ", accessibleTo='" + accessibleTo + '\'' +
@@ -163,11 +179,11 @@ public class ActualFile {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ActualFile that = (ActualFile) o;
-    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(actualPath, that.actualPath) && Objects.equals(sha1Checksum, that.sha1Checksum) && Objects.equals(storageId, that.storageId) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(embargoDate, that.embargoDate);
+    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(actualPath, that.actualPath) && Objects.equals(curator, that.curator) && Objects.equals(sha1Checksum, that.sha1Checksum) && Objects.equals(storageId, that.storageId) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(embargoDate, that.embargoDate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, actualPath, majorVersionNr, minorVersionNr, sha1Checksum, storageId, accessibleTo, embargoDate);
+    return Objects.hash(doi, actualPath, majorVersionNr, minorVersionNr, curator, sha1Checksum, storageId, accessibleTo, embargoDate);
   }
 }

@@ -20,6 +20,8 @@ import nl.knaw.dans.filemigration.api.ActualFile;
 import nl.knaw.dans.filemigration.db.ActualFileDAO;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
+import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
+import nl.knaw.dans.lib.dataverse.model.dataset.SingleValueField;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.Embargo;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
@@ -28,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class DataverseLoader {
     private static final Logger log = LoggerFactory.getLogger(DataverseLoader.class);
@@ -67,22 +70,35 @@ public class DataverseLoader {
         for (DatasetVersion v : versions) {
             int fileCount = 0;
             for (FileMeta f : v.getFiles()) {
-                saveActual(toActual(f, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.isFileAccessRequest()));
+                saveActual(toActual(f, doi, v));
                 ++fileCount;
             }
             log.info("Stored {} actual files for DOI {}, Version {}.{} State {}", fileCount, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
         }
     }
 
-    private ActualFile toActual(FileMeta fileMeta, String doi, int majorVersion, int minorVersion, boolean datasetHasAccessRequestEnabled) {
+    private ActualFile toActual(FileMeta fileMeta, String doi, DatasetVersion v) {
         DataFile f = fileMeta.getDataFile();
         String dl = fileMeta.getDirectoryLabel();
         String actualPath = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
-        ActualFile actualFile = new ActualFile(doi, actualPath, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
-        actualFile.setAccessibleTo(fileMeta.getRestricted(), datasetHasAccessRequestEnabled);
+        ActualFile actualFile = new ActualFile(doi, actualPath, v.getVersionNumber(), v.getVersionMinorNumber(), f.getChecksum().getValue(), f.getStorageIdentifier());
+        actualFile.setAccessibleTo(fileMeta.getRestricted(), v.isFileAccessRequest());
+        actualFile.setCurator(getCitationDepositor(v, doi));
         Embargo embargo = f.getEmbargo();
         if (embargo != null)
             actualFile.setEmbargoDate(embargo.getDateAvailable());
         return actualFile;
+    }
+
+    private String getCitationDepositor(DatasetVersion datasetVersion, String doi) {
+        try {
+            Stream<MetadataField> fieldStream = datasetVersion.getMetadataBlocks()
+                    .get("citation").getFields().stream()
+                    .filter(x -> "depositor".equals(x.getTypeName()));
+            return ((SingleValueField) fieldStream.findFirst().get()).getValue();
+        } catch (Exception e) {
+            log.warn("no citation/depositor found for " + doi, e);
+            return "";
+        }
     }
 }
