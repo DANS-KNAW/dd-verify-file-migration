@@ -19,20 +19,30 @@ import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.NotNull;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
+
+import static nl.knaw.dans.filemigration.core.HttpHelper.executeReq;
 
 public class EasyFileLoader extends ExpectedLoader {
 
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
   private final EasyFileDAO easyFileDAO;
+  private final URI solrUri;
 
-  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO) {
+  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO, URI solrBaseUri) {
     super(expectedDAO);
     this.easyFileDAO = easyFileDAO;
+    this.solrUri = solrBaseUri.resolve("datasets/select");
   }
 
   public void loadFromCsv(FedoraToBagCsv csv) {
@@ -41,17 +51,48 @@ public class EasyFileLoader extends ExpectedLoader {
     else {
       // read fedora files before adding expected migration files
       // thus we don't write anything when reading fails
+      FileRights datasetRights = getDatasetRights(csv.getDatasetId());
       if (!csv.getComment().contains("no payload"))
-        fedoraFiles(csv);
-      FileRights fileRights = new FileRights("OPEN_ACCESS"); // TODO from dataset.xml <accessRight>?
-      expectedMigrationFiles(csv.getDoi(), migrationFiles, fileRights);
+        fedoraFiles(csv, datasetRights.getEmbargoDate());
+      expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights);
+    }
+  }
+
+  @NotNull
+  protected FileRights getDatasetRights(String datasetId) {
+    URIBuilder builder = new URIBuilder(solrUri)
+            .setParameter("q", "sid:\""+datasetId+"\"")
+            .setParameter("fl", "emd_date_available_formatted,dc_rights")
+            .setParameter("wt", "csv")
+            .setParameter("csv.header", "false")
+            .setParameter("version", "2.2");
+    try {
+      String line = executeReq(new HttpGet(builder.build()), false);
+      String dateAvailable = line
+              .replaceAll(",.*","");
+      String rights = line
+              .replaceAll("^[^,]*,","") // strip date
+              .replaceAll("^\"","") // strip leading quote
+              .replaceAll("\"$","") // strip trailing quote
+              .replaceAll(",.*",""); // strip licence URL and rights holder
+      FileRights fileRights = new FileRights();
+      fileRights.setEmbargoDate(dateAvailable.trim());
+      fileRights.setFileRights(rights);
+      return fileRights;
+    } catch (IOException | URISyntaxException e) {
+      // expecting an empty line when not found, other errors are fatal
+      throw new IllegalStateException(e.getMessage(), e);
     }
   }
 
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
 
-  private void fedoraFiles(FedoraToBagCsv csv) {
+  /**
+   * @param csv         not null, record produced by easy-fedora-to-bag
+   * @param embargoDate null if data-available not in the future
+   */
+  private void fedoraFiles(FedoraToBagCsv csv, String embargoDate) {
     log.trace(csv.toString());
     List<EasyFile> easyFiles = getByDatasetId(csv);
     for (EasyFile f : easyFiles) {
@@ -61,6 +102,7 @@ public class EasyFileLoader extends ExpectedLoader {
       ExpectedFile expected = new ExpectedFile(csv.getDoi(), f, removeOriginal);
       expected.setAccessibleTo(f.getAccessible_to());
       expected.setVisibleTo(f.getVisible_to());
+      expected.setEmbargo_date(embargoDate);
       retriedSave(expected);
     }
   }

@@ -29,10 +29,10 @@ logging:
       currentLogFilename: data/dd-verify-file-migration.log
 
 # with tunnel ssh -L 18080:localhost:20110 USER@XXX.dans.knaw.nl
-bagStoreBaseUri: 'http://localhost:18080/'
+bagStoreBaseUri: 'http://deasy.dans.knaw.nl:20110/'
 
 # with tunnel ssh -L 28080:localhost:20120 USER@XXX.dans.knaw.nl
-bagIndexBaseUri: 'http://localhost:28080/'
+bagIndexBaseUri: 'http://deasy.dans.knaw.nl:20120/'
 
 dataverse:
   baseUrl: 'http://dar.dans.knaw.nl:8080/'
@@ -47,6 +47,8 @@ easyDb:
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
     hibernate.hbm2ddl.auto: update
+
+solrBaseUri: 'http://deasy.dans.knaw.nl:8080/solr'
 
 verificationDatabase:
   driverClass: org.hsqldb.jdbcDriver

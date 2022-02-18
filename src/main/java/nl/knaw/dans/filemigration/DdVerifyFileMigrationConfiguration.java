@@ -40,6 +40,10 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
   private URI bagIndexBaseUri;
 
   @Valid
+  @NotNull
+  private URI solrBaseUri;
+
+  @Valid
   @Nullable
   private DataSourceFactory easyDb = new DataSourceFactory();
 
@@ -87,5 +91,13 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
 
   public void setBagIndexBaseUri(URI bagIndexBaseUri) {
     this.bagIndexBaseUri = bagIndexBaseUri;
+  }
+
+  public URI getSolrBaseUri() {
+    return solrBaseUri;
+  }
+
+  public void setSolrBaseUri(URI solrBaseUri) {
+    this.solrBaseUri = solrBaseUri;
   }
 }

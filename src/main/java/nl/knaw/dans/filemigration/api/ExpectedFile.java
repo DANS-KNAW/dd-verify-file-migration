@@ -17,12 +17,11 @@ package nl.knaw.dans.filemigration.api;
 
 import nl.knaw.dans.filemigration.core.FileRights;
 import nl.knaw.dans.filemigration.core.ManifestCsv;
+import org.hsqldb.lib.StringUtil;
+import org.joda.time.DateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
+import javax.annotation.Nullable;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
@@ -36,8 +35,8 @@ public class ExpectedFile {
 
     public ExpectedFile(String doi, EasyFile easyFile, boolean removeOriginal) {
         final String path = removeOriginal
-            ? easyFile.getPath().replace("original/", "")
-            : easyFile.getPath();
+                ? easyFile.getPath().replace("original/", "")
+                : easyFile.getPath();
         final String dvPath = dvPath(path);
 
         setDoi(doi);
@@ -147,12 +146,27 @@ public class ExpectedFile {
     @Column()
     private String visibleTo;
 
+    @Nullable
+    @Column()
+    private String embargo_date;
+
     @Override
     public String toString() {
-        return "ExpectedFile{" + "doi='" + doi + '\'' + ", expected_path='" + expected_path + '\'' + ", removed_duplicate_file_count=" + removed_duplicate_file_count + ", removed_original_directory="
-            + removed_original_directory + ", sha1_checksum='" + sha1_checksum + '\'' + ", easy_file_id='" + easy_file_id + '\'' + ", fs_rdb_path='" + fs_rdb_path + '\'' + ", added_during_migration="
-            + added_during_migration + ", removed_thumbnail=" + removed_thumbnail + ", transformed_name=" + transformed_name + ", accessibleTo='" + accessibleTo + '\'' + ", visibleTo='" + visibleTo
-            + '\'' + '}';
+        return "ExpectedFile{" +
+                "doi='" + doi + '\'' +
+                ", expected_path='" + expected_path + '\'' +
+                ", removed_duplicate_file_count=" + removed_duplicate_file_count +
+                ", removed_original_directory=" + removed_original_directory +
+                ", sha1_checksum='" + sha1_checksum + '\'' +
+                ", easy_file_id='" + easy_file_id + '\'' +
+                ", fs_rdb_path='" + fs_rdb_path + '\'' +
+                ", added_during_migration=" + added_during_migration +
+                ", removed_thumbnail=" + removed_thumbnail +
+                ", transformed_name=" + transformed_name +
+                ", accessibleTo='" + accessibleTo + '\'' +
+                ", visibleTo='" + visibleTo + '\'' +
+                ", embargo_date='" + embargo_date + '\'' +
+                '}';
     }
 
     public boolean isTransformed_name() {
@@ -239,6 +253,16 @@ public class ExpectedFile {
         this.doi = doi;
     }
 
+    @Nullable
+    public String getEmbargo_date() {
+        return embargo_date;
+    }
+
+    public void setEmbargo_date(@Nullable String dateAvailable) {
+        if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
+            this.embargo_date = dateAvailable;
+    }
+
     public String getAccessibleTo() {
         return accessibleTo;
     }
@@ -257,20 +281,14 @@ public class ExpectedFile {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         ExpectedFile that = (ExpectedFile) o;
-        return removed_duplicate_file_count == that.removed_duplicate_file_count && removed_original_directory == that.removed_original_directory
-            && added_during_migration == that.added_during_migration && removed_thumbnail == that.removed_thumbnail && transformed_name == that.transformed_name && Objects.equals(doi, that.doi)
-            && Objects.equals(expected_path, that.expected_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(easy_file_id, that.easy_file_id) && Objects.equals(fs_rdb_path,
-            that.fs_rdb_path) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo);
+        return removed_duplicate_file_count == that.removed_duplicate_file_count && removed_original_directory == that.removed_original_directory && added_during_migration == that.added_during_migration && removed_thumbnail == that.removed_thumbnail && transformed_name == that.transformed_name && Objects.equals(doi, that.doi) && Objects.equals(expected_path, that.expected_path) && Objects.equals(sha1_checksum, that.sha1_checksum) && Objects.equals(easy_file_id, that.easy_file_id) && Objects.equals(fs_rdb_path, that.fs_rdb_path) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo) && Objects.equals(embargo_date, that.embargo_date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(doi, expected_path, removed_duplicate_file_count, removed_original_directory, sha1_checksum, easy_file_id, fs_rdb_path, added_during_migration, removed_thumbnail,
-            transformed_name, accessibleTo, visibleTo);
+        return Objects.hash(doi, expected_path, removed_duplicate_file_count, removed_original_directory, sha1_checksum, easy_file_id, fs_rdb_path, added_during_migration, removed_thumbnail, transformed_name, accessibleTo, visibleTo, embargo_date);
     }
 }

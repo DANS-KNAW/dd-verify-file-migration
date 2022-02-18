@@ -21,13 +21,13 @@ import nl.knaw.dans.filemigration.db.ActualFileDAO;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
+import nl.knaw.dans.lib.dataverse.model.file.Embargo;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
 import org.hsqldb.lib.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Locale;
 
 public class DataverseLoader {
     private static final Logger log = LoggerFactory.getLogger(DataverseLoader.class);
@@ -67,17 +67,22 @@ public class DataverseLoader {
         for (DatasetVersion v : versions) {
             int fileCount = 0;
             for (FileMeta f : v.getFiles()) {
-                saveActual(toActual(f, doi, v.getVersionNumber(), v.getVersionMinorNumber()));
+                saveActual(toActual(f, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.isFileAccessRequest()));
                 ++fileCount;
             }
             log.info("Stored {} actual files for DOI {}, Version {}.{} State {}", fileCount, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
         }
     }
 
-    private ActualFile toActual(FileMeta fileMeta, String doi, int majorVersion, int minorVersion) {
+    private ActualFile toActual(FileMeta fileMeta, String doi, int majorVersion, int minorVersion, boolean datasetHasAccessRequestEnabled) {
         DataFile f = fileMeta.getDataFile();
         String dl = fileMeta.getDirectoryLabel();
         String actual_path = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
-        return new ActualFile(doi, actual_path, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
+        ActualFile actualFile = new ActualFile(doi, actual_path, majorVersion, minorVersion, f.getChecksum().getValue(), f.getStorageIdentifier());
+        actualFile.setAccessibleTo(fileMeta.getRestricted(), datasetHasAccessRequestEnabled);
+        Embargo embargo = f.getEmbargo();
+        if (embargo != null)
+            actualFile.setEmbargo_date(embargo.getDateAvailable());
+        return actualFile;
     }
 }
