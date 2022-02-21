@@ -33,7 +33,7 @@ public class ExpectedFile {
     public ExpectedFile() {
     }
 
-    public ExpectedFile(String doi, EasyFile easyFile, boolean removeOriginal) {
+    public ExpectedFile(String doi, EasyFile easyFile, boolean removeOriginal, String depositor) {
         final String path = removeOriginal
                 ? easyFile.getPath().replace("original/", "")
                 : easyFile.getPath();
@@ -50,10 +50,11 @@ public class ExpectedFile {
         setRemovedThumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
         setRemovedOriginalDirectory(removeOriginal);
         setRemovedDuplicateFileCount(0);
+        setDepositor(depositor);
         setTransformedName(!path.equals(dvPath));
     }
 
-    public ExpectedFile(String doi, ManifestCsv manifestCsv, FileRights fileRights) {
+    public ExpectedFile(String doi, ManifestCsv manifestCsv, FileRights fileRights, String depositor) {
         final String path = manifestCsv.getPath();
         final String dvPath = dvPath(path);
 
@@ -68,6 +69,7 @@ public class ExpectedFile {
         setRemovedThumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
         setRemovedOriginalDirectory(false);
         setRemovedDuplicateFileCount(0);
+        setDepositor(depositor);
         setTransformedName(!path.equals(dvPath));
     }
 
@@ -263,6 +265,7 @@ public class ExpectedFile {
     }
 
     public void setDepositor(String depositor) {
+        // TODO mapping of easy-convert-bag-to-deposit/src/main/assembly/dist/cfg/account-substitutes.csv
         this.depositor = depositor;
     }
 

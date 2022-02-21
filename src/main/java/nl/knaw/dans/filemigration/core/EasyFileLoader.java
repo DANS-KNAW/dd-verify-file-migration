@@ -91,7 +91,7 @@ public class EasyFileLoader extends ExpectedLoader {
       // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
       log.trace("EasyFile = {}", f);
       final boolean removeOriginal = csv.getTransformation().startsWith("original") && f.getPath().startsWith("original/");
-      ExpectedFile expected = new ExpectedFile(csv.getDoi(), f, removeOriginal);
+      ExpectedFile expected = new ExpectedFile(csv.getDoi(), f, removeOriginal, ""); // TODO depositor
       expected.setAccessibleTo(f.getAccessibleTo());
       expected.setVisibleTo(f.getVisibleTo());
       expected.setEmbargoDate(embargoDate);

@@ -26,12 +26,8 @@ import nl.knaw.dans.lib.dataverse.ResultItemDeserializer;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.dataverse.DataverseItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +36,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -104,16 +97,17 @@ public class VaultLoader extends ExpectedLoader {
 
   private void processBag(String uuid, String doi) {
     Map<String, FileRights> filesXml = readFileMeta(uuid);
-    FileRights defaultFileRights = readDefaultRights(uuid);
-    readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml, defaultFileRights));
-    expectedMigrationFiles(doi, migrationFiles, defaultFileRights,""); // TODO creator
+    FileRights datasetRights = readDefaultRights(uuid);
+    String depositor = depositorFromBagInfo(uuid);
+    readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml, datasetRights, depositor));
+    expectedMigrationFiles(doi, migrationFiles, datasetRights, depositor);
   }
 
-  private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
+  private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights, String depositor) {
     String path = m.getPath();
     FileRights fileRights = fileRightsMap.get(path).applyDefaults(defaultFileRights);
     log.trace("{} {}", path, fileRights);
-    retriedSave(new ExpectedFile(doi, m, fileRights));
+    retriedSave(new ExpectedFile(doi, m, fileRights, depositor));
   }
 
   private Stream<ManifestCsv> readManifest(String uuid) {
@@ -153,6 +147,22 @@ public class VaultLoader extends ExpectedLoader {
     try {
       String xmlString = executeReq(new HttpGet(uri), true);
       return DatasetRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private String depositorFromBagInfo(String uuid) {
+    URI uri = bagStoreBaseUri
+        .resolve("bags/")
+        .resolve(uuid+"/")
+        .resolve("bag-info.txt");
+    try {
+      String txt = executeReq(new HttpGet(uri), true);
+      Properties properties = new Properties();
+      properties.load(new ByteArrayInputStream(txt.getBytes(StandardCharsets.UTF_8)));
+      return properties.getProperty("EASY-User-Account");
     }
     catch (IOException e) {
       throw new RuntimeException(e);
