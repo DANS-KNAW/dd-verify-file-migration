@@ -56,7 +56,7 @@ public class EasyFileLoader extends ExpectedLoader {
       fileRights.setEmbargoDate(solrFields.available.trim());
       fileRights.setFileRights(solrFields.rights);
       if (!csv.getComment().contains("no payload"))
-        fedoraFiles(csv, datasetRights.getEmbargoDate());
+        fedoraFiles(csv, datasetRights.getEmbargoDate(), solrFields.creator);
       expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights, solrFields.creator);
     }
   }
@@ -83,15 +83,16 @@ public class EasyFileLoader extends ExpectedLoader {
   /**
    * @param csv         not null, record produced by easy-fedora-to-bag
    * @param embargoDate null if data-available not in the future
+   * @param creator
    */
-  private void fedoraFiles(FedoraToBagCsv csv, String embargoDate) {
+  private void fedoraFiles(FedoraToBagCsv csv, String embargoDate, String creator) {
     log.trace(csv.toString());
     List<EasyFile> easyFiles = getByDatasetId(csv);
     for (EasyFile f : easyFiles) {
       // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
       log.trace("EasyFile = {}", f);
       final boolean removeOriginal = csv.getTransformation().startsWith("original") && f.getPath().startsWith("original/");
-      ExpectedFile expected = new ExpectedFile(csv.getDoi(), f, removeOriginal, ""); // TODO depositor
+      ExpectedFile expected = new ExpectedFile(csv.getDoi(), f, removeOriginal, creator);
       expected.setAccessibleTo(f.getAccessibleTo());
       expected.setVisibleTo(f.getVisibleTo());
       expected.setEmbargoDate(embargoDate);
