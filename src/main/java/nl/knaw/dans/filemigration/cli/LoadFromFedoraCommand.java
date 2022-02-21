@@ -95,6 +95,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
                 new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, URI.class},
                 new Object[] { easyFileDAO, expectedDAO, configuration.getSolrBaseUri()}
             );
+        configuration.loadAccountSubstitutes(namespace);
         for (File file : namespace.<File> getList("csv")) {
             log.info(file.toString());
             for (CSVRecord r : FedoraToBagCsv.parse(file)) {

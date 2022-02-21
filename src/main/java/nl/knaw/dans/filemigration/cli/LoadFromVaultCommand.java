@@ -86,6 +86,7 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         String uuid = namespace.getString("uuid");
         String file = namespace.getString("uuids");
         String store = namespace.getString("store");
+        configuration.loadAccountSubstitutes(namespace);
         if (uuid != null)
             proxy.loadFromVault(UUID.fromString(uuid));
         else if (file != null) {
