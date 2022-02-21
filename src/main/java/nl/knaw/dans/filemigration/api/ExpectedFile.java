@@ -90,22 +90,6 @@ public class ExpectedFile {
         return s;
     }
 
-    public ExpectedFile(String doi, String expectedPath, int removedDuplicateFileCount, boolean removedOriginalDirectory, String sha1Checksum, String easyFileId, String fsRdbPath,
-        boolean addedDuringMigration, boolean removedThumbnail, boolean transformedName, String accessibleTo, String visibleTo) {
-        this.doi = doi;
-        this.expectedPath = expectedPath;
-        this.removedDuplicateFileCount = removedDuplicateFileCount;
-        this.removedOriginalDirectory = removedOriginalDirectory;
-        this.sha1Checksum = sha1Checksum;
-        this.easyFileId = easyFileId;
-        this.fsRdbPath = fsRdbPath;
-        this.addedDuringMigration = addedDuringMigration;
-        this.removedThumbnail = removedThumbnail;
-        this.transformedName = transformedName;
-        this.accessibleTo = accessibleTo;
-        this.visibleTo = visibleTo;
-    }
-
     // most lengths from easy-dtap/provisioning/roles/easy-fs-rdb/templates/create-easy-db-tables.sql
     // doi length as in dd-dtap/shared-code/dataverse/scripts/database/create/create_v*.sql
 

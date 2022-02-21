@@ -50,7 +50,7 @@ public class EasyFileLoaderTest {
     @Override
     protected SolrFields getSolrFields(String datasetId) {
       try {
-        return new SolrFields("2020-01-01,ANONYMOUS,somebody");
+        return new SolrFields("2020-01-01,OPEN_ACCESS,somebody");
       } catch (IOException e) {
         return fail("Not expected exception on mocked test data");
       }
@@ -115,9 +115,9 @@ public class EasyFileLoaderTest {
         new EasyFile("easy-file:1","easy-folder:1",datasetId,"some?/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123")
     );
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
-    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:2","some_/file.txt",false,false,false, "ANONYMOUS", "ANONYMOUS"));
-    expectThrows(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:1","some?/file.txt",false,false,true, "ANONYMOUS", "ANONYMOUS"));
-    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",1,false,"123","easy-file:1","some?/file.txt",false,false,true, "ANONYMOUS", "ANONYMOUS"));
+    expectSuccess(expectedFileDAO, createExpectedPayloadFile("some_/file.txt", 0, false, "easy-file:2", "some_/file.txt", false, false));
+    expectThrows(expectedFileDAO, createExpectedPayloadFile("some_/file.txt", 0, false, "easy-file:1", "some?/file.txt", false, true));
+    expectSuccess(expectedFileDAO, createExpectedPayloadFile("some_/file.txt", 1, false, "easy-file:1", "some?/file.txt", false, true));
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(expectedFileDAO, ef);
 
@@ -135,9 +135,9 @@ public class EasyFileLoaderTest {
         new EasyFile("easy-file:1","easy-folder:1",datasetId,"original/some?/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123")
     );
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
-    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:2","some_/file.txt",false,false,false, "ANONYMOUS", "ANONYMOUS"));
-    expectThrows(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,true,"123","easy-file:1","original/some?/file.txt",false,false,true, "ANONYMOUS", "ANONYMOUS"));
-    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",1,true,"123","easy-file:1","original/some?/file.txt",false,false,true, "ANONYMOUS", "ANONYMOUS"));
+    expectSuccess(expectedFileDAO, createExpectedPayloadFile("some_/file.txt", 0, false, "easy-file:2", "some_/file.txt", false, false));
+    expectThrows(expectedFileDAO, createExpectedPayloadFile("some_/file.txt", 0, true, "easy-file:1", "original/some?/file.txt", false, true));
+    expectSuccess(expectedFileDAO, createExpectedPayloadFile("some_/file.txt", 1, true, "easy-file:1", "original/some?/file.txt", false, true));
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(expectedFileDAO, ef);
 
@@ -155,7 +155,7 @@ public class EasyFileLoaderTest {
         new EasyFile("easy-file:1","easy-folder:1",datasetId,"some_thumbnails/image_small.png","image_small.png",10,"png","DEPOSITOR","ANONYMOUS","ANONYMOUS","123")
     );
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
-    expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_thumbnails/image_small.png",0,false,"123","easy-file:1","some_thumbnails/image_small.png",false,true,false, "ANONYMOUS", "ANONYMOUS"));
+    expectSuccess(expectedFileDAO, createExpectedPayloadFile("some_thumbnails/image_small.png", 0, false, "easy-file:1", "some_thumbnails/image_small.png", true, false));
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(expectedFileDAO, ef);
 
@@ -165,13 +165,36 @@ public class EasyFileLoaderTest {
   }
 
   private void expectSuccess(ExpectedFileDAO expectedFileDAO, ExpectedFile ef) {
+    ef.setDepositor("somebody");
+    ef.setAccessibleTo("ANONYMOUS");
+    ef.setVisibleTo("ANONYMOUS");
     expectedFileDAO.create(ef);
     EasyMock.expectLastCall().once();
   }
 
   private void expectThrows(ExpectedFileDAO expectedFileDAO, ExpectedFile ef) {
+    ef.setDepositor("somebody");
+    ef.setAccessibleTo("ANONYMOUS");
+    ef.setVisibleTo("ANONYMOUS");
     expectedFileDAO.create(ef);
     EasyMock.expectLastCall().andThrow(new PersistenceException(new ConstraintViolationException("",null,"blabla"))).once();
+  }
+
+  private ExpectedFile createExpectedPayloadFile(String expectedPath, int removedDuplicateFileCount, boolean removedOriginalDirectory, String easyFileId, String fsRdbPath, boolean removedThumbnail, boolean transformedName) {
+    ExpectedFile expectedFile = new ExpectedFile();
+    expectedFile.setDoi(doi);
+    expectedFile.setExpectedPath(expectedPath);
+    expectedFile.setRemovedDuplicateFileCount(removedDuplicateFileCount);
+    expectedFile.setRemovedOriginalDirectory(removedOriginalDirectory);
+    expectedFile.setEasyFileId(easyFileId);
+    expectedFile.setFsRdbPath(fsRdbPath);
+    expectedFile.setRemovedThumbnail(removedThumbnail);
+    expectedFile.setTransformedName(transformedName);
+
+    // other values covered by expectedMigrationFiles
+    expectedFile.setSha1Checksum("123");
+    expectedFile.setAddedDuringMigration(false);
+    return expectedFile;
   }
 
   private List<ExpectedFile> expectedMigrationFiles() {
@@ -183,8 +206,6 @@ public class EasyFileLoaderTest {
       expectedFile.setExpectedPath("easy-migration/" + f);
       expectedFile.setAddedDuringMigration(true);
       expectedFiles.add(expectedFile);
-      expectedFile.setAccessibleTo("NONE");
-      expectedFile.setVisibleTo("NONE");
     }
     return expectedFiles;
   }

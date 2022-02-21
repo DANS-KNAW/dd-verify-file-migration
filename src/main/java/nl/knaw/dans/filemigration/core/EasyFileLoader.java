@@ -52,9 +52,9 @@ public class EasyFileLoader extends ExpectedLoader {
       // thus we don't write anything when reading fails
       SolrFields solrFields = getSolrFields(csv.getDatasetId());
       FileRights datasetRights = new FileRights();
-      FileRights fileRights = new FileRights();
-      fileRights.setEmbargoDate(solrFields.available.trim());
-      fileRights.setFileRights(solrFields.rights);
+      datasetRights.setEmbargoDate(solrFields.available.trim());
+      datasetRights.setFileRights(solrFields.rights);
+      datasetRights.setFileRights(solrFields.rights);
       if (!csv.getComment().contains("no payload"))
         fedoraFiles(csv, datasetRights.getEmbargoDate(), solrFields.creator);
       expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights, solrFields.creator);
@@ -83,19 +83,20 @@ public class EasyFileLoader extends ExpectedLoader {
   /**
    * @param csv         not null, record produced by easy-fedora-to-bag
    * @param embargoDate null if data-available not in the future
-   * @param creator
+   * @param depositor
    */
-  private void fedoraFiles(FedoraToBagCsv csv, String embargoDate, String creator) {
+  private void fedoraFiles(FedoraToBagCsv csv, String embargoDate, String depositor) {
     log.trace(csv.toString());
     List<EasyFile> easyFiles = getByDatasetId(csv);
     for (EasyFile f : easyFiles) {
       // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
       log.trace("EasyFile = {}", f);
       final boolean removeOriginal = csv.getTransformation().startsWith("original") && f.getPath().startsWith("original/");
-      ExpectedFile expected = new ExpectedFile(csv.getDoi(), f, removeOriginal, creator);
+      ExpectedFile expected = new ExpectedFile(csv.getDoi(), f, removeOriginal, depositor);
       expected.setAccessibleTo(f.getAccessibleTo());
       expected.setVisibleTo(f.getVisibleTo());
       expected.setEmbargoDate(embargoDate);
+      expected.setDepositor(depositor);
       retriedSave(expected);
     }
   }
