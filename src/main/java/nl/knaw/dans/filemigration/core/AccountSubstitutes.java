@@ -50,6 +50,8 @@ public class AccountSubstitutes {
         } catch (IOException e) {
             throw new IllegalStateException("Can't read " + csvFile, e);
         }
+        if (records.isEmpty())
+            throw new IllegalStateException("Empty " + csvFile);
         HashMap<String, String> accountSubstitutes = new HashMap<>();
         records.forEach(csvRecord -> accountSubstitutes.put(
                 csvRecord.get(removedAccount), csvRecord.get(chosenAccount))
