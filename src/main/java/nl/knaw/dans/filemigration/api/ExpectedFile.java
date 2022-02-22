@@ -130,10 +130,10 @@ public class ExpectedFile {
     @Column(name="transformed_name")
     private boolean transformedName;
 
-    @Column()
+    @Column(name="accessible_to")
     private String accessibleTo;
 
-    @Column()
+    @Column(name="visible_to")
     private String visibleTo;
 
     @Nullable
