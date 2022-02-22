@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -52,8 +53,8 @@ public class VaultLoader extends ExpectedLoader {
   private final URI bagSeqUri;
   private final ObjectMapper mapper;
 
-  public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
-    super(expectedDAO);
+  public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
+    super(expectedDAO, configDir);
     bagSeqUri = bagIndexBaseUri.resolve("bag-sequence");
     this.bagStoreBaseUri = bagStoreBaseUri;
     this.bagIndexBaseUri = bagIndexBaseUri;

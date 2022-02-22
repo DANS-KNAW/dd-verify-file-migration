@@ -19,12 +19,13 @@ import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 
+import java.io.File;
 import java.net.URI;
 
 public class VaultLoaderImpl extends VaultLoader {
 
-  public VaultLoaderImpl(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
-    super(expectedDAO, bagStoreBaseUri, bagIndexBaseUri);
+  public VaultLoaderImpl(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
+    super(expectedDAO, bagStoreBaseUri, bagIndexBaseUri, configDir);
   }
 
   @UnitOfWork("hibernate")

@@ -22,14 +22,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.PersistenceException;
+import java.io.File;
+import java.util.Map;
 
 public class ExpectedLoader {
   private static final Logger log = LoggerFactory.getLogger(ExpectedLoader.class);
 
   private final ExpectedFileDAO expectedDAO;
+  private final Map<String, String> accountSubstitutes;
 
-  public ExpectedLoader(ExpectedFileDAO expectedDAO) {
+  public ExpectedLoader(ExpectedFileDAO expectedDAO, File configDir) {
+
     this.expectedDAO = expectedDAO;
+    this.accountSubstitutes = AccountSubstitutes.load(configDir);
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights, String creator) {
@@ -54,6 +59,9 @@ public class ExpectedLoader {
   }
 
   public void retriedSave(ExpectedFile expected) {
+    String depositor = expected.getDepositor();
+    if(accountSubstitutes.containsKey(depositor))
+      expected.setDepositor(accountSubstitutes.get(depositor));
     try {
       saveExpected(expected);
     } catch(PersistenceException e){

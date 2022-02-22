@@ -21,13 +21,14 @@ import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
 
+import java.io.File;
 import java.net.URI;
 import java.util.List;
 
 public class EasyFileLoaderImpl extends EasyFileLoader {
 
-    public EasyFileLoaderImpl(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO, URI solrBaseUri) {
-        super(easyFileDAO, expectedDAO, solrBaseUri);
+    public EasyFileLoaderImpl(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO, URI solrBaseUri, File configDir) {
+        super(easyFileDAO, expectedDAO, solrBaseUri, configDir);
     }
 
   @UnitOfWork("easyBundle")

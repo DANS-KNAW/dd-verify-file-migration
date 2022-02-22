@@ -19,24 +19,12 @@ package nl.knaw.dans.filemigration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import net.sourceforge.argparse4j.inf.Namespace;
 import nl.knaw.dans.lib.util.DataverseClientFactory;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-
-import static org.apache.commons.csv.CSVFormat.RFC4180;
 
 public class DdVerifyFileMigrationConfiguration extends Configuration {
   @Valid
@@ -63,7 +51,6 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
   @NotNull
   private DataSourceFactory verificationDatabase = new DataSourceFactory();
 
-  HashMap<String, String> accountSubstitutes = new HashMap<>();
 
   @JsonProperty("easyDb")
   public DataSourceFactory getEasyDb() {
@@ -77,27 +64,6 @@ public class DdVerifyFileMigrationConfiguration extends Configuration {
   @JsonProperty("verificationDatabase")
   public DataSourceFactory getVerificationDatabase() {
     return verificationDatabase;
-  }
-
-  public void loadAccountSubstitutes(Namespace namespace) throws IOException {
-    CSVFormat format = RFC4180.withHeader("old", "new")
-            .withDelimiter(',')
-            .withFirstRecordAsHeader()
-            .withRecordSeparator(System.lineSeparator());
-    String configDir = new File(namespace.getString("file")).getParent();
-    File csvFile = new File(configDir + "/account-substitutes.csv");
-    if (csvFile.exists() && 0 != csvFile.length()) {
-      List<CSVRecord> records = CSVParser.parse(new FileInputStream(csvFile), StandardCharsets.UTF_8, format).getRecords();
-      records.forEach(csvRecord -> accountSubstitutes.put(csvRecord.get("old"), csvRecord.get("new")));
-    }
-  }
-
-  public HashMap<String, String> getAccountSubstitutes() {
-    return accountSubstitutes;
-  }
-
-  public void setAccountSubstitutes(HashMap<String, String> accountSubstitutes) {
-    this.accountSubstitutes = accountSubstitutes;
   }
 
   public void setVerificationDatabase(DataSourceFactory dataSourceFactory) {

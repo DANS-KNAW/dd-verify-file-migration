@@ -24,6 +24,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,8 +39,8 @@ public class EasyFileLoader extends ExpectedLoader {
   private final EasyFileDAO easyFileDAO;
   private final URI solrUri;
 
-  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO, URI solrBaseUri) {
-    super(expectedDAO);
+  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO, URI solrBaseUri, File configDir) {
+    super(expectedDAO, configDir);
     this.easyFileDAO = easyFileDAO;
     this.solrUri = solrBaseUri.resolve("datasets/select");
   }

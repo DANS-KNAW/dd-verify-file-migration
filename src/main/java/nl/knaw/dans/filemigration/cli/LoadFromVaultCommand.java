@@ -23,6 +23,7 @@ import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.filemigration.DdVerifyFileMigrationConfiguration;
+import nl.knaw.dans.filemigration.core.AccountSubstitutes;
 import nl.knaw.dans.filemigration.core.VaultLoader;
 import nl.knaw.dans.filemigration.core.VaultLoaderImpl;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
@@ -75,18 +76,18 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyFileMigrationConfiguration configuration) throws Exception {
         log.info(namespace.getAttrs().toString());
-        // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
         ExpectedFileDAO expectedDAO = new ExpectedFileDAO(expectedBundle.getSessionFactory());
+        File configDir = new File(namespace.getString("file")).getParentFile();
+        // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
         VaultLoader proxy = new UnitOfWorkAwareProxyFactory(expectedBundle)
             .create(
                 VaultLoaderImpl.class,
-                new Class[] { ExpectedFileDAO.class, URI.class, URI.class },
-                new Object[] { expectedDAO, configuration.getBagStoreBaseUri(), configuration.getBagIndexBaseUri() }
+                new Class[] { ExpectedFileDAO.class, URI.class, URI.class, File.class },
+                new Object[] { expectedDAO, configuration.getBagStoreBaseUri(), configuration.getBagIndexBaseUri(), configDir }
             );
         String uuid = namespace.getString("uuid");
         String file = namespace.getString("uuids");
         String store = namespace.getString("store");
-        configuration.loadAccountSubstitutes(namespace);
         if (uuid != null)
             proxy.loadFromVault(UUID.fromString(uuid));
         else if (file != null) {

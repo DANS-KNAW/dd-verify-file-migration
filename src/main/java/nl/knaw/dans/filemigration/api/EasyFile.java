@@ -15,13 +15,7 @@
  */
 package nl.knaw.dans.filemigration.api;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 // order by in decreasing numeric order, thus earlier versions become duplicates

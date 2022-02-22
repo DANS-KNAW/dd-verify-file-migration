@@ -24,6 +24,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.PersistenceException;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,10 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EasyFileLoaderTest {
@@ -44,7 +42,7 @@ public class EasyFileLoaderTest {
   private static class Loader extends EasyFileLoader {
 
     public Loader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO) {
-      super(easyFileDAO, expectedDAO, solrBaseUri());
+      super(easyFileDAO, expectedDAO, solrBaseUri(), new File("src/test/resources/debug-etc"));
     }
 
     @Override
