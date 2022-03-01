@@ -34,9 +34,7 @@ public class SolrFields {
         CSVRecord record = CSVParser.parse(inputStream, StandardCharsets.UTF_8, solrFormat).getRecords().get(0);
         available = record.get(0).trim();
         rights = record.get(1)
-                .replaceAll("^[^,]*,","") // strip date
-                .replaceAll("^\"","") // strip leading quote
-                .replaceAll("\"$","") // strip trailing quote
+                .replaceAll("^\"(.*)\"$","$1") // strip quotes
                 .replaceAll(",.*",""); // strip licence URL and rights holder;
         creator = record.get(2).trim();
     }
