@@ -81,12 +81,42 @@ public class FileRights implements Serializable {
     }
   }
 
-  public FileRights applyDefaults(FileRights defaultRights){
-    if(StringUtil.isEmpty(getAccessibleTo()))
-      setAccessibleTo(defaultRights.getAccessibleTo());
-    if(StringUtil.isEmpty(getVisibleTo()))
-      setVisibleTo(defaultRights.getVisibleTo());
-    setEmbargoDate(defaultRights.getEmbargoDate());
+  public FileRights applyDefaults(FileRights datasetRights) {
+    if (StringUtil.isEmpty(accessibleTo)) {
+      setAccessibleTo(datasetRights.getAccessibleTo());
+    } else switch (accessibleTo) {
+      case "KNOWN":
+        switch (datasetRights.accessibleTo) {
+          case "RESTRICTED_REQUEST":
+          case "NONE":
+            setAccessibleTo(datasetRights.getAccessibleTo());
+            break;
+        }
+      case "RESTRICTED_REQUEST":
+        if ("NONE".equals(datasetRights.accessibleTo))
+        setAccessibleTo("NONE");
+        break;
+      case "NO_ACCESS":
+        break;
+    }
+    if (StringUtil.isEmpty(visibleTo)) {
+      setVisibleTo(datasetRights.getVisibleTo());
+    } else switch (visibleTo) {
+      case "KNOWN":
+        switch (datasetRights.visibleTo) {
+          case "RESTRICTED_REQUEST":
+          case "NONE":
+            setAccessibleTo(datasetRights.getAccessibleTo());
+            break;
+        }
+      case "RESTRICTED_REQUEST":
+        if ("NONE".equals(datasetRights.visibleTo))
+          setAccessibleTo("NONE");
+        break;
+      case "NO_ACCESS":
+        break;
+    }
+    setEmbargoDate(datasetRights.getEmbargoDate());
     return this;
   }
 
