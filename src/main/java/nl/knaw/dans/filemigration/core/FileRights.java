@@ -26,6 +26,14 @@ import java.util.Objects;
 
 public class FileRights implements Serializable {
   private static final Logger log = LoggerFactory.getLogger(FileRights.class);
+  private final String known = "KNOWN";
+  private final String restricted_request = "RESTRICTED_REQUEST";
+  private final String none = "NONE";
+  private final String no_access = "NO_ACCESS";
+  private final String open_access = "OPEN_ACCESS";
+  private final String anonymous = "ANONYMOUS";
+  private final String open_access_for_registered_users = "OPEN_ACCESS_FOR_REGISTERED_USERS";
+  private final String request_permission = "REQUEST_PERMISSION";
 
   private String accessibleTo;
   private String visibleTo;
@@ -64,23 +72,23 @@ public class FileRights implements Serializable {
 
   public void setFileRights(String datasetAccessRights) {
     switch (datasetAccessRights) {
-      case "OPEN_ACCESS":
-        setAccessibleTo("ANONYMOUS");
-        setVisibleTo("ANONYMOUS");
+      case open_access:
+        setAccessibleTo(anonymous);
+        setVisibleTo(anonymous);
         break;
-      case "OPEN_ACCESS_FOR_REGISTERED_USERS":
-        setAccessibleTo("KNOWN");
-        setVisibleTo("KNOWN");
+      case open_access_for_registered_users:
+        setAccessibleTo(known);
+        setVisibleTo(known);
         break;
-      case "REQUEST_PERMISSION":
-        setAccessibleTo("RESTRICTED_REQUEST");
-        setVisibleTo("RESTRICTED_REQUEST");
+      case request_permission:
+        setAccessibleTo(restricted_request);
+        setVisibleTo(restricted_request);
         break;
       default:
         if (!"NO_ACCESS".equals(datasetAccessRights))
           log.warn("dataset rights not known: {}", datasetAccessRights);
-        setAccessibleTo("NONE");
-        setVisibleTo("NONE");
+        setAccessibleTo(none);
+        setVisibleTo(none);
         break;
     }
   }
