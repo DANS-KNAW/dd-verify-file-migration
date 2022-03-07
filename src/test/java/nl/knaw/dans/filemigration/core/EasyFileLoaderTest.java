@@ -66,7 +66,7 @@ public class EasyFileLoaderTest {
     FedoraToBagCsv csv = mockCSV("OK no payload", "blabla");
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
     EasyFileDAO easyFileDAO = createMock(EasyFileDAO.class);
-    for (ExpectedFile ef: expectedMigrationFiles())
+    for (ExpectedFile ef: expectedMigrationFiles("NONE"))
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, expectedFileDAO, easyFileDAO);
@@ -92,7 +92,7 @@ public class EasyFileLoaderTest {
     FedoraToBagCsv csv = mockCSV("OK", "blabla");
     EasyFileDAO easyFileDAO = mockEasyFileDAO();
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
-    for (ExpectedFile ef: expectedMigrationFiles())
+    for (ExpectedFile ef: expectedMigrationFiles("NONE"))
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
@@ -106,11 +106,11 @@ public class EasyFileLoaderTest {
     FedoraToBagCsv csv = mockCSV("OK", "blabla");
     EasyFileDAO easyFileDAO = mockEasyFileDAO();
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
-    for (ExpectedFile ef: expectedMigrationFiles())
+    for (ExpectedFile ef: expectedMigrationFiles("ANONYMOUS"))
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("\"\",\"NONE,accept,rechthebbende\"", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader("\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\"", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -126,7 +126,7 @@ public class EasyFileLoaderTest {
     expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:2","some_/file.txt",false,false,false, "ANONYMOUS", "ANONYMOUS"));
     expectThrows(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:1","some?/file.txt",false,false,true, "ANONYMOUS", "ANONYMOUS"));
     expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",1,false,"123","easy-file:1","some?/file.txt",false,false,true, "ANONYMOUS", "ANONYMOUS"));
-    for (ExpectedFile ef: expectedMigrationFiles())
+    for (ExpectedFile ef: expectedMigrationFiles("NONE"))
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
@@ -146,7 +146,7 @@ public class EasyFileLoaderTest {
     expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:2","some_/file.txt",false,false,false, "ANONYMOUS", "ANONYMOUS"));
     expectThrows(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,true,"123","easy-file:1","original/some?/file.txt",false,false,true, "ANONYMOUS", "ANONYMOUS"));
     expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",1,true,"123","easy-file:1","original/some?/file.txt",false,false,true, "ANONYMOUS", "ANONYMOUS"));
-    for (ExpectedFile ef: expectedMigrationFiles())
+    for (ExpectedFile ef: expectedMigrationFiles("NONE"))
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
@@ -164,7 +164,7 @@ public class EasyFileLoaderTest {
     );
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
     expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_thumbnails/image_small.png",0,false,"123","easy-file:1","some_thumbnails/image_small.png",false,true,false, "ANONYMOUS", "ANONYMOUS"));
-    for (ExpectedFile ef: expectedMigrationFiles())
+    for (ExpectedFile ef: expectedMigrationFiles("NONE"))
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
@@ -182,7 +182,7 @@ public class EasyFileLoaderTest {
     EasyMock.expectLastCall().andThrow(new PersistenceException(new ConstraintViolationException("",null,"blabla"))).once();
   }
 
-  private List<ExpectedFile> expectedMigrationFiles() {
+  private List<ExpectedFile> expectedMigrationFiles(String rights) {
 
     ArrayList<ExpectedFile> expectedFiles = new ArrayList<>();
     for (String f : new String[] { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" }) {
@@ -191,8 +191,8 @@ public class EasyFileLoaderTest {
       expectedFile.setExpected_path("easy-migration/" + f);
       expectedFile.setAdded_during_migration(true);
       expectedFiles.add(expectedFile);
-      expectedFile.setAccessibleTo("NONE");
-      expectedFile.setVisibleTo("NONE");
+      expectedFile.setAccessibleTo(rights);
+      expectedFile.setVisibleTo(rights);
     }
     return expectedFiles;
   }
