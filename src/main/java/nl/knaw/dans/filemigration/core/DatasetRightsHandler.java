@@ -50,9 +50,7 @@ public class DatasetRightsHandler extends DefaultHandler {
       defaultFileRights.setFileRights(chars.toString().toUpperCase());
     }
     else if ("available".equalsIgnoreCase(localName)) {
-      String dateAvailable = chars.toString();
-      if (DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
-        defaultFileRights.setEmbargoDate(dateAvailable.trim());
+      defaultFileRights.setEmbargoDate(chars.toString());
     }
   }
 

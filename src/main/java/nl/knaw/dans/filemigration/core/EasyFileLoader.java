@@ -59,15 +59,10 @@ public class EasyFileLoader extends ExpectedLoader {
   }
 
   @NotNull
-  protected FileRights getDatasetRights(String datasetId) {
-    URIBuilder builder = new URIBuilder(solrUri)
-            .setParameter("q", "sid:\""+datasetId+"\"")
-            .setParameter("fl", "emd_date_available_formatted,dc_rights")
-            .setParameter("wt", "csv")
-            .setParameter("csv.header", "false")
-            .setParameter("version", "2.2");
+  private FileRights getDatasetRights(String datasetId) {
     try {
-      String line = executeReq(new HttpGet(builder.build()), false);
+      String line = rightsFromSolr(datasetId);
+      log.trace(line);
       String dateAvailable = line
               .replaceAll(",.*","");
       String rights = line
@@ -76,13 +71,23 @@ public class EasyFileLoader extends ExpectedLoader {
               .replaceAll("\"$","") // strip trailing quote
               .replaceAll(",.*",""); // strip licence URL and rights holder
       FileRights fileRights = new FileRights();
-      fileRights.setEmbargoDate(dateAvailable.trim());
+      fileRights.setEmbargoDate(dateAvailable);
       fileRights.setFileRights(rights);
       return fileRights;
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal
       throw new IllegalStateException(e.getMessage(), e);
     }
+  }
+
+  protected String rightsFromSolr(String datasetId) throws IOException, URISyntaxException {
+    URIBuilder builder = new URIBuilder(solrUri)
+            .setParameter("q", "sid:\""+ datasetId +"\"")
+            .setParameter("fl", "emd_date_available_formatted,dc_rights")
+            .setParameter("wt", "csv")
+            .setParameter("csv.header", "false")
+            .setParameter("version", "2.2");
+    return executeReq(new HttpGet(builder.build()), false);
   }
 
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
