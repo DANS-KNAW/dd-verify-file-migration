@@ -28,7 +28,9 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static nl.knaw.dans.filemigration.core.HttpHelper.executeReq;
 
@@ -65,14 +67,22 @@ public class EasyFileLoader extends ExpectedLoader {
       log.trace(line);
       String dateAvailable = line
               .replaceAll(",.*","");
-      String rights = line
+      String[] dcRights = line
               .replaceAll("^[^,]*,","") // strip date
               .replaceAll("^\"","") // strip leading quote
               .replaceAll("\"$","") // strip trailing quote
-              .replaceAll(",.*",""); // strip licence URL and rights holder
+              .split(", *");
+      Optional<String> rights= Arrays.stream(dcRights)
+              .filter(s -> s.matches("[_A-Z]*"))
+              .findFirst(); // strip licence URL and rights holder
       FileRights fileRights = new FileRights();
       fileRights.setEmbargoDate(dateAvailable);
-      fileRights.setFileRights(rights);
+      if (rights.isPresent())
+        fileRights.setFileRights(rights.get());
+      else {
+        log.warn("no dataset rights found in solr response: {}", line);
+        fileRights.setFileRights("NO_ACCESS");
+      }
       return fileRights;
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal

@@ -115,6 +115,20 @@ public class EasyFileLoaderTest {
   }
 
   @Test
+  public void dd875() {
+
+    FedoraToBagCsv csv = mockCSV("OK", "blabla");
+    EasyFileDAO easyFileDAO = mockEasyFileDAO();
+    ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
+    for (ExpectedFile ef: expectedMigrationFiles("KNOWN"))
+      expectSuccess(expectedFileDAO, ef);
+
+    replay(csv, easyFileDAO, expectedFileDAO);
+    new Loader("2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\"", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    verify(csv, easyFileDAO, expectedFileDAO);
+  }
+
+  @Test
   public void duplicateFiles() {
 
     FedoraToBagCsv csv = mockCSV("OK", "blabla");
