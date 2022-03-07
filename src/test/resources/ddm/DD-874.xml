@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<emd:easymetadata xmlns:emd="http://easy.dans.knaw.nl/easy/easymetadata/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dct="http://purl.org/dc/terms/" xmlns:eas="http://easy.dans.knaw.nl/easy/easymetadata/eas/" emd:version="0.1">
+    <emd:title>
+        <dc:title>Archeologische begeleiding Cavaljéschool te Ede in de gemeente Ede</dc:title>
+    </emd:title>
+    <emd:creator>
+        <eas:creator>
+            <eas:title>drs</eas:title>
+            <eas:initials>E.</eas:initials>
+            <eas:surname>Louwe</eas:surname>
+            <eas:organization>Econsultancy</eas:organization>
+            <eas:entityId eas:scheme="DAI"></eas:entityId>
+            <eas:role eas:scheme="DATACITE"></eas:role>
+        </eas:creator>
+    </emd:creator>
+    <emd:subject/>
+    <emd:description>
+        <dc:description>Econsultancy heeft in opdracht van Gemeente Ede in oktober en november 2015 een archeologische begeleiding uitgevoerd voor de locatie Cavaljéschool te Ede in de gemeente Ede (bijlage 5). Binnen het plangebied voor de archeologische begeleiding is de opdrachtgever voornemens een oude school door een nieuw gebouw te vervangen. De nieuwbouw zal bestaan uit een ondergrondse parkeergarage, een school, een BSO/PSZ, een commerciële ruimte en 56 appartementen. Het bouwvlak heeft een omvang van circa 2.824 m². Naar verwachting zal de bodem daarbij tot circa 3,5 m onder maaiveld worden verstoord.  Het archeologisch onderzoek wordt noodzakelijk geacht om te bepalen of er een gerede kans is dat archeologische waarden wel of niet aanwezig (kunnen) zijn in de ondergrond, die door de voorgenomen bodemingrepen kunnen worden aangetast/verloren kunnen gaan. Daarom is conform het beleid van de gemeente verplicht voorafgaand archeologisch onderzoek uit te voeren (zie bijlage 3).
+
+            Het doel van de archeologische begeleiding is het aanvullen en toetsen van het op basis van het archeologisch vooronderzoek opgestelde en in dit Programma van Eisen opgenomen gespecificeerd verwachtingsmodel en het vaststellen van de aard, het karakter, de omvang, de datering, de gaafheid, de conservering en de inhoudelijke kwaliteit van eventueel aanwezige archeologische waarde in het projectgebied. Indien behoudenswaardige archeologische resten aanwezig waren, zijn deze volledig gedocumenteerd en veiliggesteld om daarmee informatie te behouden die van belang is voor kennisvorming over het verleden (archeologische begeleiding protocol opgraven)</dc:description>
+    </emd:description>
+    <emd:publisher>
+        <dc:publisher>Econsultancy</dc:publisher>
+    </emd:publisher>
+    <emd:contributor/>
+    <emd:date>
+        <eas:created eas:scheme="W3CDTF" eas:format="DAY">2016-03-28T00:00:00.000+02:00</eas:created>
+    </emd:date>
+    <emd:type>
+        <dc:type eas:scheme="DCMI" eas:schemeId="common.dc.type">Text</dc:type>
+        <dc:type>dataset archeologisch onderzoek</dc:type>
+    </emd:type>
+    <emd:format>
+        <dc:format eas:scheme="IMT" eas:schemeId="common.dc.format">application/pdf</dc:format>
+    </emd:format>
+    <emd:identifier>
+        <dc:identifier eas:scheme="PID" eas:identification-system="http://www.persistent-identifier.nl">urn:nbn:nl:ui:13-4l-9eom</dc:identifier>
+        <dc:identifier eas:scheme="DOI" eas:identification-system="https://doi.org">10.17026/dans-xc3-kwmg</dc:identifier>
+        <dc:identifier eas:scheme="Archis_onderzoek_m_nr" eas:schemeId="archaeology.dc.identifier" eas:identification-system="https://archis.cultureelerfgoed.nl">3976618100</dc:identifier>
+        <dc:identifier eas:scheme="ISSN">2210-8785</dc:identifier>
+        <dc:identifier eas:scheme="eDNA-project">a38415</dc:identifier>
+        <dc:identifier>Rapportnummer 15035382</dc:identifier>
+        <dc:identifier eas:scheme="DMO_ID">easy-dataset:103872</dc:identifier>
+    </emd:identifier>
+    <emd:source>
+        <dc:source>Rapport  archeologisch onderzoek</dc:source>
+    </emd:source>
+    <emd:language>
+        <dc:language eas:scheme="ISO 639" eas:schemeId="common.dc.language">dut/nld</dc:language>
+    </emd:language>
+    <emd:relation>
+        <eas:references>
+            <eas:subject-title>Broeke, ir. E.M. ten (Econsultancy) (2015): Eindrapportage archeologisch onderzoek Locatie Radeland te Brummen</eas:subject-title>
+            <eas:subject-link>http://dx.doi.org/10.17026/dans-xyy-7srv</eas:subject-link>
+        </eas:references>
+    </emd:relation>
+    <emd:coverage>
+        <dct:spatial>Veenderweg 2</dct:spatial>
+        <dct:spatial>Ede</dct:spatial>
+        <dct:spatial>Gemeente Ede</dct:spatial>
+        <dct:spatial>Gelderland</dct:spatial>
+        <eas:spatial>
+            <eas:point eas:scheme="RD">
+                <eas:x>174108</eas:x>
+                <eas:y>450868</eas:y>
+            </eas:point>
+        </eas:spatial>
+    </emd:coverage>
+    <emd:rights>
+        <dct:accessRights eas:schemeId="common.dcterms.accessrights">OPEN_ACCESS</dct:accessRights>
+        <dct:license>accept</dct:license>
+        <dct:license>http://creativecommons.org/licenses/by/4.0</dct:license>
+        <dct:rightsHolder>Econsultancy</dct:rightsHolder>
+    </emd:rights>
+    <emd:audience>
+        <dct:audience eas:schemeId="custom.disciplines">easy-discipline:2</dct:audience>
+    </emd:audience>
+    <emd:other>
+        <eas:application-specific>
+            <eas:metadataformat>ARCHAEOLOGY</eas:metadataformat>
+            <eas:pakbon-status>NOT_IMPORTED</eas:pakbon-status>
+        </eas:application-specific>
+        <eas:etc/>
+    </emd:other>
+</emd:easymetadata>

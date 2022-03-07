@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ddm:DDM
+        xsi:schemaLocation="http://easy.dans.knaw.nl/schemas/md/ddm/ https://easy.dans.knaw.nl/schemas/md/ddm/ddm.xsd" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcx-dai="http://easy.dans.knaw.nl/schemas/dcx/dai/" xmlns:dcx-gml="http://easy.dans.knaw.nl/schemas/dcx/gml/" xmlns:gml="http://www.opengis.net/gml" xmlns:abr="http://www.den.nl/standaard/166/Archeologisch-Basisregister/" xmlns:ddm="http://easy.dans.knaw.nl/schemas/md/ddm/" xmlns:id-type="http://easy.dans.knaw.nl/schemas/vocab/identifier-type/">
+    <ddm:profile>
+        <dc:title>Test update scenarios (First)</dc:title>
+        <dct:description>onderzoeksrapport</dct:description>
+        <dc:creator>Bergman, W.A.</dc:creator>
+        <ddm:created>2004</ddm:created>
+        <ddm:available>""</ddm:available>
+        <ddm:audience>D37000</ddm:audience>
+        <ddm:accessRights>OPEN_ACCESS</ddm:accessRights>
+    </ddm:profile>
+    <ddm:dcmiMetadata/>
+</ddm:DDM>

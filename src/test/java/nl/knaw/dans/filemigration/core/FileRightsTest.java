@@ -35,6 +35,24 @@ public class FileRightsTest {
     }
 
     @Test
+    public void parseQuotedEmptyEmbargoDdm() throws IOException {
+        FileRights datasetRights = DatasetRightsHandler
+                .parseRights(new FileInputStream("src/test/resources/ddm/quoted-empty-embargo.xml"));
+        assertEquals("ANONYMOUS", datasetRights.getAccessibleTo());
+        assertEquals("ANONYMOUS", datasetRights.getVisibleTo());
+        assertNull(datasetRights.getEmbargoDate());
+    }
+
+    @Test
+    public void parseDD_874() throws IOException {
+        FileRights datasetRights = DatasetRightsHandler
+                .parseRights(new FileInputStream("src/test/resources/ddm/DD-874.xml"));
+        assertEquals("ANONYMOUS", datasetRights.getAccessibleTo());
+        assertEquals("ANONYMOUS", datasetRights.getVisibleTo());
+        assertNull(datasetRights.getEmbargoDate());
+    }
+
+    @Test
     public void parseRestrictedDdm() throws IOException {
         FileRights datasetRights = DatasetRightsHandler
                 .parseRights(new FileInputStream("src/test/resources/ddm/restricted.xml"));

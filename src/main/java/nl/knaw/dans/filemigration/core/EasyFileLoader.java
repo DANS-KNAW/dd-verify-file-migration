@@ -62,20 +62,32 @@ public class EasyFileLoader extends ExpectedLoader {
     }
   }
 
-  protected SolrFields getSolrFields(String datasetId) {
+  @NotNull
+  private SolrFields getDatasetRights(String datasetId) {
     URIBuilder builder = new URIBuilder(solrUri)
             .setParameter("q", "sid:\""+datasetId+"\"")
-            .setParameter("fl", SolrFields.requestedFields)
+            .setParameter("fl", "emd_date_available_formatted,dc_rights")
             .setParameter("wt", "csv")
             .setParameter("csv.header", "false")
             .setParameter("version", "2.2");
     try {
       String line = executeReq(new HttpGet(builder.build()), false);
+      log.trace(line);
       return new SolrFields(line);
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal
       throw new IllegalStateException(e.getMessage(), e);
     }
+  }
+
+  protected String rightsFromSolr(String datasetId) throws IOException, URISyntaxException {
+    URIBuilder builder = new URIBuilder(solrUri)
+            .setParameter("q", "sid:\""+ datasetId +"\"")
+            .setParameter("fl", SolrFields.requestedFields)
+            .setParameter("wt", "csv")
+            .setParameter("csv.header", "false")
+            .setParameter("version", "2.2");
+    return executeReq(new HttpGet(builder.build()), false);
   }
 
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */

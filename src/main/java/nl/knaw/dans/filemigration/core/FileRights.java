@@ -44,8 +44,12 @@ public class FileRights implements Serializable {
   }
 
   public void setEmbargoDate(@Nullable String dateAvailable) {
-    if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable.trim())) < 0)
-      this.embargoDate = dateAvailable.trim();
+    if (null != dateAvailable) {
+      String s = dateAvailable.trim().replaceAll("\"", "");
+      if (!StringUtil.isEmpty(s) && DateTime.now().compareTo(DateTime.parse(s)) < 0) {
+        this.embargoDate = dateAvailable.trim();
+      }
+    }
   }
 
   public String getAccessibleTo() {
