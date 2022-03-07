@@ -24,6 +24,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -51,7 +52,7 @@ public class EasyFileLoader extends ExpectedLoader {
     else {
       // read fedora files before adding expected migration files
       // thus we don't write anything when reading fails
-      SolrFields solrFields = getSolrFields(csv.getDatasetId());
+      SolrFields solrFields = getDatasetRights(csv.getDatasetId());
       FileRights datasetRights = new FileRights();
       datasetRights.setEmbargoDate(solrFields.available.trim());
       datasetRights.setFileRights(solrFields.rights);
@@ -71,7 +72,7 @@ public class EasyFileLoader extends ExpectedLoader {
             .setParameter("csv.header", "false")
             .setParameter("version", "2.2");
     try {
-      String line = executeReq(new HttpGet(builder.build()), false);
+      String line = rightsFromSolr(datasetId);
       log.trace(line);
       return new SolrFields(line);
     } catch (IOException | URISyntaxException e) {
