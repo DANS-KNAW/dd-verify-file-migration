@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
   private static final String doi = "10.80270/test-nySe-x6f-kf66";
-  private static final String expectedSolr = "2016-11-11,\"no_ACCESS,accept,rechthebbende\",somebody";
+  private static final String expectedSolr = "2016-11-11,\"OPEN_ACCESS,accept,rechthebbende\",somebody";
 
   private static class Loader extends EasyFileLoader {
 
@@ -157,7 +157,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
