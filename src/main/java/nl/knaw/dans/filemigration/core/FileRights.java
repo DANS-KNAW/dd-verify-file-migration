@@ -26,15 +26,6 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class FileRights implements Serializable {
-  private static final Logger log = LoggerFactory.getLogger(FileRights.class);
-  private final String known = "KNOWN";
-  private final String restricted_request = "RESTRICTED_REQUEST";
-  private final String none = "NONE";
-  private final String no_access = "NO_ACCESS";
-  private final String open_access = "OPEN_ACCESS";
-  private final String anonymous = "ANONYMOUS";
-  private final String open_access_for_registered_users = "OPEN_ACCESS_FOR_REGISTERED_USERS";
-  private final String request_permission = "REQUEST_PERMISSION";
 
   private String accessibleTo;
   private String visibleTo;
@@ -74,7 +65,7 @@ public class FileRights implements Serializable {
   public void setFileRights(DatasetRights rights) {
     String fileRights = rights.getFileRights();
     setAccessibleTo(fileRights);
-    setVisibleTo(fileRights);
+    setVisibleTo(DatasetRights.OPEN_ACCESS.getFileRights());
   }
 
   public FileRights applyDefaults(FileRights defaultRights){
