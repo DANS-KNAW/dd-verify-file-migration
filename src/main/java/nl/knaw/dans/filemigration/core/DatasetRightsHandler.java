@@ -47,7 +47,7 @@ public class DatasetRightsHandler extends DefaultHandler {
   public void endElement(String uri, String localName, String qName) {
 
     if ("accessRights".equalsIgnoreCase(localName)) {
-      defaultFileRights.setFileRights(chars.toString().toUpperCase());
+      defaultFileRights.setFileRights(DatasetRights.valueOf(chars.toString()));
     }
     else if ("available".equalsIgnoreCase(localName)) {
       defaultFileRights.setEmbargoDate(chars.toString());

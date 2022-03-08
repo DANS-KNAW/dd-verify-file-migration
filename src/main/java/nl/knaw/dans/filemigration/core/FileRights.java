@@ -71,27 +71,10 @@ public class FileRights implements Serializable {
 
   public FileRights() {}
 
-  public void setFileRights(String datasetAccessRights) {
-    switch (datasetAccessRights) {
-      case open_access:
-        setAccessibleTo(anonymous);
-        setVisibleTo(anonymous);
-        break;
-      case open_access_for_registered_users:
-        setAccessibleTo(known);
-        setVisibleTo(known);
-        break;
-      case request_permission:
-        setAccessibleTo(restricted_request);
-        setVisibleTo(restricted_request);
-        break;
-      default:
-        if (!"NO_ACCESS".equals(datasetAccessRights))
-          log.warn("dataset rights not known: {}", datasetAccessRights);
-        setAccessibleTo(none);
-        setVisibleTo(none);
-        break;
-    }
+  public void setFileRights(DatasetRights rights) {
+    String fileRights = rights.getFileRights();
+    setAccessibleTo(fileRights);
+    setVisibleTo(fileRights);
   }
 
   public FileRights applyDefaults(FileRights defaultRights){
