@@ -19,15 +19,20 @@ import nl.knaw.dans.filemigration.api.EasyFile;
 import nl.knaw.dans.filemigration.api.ExpectedFile;
 import nl.knaw.dans.filemigration.db.EasyFileDAO;
 import nl.knaw.dans.filemigration.db.ExpectedFileDAO;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -60,28 +65,34 @@ public class EasyFileLoader extends ExpectedLoader {
     }
   }
 
+  private static final String REQUESTED_FIELDS = "emd_date_available_formatted,dc_rights";
+
   @NotNull
   private FileRights getDatasetRights(String datasetId) {
     try {
       String line = rightsFromSolr(datasetId);
       log.trace(line);
-      String dateAvailable = line
-              .replaceAll(",.*","");
-      String[] dcRights = line
-              .replaceAll("^[^,]*,","") // strip date
+      CSVRecord record = CSVParser.parse(
+              new ByteArrayInputStream(line.getBytes(StandardCharsets.UTF_8)),
+              StandardCharsets.UTF_8,
+              CSVFormat.RFC4180.withDelimiter(',')
+      ).getRecords().get(0);
+      String dateAvailable = record.get(0);
+      String[] dcRights = record.get(1)
               .replaceAll("^\"","") // strip leading quote
               .replaceAll("\"$","") // strip trailing quote
               .split(", *");
-      Optional<String> rights= Arrays.stream(dcRights)
-              .filter(s -> s.matches("[_A-Z]*"))
-              .findFirst(); // strip licence URL and rights holder
+      Optional<DatasetRights> maybeRights= Arrays.stream(dcRights)
+              .filter(this::isDatasetRights)
+              .map(DatasetRights::valueOf)
+              .findFirst();
       FileRights fileRights = new FileRights();
       fileRights.setEmbargoDate(dateAvailable);
-      if (rights.isPresent())
-        fileRights.setFileRights(rights.get());
+      if (maybeRights.isPresent())
+        fileRights.setFileRights(maybeRights.get());
       else {
-        log.warn("no dataset rights found in solr response: {}", line);
-        fileRights.setFileRights("NO_ACCESS");
+        log.warn("no dataset rights found in solr response: {} using NO_ACCESS", line);
+        fileRights.setFileRights(DatasetRights.NO_ACCESS);
       }
       return fileRights;
     } catch (IOException | URISyntaxException e) {
@@ -90,10 +101,19 @@ public class EasyFileLoader extends ExpectedLoader {
     }
   }
 
+  private boolean isDatasetRights(String s) {
+    try {
+      DatasetRights.valueOf(s);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
   protected String rightsFromSolr(String datasetId) throws IOException, URISyntaxException {
     URIBuilder builder = new URIBuilder(solrUri)
             .setParameter("q", "sid:\""+ datasetId +"\"")
-            .setParameter("fl", "emd_date_available_formatted,dc_rights")
+            .setParameter("fl", REQUESTED_FIELDS)
             .setParameter("wt", "csv")
             .setParameter("csv.header", "false")
             .setParameter("version", "2.2");

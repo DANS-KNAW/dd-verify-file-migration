@@ -35,6 +35,7 @@ import static org.easymock.EasyMock.*;
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
   private static final String doi = "10.80270/test-nySe-x6f-kf66";
+  private static final String expectedSolr = "2022-03-08," + DatasetRights.NO_ACCESS;
 
   private static class Loader extends EasyFileLoader {
 
@@ -70,7 +71,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, expectedFileDAO, easyFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, expectedFileDAO, easyFileDAO);
   }
 
@@ -96,7 +97,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -120,7 +121,7 @@ public class EasyFileLoaderTest {
     FedoraToBagCsv csv = mockCSV("OK", "blabla");
     EasyFileDAO easyFileDAO = mockEasyFileDAO();
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
-    for (ExpectedFile ef: expectedMigrationFiles("KNOWN"))
+    for (ExpectedFile ef: expectedMigrationFiles("RESTRICTED_REQUEST"))
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
@@ -144,7 +145,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -164,7 +165,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -182,7 +183,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
