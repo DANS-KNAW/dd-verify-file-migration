@@ -26,20 +26,20 @@
     </parent>
 
     <groupId>nl.knaw.dans</groupId>
-    <artifactId>dd-verify-file-migration</artifactId>
+    <artifactId>dd-verify-migration</artifactId>
     <version>1.0.3-SNAPSHOT</version>
 
-    <name>DD Verify File Migration</name>
-    <url>https://github.com/DANS-KNAW/dd-verify-file-migration</url>
+    <name>DD Verify Migration</name>
+    <url>https://github.com/DANS-KNAW/dd-verify-migration</url>
     <description>Database for comparing expected and actual files after migration to data station</description>
     <inceptionYear>2021</inceptionYear>
 
     <properties>
-        <main-class>nl.knaw.dans.filemigration.DdVerifyFileMigrationApplication</main-class>
+        <main-class>nl.knaw.dans.migration.DdVerifyMigrationApplication</main-class>
     </properties>
 
     <scm>
-        <developerConnection>scm:git:https://github.com/DANS-KNAW/dd-verify-file-migration</developerConnection>
+        <developerConnection>scm:git:https://github.com/DANS-KNAW/dd-verify-migration</developerConnection>
         <tag>HEAD</tag>
     </scm>
 

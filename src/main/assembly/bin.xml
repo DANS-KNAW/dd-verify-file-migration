@@ -39,7 +39,7 @@
             <directory>${project.basedir}/src/main/assembly/dist/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <includes>
-                <include>dd-verify-file-migration</include>
+                <include>dd-verify-migration</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>

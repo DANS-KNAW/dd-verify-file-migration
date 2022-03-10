@@ -1,10 +1,10 @@
-dd-verify-file-migration
+dd-verify-migration
 =========================
 
 SYNOPSIS
 --------
 
-    dd-verify-file-migration { server | check  | load-from-easy | load-from-dataverse }
+    dd-verify-migration { server | check  | load-from-easy | load-from-dataverse }
 
 
 DESCRIPTION
@@ -32,15 +32,15 @@ EXAMPLES
 INSTALLATION AND CONFIGURATION
 ------------------------------
 Currently this project is built as an RPM package for RHEL7/CentOS7 and later. The RPM will install the binaries to
-`/opt/dans.knaw.nl/dd-verify-file-migration` and the configuration files to `/etc/opt/dans.knaw.nl/dd-verify-file-migration`. 
+`/opt/dans.knaw.nl/dd-verify-migration` and the configuration files to `/etc/opt/dans.knaw.nl/dd-verify-migration`. 
 
 For installation on systems that do no support RPM and/or systemd:
 
 1. Build the tarball (see next section).
-2. Extract it to some location on your system, for example `/opt/dans.knaw.nl/dd-verify-file-migration`.
+2. Extract it to some location on your system, for example `/opt/dans.knaw.nl/dd-verify-migration`.
 3. Start the service with the following command
    ```
-   /opt/dans.knaw.nl/dd-verify-file-migration/bin/dd-verify-file-migration server /opt/dans.knaw.nl/dd-verify-file-migration/cfg/config.yml 
+   /opt/dans.knaw.nl/dd-verify-migration/bin/dd-verify-migration server /opt/dans.knaw.nl/dd-verify-migration/cfg/config.yml 
    ```
 
 BUILDING FROM SOURCE
@@ -53,8 +53,8 @@ Prerequisites:
 
 Steps:
     
-    git clone https://github.com/DANS-KNAW/dd-verify-file-migration.git
-    cd dd-verify-file-migration 
+    git clone https://github.com/DANS-KNAW/dd-verify-migration.git
+    cd dd-verify-migration 
     mvn clean install
 
 If the `rpm` executable is found at `/usr/local/bin/rpm`, the build profile that includes the RPM 
