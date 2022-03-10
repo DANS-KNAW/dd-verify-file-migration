@@ -22,10 +22,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class FileRights implements Serializable {
-  private static final Logger log = LoggerFactory.getLogger(FileRights.class);
 
   private String accessibleTo;
   private String visibleTo;
@@ -62,27 +62,10 @@ public class FileRights implements Serializable {
 
   public FileRights() {}
 
-  public void setFileRights(String datasetAccessRights) {
-    switch (datasetAccessRights) {
-      case "OPEN_ACCESS":
-        setAccessibleTo("ANONYMOUS");
-        setVisibleTo("ANONYMOUS");
-        break;
-      case "OPEN_ACCESS_FOR_REGISTERED_USERS":
-        setAccessibleTo("KNOWN");
-        setVisibleTo("KNOWN");
-        break;
-      case "REQUEST_PERMISSION":
-        setAccessibleTo("RESTRICTED_REQUEST");
-        setVisibleTo("RESTRICTED_REQUEST");
-        break;
-      default:
-        if (!"NO_ACCESS".equals(datasetAccessRights))
-          log.warn("dataset rights not known: {}", datasetAccessRights);
-        setAccessibleTo("NONE");
-        setVisibleTo("NONE");
-        break;
-    }
+  public void setFileRights(DatasetRights rights) {
+    String fileRights = rights.getFileRights();
+    setAccessibleTo(fileRights);
+    setVisibleTo(DatasetRights.OPEN_ACCESS.getFileRights());
   }
 
   public FileRights applyDefaults(FileRights defaultRights){

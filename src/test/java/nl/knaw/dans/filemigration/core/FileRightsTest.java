@@ -57,7 +57,7 @@ public class FileRightsTest {
         FileRights datasetRights = DatasetRightsHandler
                 .parseRights(new FileInputStream("src/test/resources/ddm/restricted.xml"));
         assertEquals("RESTRICTED_REQUEST", datasetRights.getAccessibleTo());
-        assertEquals("RESTRICTED_REQUEST", datasetRights.getVisibleTo());
+        assertEquals("ANONYMOUS", datasetRights.getVisibleTo());
         assertNull(datasetRights.getEmbargoDate());
     }
 

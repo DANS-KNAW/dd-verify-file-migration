@@ -35,6 +35,7 @@ import static org.easymock.EasyMock.*;
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
   private static final String doi = "10.80270/test-nySe-x6f-kf66";
+  private static final String expectedSolr = "2022-03-08," + DatasetRights.NO_ACCESS;
 
   private static class Loader extends EasyFileLoader {
 
@@ -70,7 +71,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, expectedFileDAO, easyFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, expectedFileDAO, easyFileDAO);
   }
 
@@ -96,7 +97,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -111,6 +112,20 @@ public class EasyFileLoaderTest {
 
     replay(csv, easyFileDAO, expectedFileDAO);
     new Loader("\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\"", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    verify(csv, easyFileDAO, expectedFileDAO);
+  }
+
+  @Test
+  public void dd875() {
+
+    FedoraToBagCsv csv = mockCSV("OK", "blabla");
+    EasyFileDAO easyFileDAO = mockEasyFileDAO();
+    ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
+    for (ExpectedFile ef: expectedMigrationFiles("RESTRICTED_REQUEST"))
+      expectSuccess(expectedFileDAO, ef);
+
+    replay(csv, easyFileDAO, expectedFileDAO);
+    new Loader("2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\"", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -130,7 +145,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -150,7 +165,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -168,7 +183,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -192,7 +207,7 @@ public class EasyFileLoaderTest {
       expectedFile.setAdded_during_migration(true);
       expectedFiles.add(expectedFile);
       expectedFile.setAccessibleTo(rights);
-      expectedFile.setVisibleTo(rights);
+      expectedFile.setVisibleTo("ANONYMOUS");
     }
     return expectedFiles;
   }
