@@ -17,7 +17,7 @@
 
 #include <service.sh>
 
-MODULE_NAME=dd-verify-file-migration
+MODULE_NAME=dd-verify-migration
 PHASE="POST-TRANS"
 
 echo "$PHASE: START"

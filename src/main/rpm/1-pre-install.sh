@@ -18,7 +18,7 @@
 #include <service.sh>
 
 NUMBER_OF_INSTALLATIONS=$1
-MODULE_NAME=dd-verify-file-migration
+MODULE_NAME=dd-verify-migration
 PHASE="PRE-INSTALL"
 
 echo "$PHASE: START (Number of current installations: $NUMBER_OF_INSTALLATIONS)"

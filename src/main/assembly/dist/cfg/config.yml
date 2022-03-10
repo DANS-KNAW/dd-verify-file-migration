@@ -48,9 +48,9 @@ easyDb:
 
 verificationDatabase:
   driverClass: org.postgresql.Driver
-  url: 'jdbc:postgresql://localhost:5432/dd_verify_file_migration'
+  url: 'jdbc:postgresql://localhost:5432/dd_verify_migration'
   logValidationErrors: true
-  user: dd_verify_file_migration
+  user: dd_verify_migration
   password: changeme
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
@@ -69,6 +69,6 @@ logging:
     - type: file
       archive: true
       logFormat: "%-5p [%d{ISO8601}] [%t] %c: %m%n%rEx"
-      currentLogFilename: /var/opt/dans.knaw.nl/log/dd-verify-file-migration/dd-verify-file-migration.log
-      archivedLogFilenamePattern: /var/opt/dans.knaw.nl/log/dd-verify-file-migration/dd-verify-file-migration-%d.log
+      currentLogFilename: /var/opt/dans.knaw.nl/log/dd-verify-migration/dd-verify-migration.log
+      archivedLogFilenamePattern: /var/opt/dans.knaw.nl/log/dd-verify-migration/dd-verify-migration-%d.log
       archivedFileCount: 5

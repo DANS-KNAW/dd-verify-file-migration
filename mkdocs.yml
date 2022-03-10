@@ -14,13 +14,13 @@
 # limitations under the License.
 #
 
-site_name: dd-verify-file-migration
+site_name: dd-verify-migration
 theme:
   name: dans
   disclaimer: false
 
-repo_name: DANS-KNAW/dd-verify-file-migration
-repo_url: https://github.com/DANS-KNAW/dd-verify-file-migration
+repo_name: DANS-KNAW/dd-verify-migration
+repo_url: https://github.com/DANS-KNAW/dd-verify-migration
 
 nav:
   - Manual: index.md

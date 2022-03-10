@@ -26,7 +26,7 @@ logging:
 
     - type: file
       archive: false
-      currentLogFilename: data/dd-verify-file-migration.log
+      currentLogFilename: data/dd-verify-migration.log
 
 # with tunnel ssh -L 18080:localhost:20110 USER@XXX.dans.knaw.nl
 bagStoreBaseUri: 'http://deasy.dans.knaw.nl:20110/'
