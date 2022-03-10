@@ -21,6 +21,7 @@ import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.Embargo;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
+import nl.knaw.dans.migration.core.tables.ActualFile;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 import org.hsqldb.lib.StringUtil;
 import org.slf4j.Logger;
