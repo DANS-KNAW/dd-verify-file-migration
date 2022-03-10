@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.migration.core;
+package nl.knaw.dans.migration.core.tables;
 
+import nl.knaw.dans.migration.core.EasyFile;
+import nl.knaw.dans.migration.core.FileRights;
+import nl.knaw.dans.migration.core.ManifestCsv;
 import org.hsqldb.lib.StringUtil;
 import org.joda.time.DateTime;
 

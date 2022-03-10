@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.migration.core;
 
+import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import org.apache.commons.csv.CSVFormat;

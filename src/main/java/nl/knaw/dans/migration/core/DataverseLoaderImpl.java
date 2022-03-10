@@ -17,6 +17,7 @@ package nl.knaw.dans.migration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
+import nl.knaw.dans.migration.core.tables.ActualFile;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 
 public class DataverseLoaderImpl extends DataverseLoader {
