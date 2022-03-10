@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.migration.api;
+package nl.knaw.dans.migration.core;
 
 import org.hsqldb.lib.StringUtil;
 import org.joda.time.DateTime;

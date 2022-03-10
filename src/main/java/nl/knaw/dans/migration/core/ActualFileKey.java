@@ -13,30 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.migration.api;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+package nl.knaw.dans.migration.core;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-public class ExpectedFileKey implements Serializable {
-
+public class ActualFileKey implements Serializable {
   private String doi;
-  private String expectedPath;
-  private int removedDuplicateFileCount;
+  private String actualPath;
+  private int majorVersionNr;
+  private int minorVersionNr;
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ExpectedFileKey that = (ExpectedFileKey) o;
-    return removedDuplicateFileCount == that.removedDuplicateFileCount && Objects.equals(doi, that.doi) && Objects.equals(expectedPath, that.expectedPath);
+    ActualFileKey that = (ActualFileKey) o;
+    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(actualPath, that.actualPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, expectedPath, removedDuplicateFileCount);
+    return Objects.hash(doi, actualPath, majorVersionNr, minorVersionNr);
   }
 }

@@ -16,7 +16,6 @@
 package nl.knaw.dans.migration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
-import nl.knaw.dans.migration.api.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 
 import java.net.URI;

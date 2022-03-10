@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.migration.core;
 
-import nl.knaw.dans.migration.api.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;

@@ -16,7 +16,6 @@
 package nl.knaw.dans.migration.core;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import nl.knaw.dans.migration.api.ActualFile;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;

@@ -18,7 +18,6 @@ package nl.knaw.dans.migration.core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import nl.knaw.dans.migration.api.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import nl.knaw.dans.lib.dataverse.DataverseItemDeserializer;
 import nl.knaw.dans.lib.dataverse.MetadataFieldDeserializer;
