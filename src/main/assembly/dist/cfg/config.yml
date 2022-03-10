@@ -69,6 +69,6 @@ logging:
     - type: file
       archive: true
       logFormat: "%-5p [%d{ISO8601}] [%t] %c: %m%n%rEx"
-      currentLogFilename: /var/opt/dans.knaw.nl/log/dd-verify-migration/dd-verify-migration.log
-      archivedLogFilenamePattern: /var/opt/dans.knaw.nl/log/dd-verify-migration/dd-verify-migration-%d.log
+      currentLogFilename: dd-verify-migration.log
+      archivedLogFilenamePattern: dd-verify-migration-%d.log
       archivedFileCount: 5
