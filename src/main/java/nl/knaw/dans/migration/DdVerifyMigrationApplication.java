@@ -23,12 +23,12 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import nl.knaw.dans.migration.core.ActualFile;
-import nl.knaw.dans.migration.core.EasyFile;
-import nl.knaw.dans.migration.core.ExpectedFile;
 import nl.knaw.dans.migration.cli.LoadFromDataverseCommand;
 import nl.knaw.dans.migration.cli.LoadFromFedoraCommand;
 import nl.knaw.dans.migration.cli.LoadFromVaultCommand;
+import nl.knaw.dans.migration.core.ActualFile;
+import nl.knaw.dans.migration.core.EasyFile;
+import nl.knaw.dans.migration.core.ExpectedFile;
 
 public class DdVerifyMigrationApplication extends Application<DdVerifyMigrationConfiguration> {
 
