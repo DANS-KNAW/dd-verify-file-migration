@@ -24,7 +24,7 @@ import java.util.Objects;
 
 @Entity
 @IdClass(ActualFileKey.class)
-@Table(name = "actual")
+@Table(name = "actual_files")
 public class ActualFile {
   // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 

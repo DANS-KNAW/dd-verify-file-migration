@@ -24,7 +24,7 @@ import java.util.Objects;
 
 @Entity
 @IdClass(ExpectedFileKey.class)
-@Table(name = "expected")
+@Table(name = "expected_files")
 public class ExpectedFile {
     // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 
