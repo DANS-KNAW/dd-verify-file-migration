@@ -16,7 +16,7 @@
 package nl.knaw.dans.migration.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
-import nl.knaw.dans.migration.core.tables.ExpectedFile;
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class ExpectedDatasetDAO extends AbstractDAO<ExpectedDatasetDAO> {
     super(sessionFactory);
   }
 
-  public void create(ExpectedFile expected) {
+  public void create(ExpectedDataset expected) {
     log.trace(expected.toString());
     currentSession().save(expected);
   }

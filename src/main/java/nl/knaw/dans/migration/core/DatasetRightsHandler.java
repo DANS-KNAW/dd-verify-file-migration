@@ -44,7 +44,7 @@ public class DatasetRightsHandler extends DefaultHandler {
   public void endElement(String uri, String localName, String qName) {
 
     if ("accessRights".equalsIgnoreCase(localName)) {
-      defaultFileRights.setFileRights(DatasetRights.valueOf(chars.toString()));
+      defaultFileRights.setFileRights(AccessCategory.valueOf(chars.toString()));
     }
     else if ("available".equalsIgnoreCase(localName)) {
       defaultFileRights.setEmbargoDate(chars.toString());
@@ -52,7 +52,7 @@ public class DatasetRightsHandler extends DefaultHandler {
   }
 
   @Override
-  public void characters(char[] ch, int start, int length) throws SAXException {
+  public void characters(char[] ch, int start, int length) {
     chars.append(new String(ch, start, length));
   }
 

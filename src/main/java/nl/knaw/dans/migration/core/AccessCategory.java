@@ -18,18 +18,18 @@ package nl.knaw.dans.migration.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public enum DatasetRights {
+public enum AccessCategory {
 
     OPEN_ACCESS("ANONYMOUS"),
     OPEN_ACCESS_FOR_REGISTERED_USERS("KNOWN"),
     REQUEST_PERMISSION("RESTRICTED_REQUEST"),
     NO_ACCESS("NONE"),
     GROUP_ACCESS("RESTRICTED_REQUEST");
-    private static final Logger log = LoggerFactory.getLogger(DatasetRights.class);
+    private static final Logger log = LoggerFactory.getLogger(AccessCategory.class);
 
     private final String fileRights;
 
-    DatasetRights(String fileRights) {
+    AccessCategory(String fileRights) {
         this.fileRights = fileRights;
     }
 

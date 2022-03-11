@@ -15,8 +15,10 @@
  */
 package nl.knaw.dans.migration.core;
 
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.EasyFileDAO;
+import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import org.easymock.EasyMock;
 import org.hibernate.exception.ConstraintViolationException;
@@ -29,61 +31,68 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
   private static final String doi = "10.80270/test-nySe-x6f-kf66";
-  private static final String expectedSolr = "2022-03-08," + DatasetRights.NO_ACCESS;
+  private static final String expectedSolr = "2022-03-08," + AccessCategory.NO_ACCESS + ",somebody";
 
   private static class Loader extends EasyFileLoader {
 
     private final String expectedSolr;
-
-    public Loader(String expectedSolr, EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO) {
-      super(easyFileDAO, expectedDAO, solrBaseUri());
+    public Loader(String expectedSolr, EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO) {
+      super(easyFileDAO, expectedFileDAO, expectedDatasetDAO, solrBaseUri());
       this.expectedSolr = expectedSolr;
     }
 
     @Override
-    protected String rightsFromSolr(String datasetId) {
+    protected String solrInfo(String datasetId) {
       return expectedSolr;
     }
-  }
 
-  static URI solrBaseUri(){
-    try {
-      return new URI("http://does.not.exist.dans.knaw.nl:8080/solr/");
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
+    static URI solrBaseUri(){
+      try {
+        return new URI("http://does.not.exist.dans.knaw.nl:8080/solr/");
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+      }
+      return null;
     }
-    return null;
   }
 
   @Test
-  public void skipNoPayload() {
+  public void migrationFilesForSkippedPayload() {
 
     FedoraToBagCsv csv = mockCSV("OK no payload", "blabla");
+
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
     EasyFileDAO easyFileDAO = createMock(EasyFileDAO.class);
     for (ExpectedFile ef: expectedMigrationFiles("NONE"))
       expectSuccess(expectedFileDAO, ef);
 
-    replay(csv, expectedFileDAO, easyFileDAO);
-    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
-    verify(csv, expectedFileDAO, easyFileDAO);
+    ExpectedDataset expectedDataset = new ExpectedDataset();
+    expectedDataset.setDepositor("somebody");
+    expectedDataset.setDoi("10.80270/test-nySe-x6f-kf66");
+    expectedDataset.setAccessCategory(AccessCategory.NO_ACCESS);
+    ExpectedDatasetDAO expectedDatasetDAO = createMock(ExpectedDatasetDAO.class);
+    expectSuccess(expectedDatasetDAO, expectedDataset);
+
+    replay(csv, expectedFileDAO, easyFileDAO, expectedDatasetDAO);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO, expectedDatasetDAO).loadFromCsv(csv);
+    verify(csv, expectedFileDAO, easyFileDAO, expectedDatasetDAO);
   }
 
   @Test
   public void skipFailed() {
 
     FedoraToBagCsv csv = mockCSV("Failed for some reason", "blabla");
-
-    ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
-    EasyFileDAO easyFileDAO = createMock(EasyFileDAO.class);
-    replay(csv, expectedFileDAO, easyFileDAO);
-    new Loader("", null, null).loadFromCsv(csv);
-    verify(csv, expectedFileDAO, easyFileDAO);
+    replay(csv);
+    new Loader(null, null, null, null).loadFromCsv(csv);
+    verify(csv);
   }
 
   @Test
@@ -96,7 +105,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -110,7 +119,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\"", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader("\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\",somebody", easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -124,7 +133,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\"", easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader("2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\",somebody", easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -144,7 +153,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -164,7 +173,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -182,8 +191,13 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader(expectedSolr, easyFileDAO, expectedFileDAO).loadFromCsv(csv);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
+  }
+
+  private void expectSuccess(ExpectedDatasetDAO expectedDao, ExpectedDataset expected) {
+    expectedDao.create(expected);
+    EasyMock.expectLastCall().once();
   }
 
   private void expectSuccess(ExpectedFileDAO expectedFileDAO, ExpectedFile ef) {

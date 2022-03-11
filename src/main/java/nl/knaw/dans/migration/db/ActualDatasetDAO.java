@@ -16,7 +16,7 @@
 package nl.knaw.dans.migration.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
-import nl.knaw.dans.migration.core.tables.ActualFile;
+import nl.knaw.dans.migration.core.tables.ActualDataset;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class ActualDatasetDAO extends AbstractDAO<ActualDatasetDAO> {
     super(sessionFactory);
   }
 
-  public void create(ActualFile actual) {
+  public void create(ActualDataset actual) {
     log.trace(actual.toString());
     currentSession().save(actual);
   }

@@ -16,8 +16,10 @@
 package nl.knaw.dans.migration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.EasyFileDAO;
+import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 
 import java.net.URI;
@@ -25,8 +27,8 @@ import java.util.List;
 
 public class EasyFileLoaderImpl extends EasyFileLoader {
 
-    public EasyFileLoaderImpl(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedDAO, URI solrBaseUri) {
-        super(easyFileDAO, expectedDAO, solrBaseUri);
+    public EasyFileLoaderImpl(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI solrBaseUri) {
+        super(easyFileDAO, expectedFileDAO, expectedDatasetDAO, solrBaseUri);
     }
 
   @UnitOfWork("easyBundle")
@@ -35,8 +37,13 @@ public class EasyFileLoaderImpl extends EasyFileLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void saveExpected(ExpectedFile expected) {
-    super.saveExpected(expected);
+  public void saveExpectedFile(ExpectedFile expected) {
+    super.saveExpectedFile(expected);
+  }
+
+  @UnitOfWork("hibernate")
+  public void saveExpectedDataset(ExpectedDataset expected) {
+    super.saveExpectedDataset(expected);
   }
 
 }

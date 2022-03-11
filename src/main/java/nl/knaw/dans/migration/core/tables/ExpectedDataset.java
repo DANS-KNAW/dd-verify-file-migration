@@ -15,11 +15,8 @@
  */
 package nl.knaw.dans.migration.core.tables;
 
-import nl.knaw.dans.migration.core.EasyFile;
+import nl.knaw.dans.migration.core.AccessCategory;
 import nl.knaw.dans.migration.core.FileRights;
-import nl.knaw.dans.migration.core.ManifestCsv;
-import org.hsqldb.lib.StringUtil;
-import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
 import javax.persistence.*;
@@ -38,11 +35,8 @@ public class ExpectedDataset {
     @Column(length = 255)
     private String doi;
 
-    @Column(name = "accessible_to")
-    private String accessibleTo;
-
-    @Column(name = "visible_to")
-    private String visibleTo;
+    @Column(name="access_category")
+    private String accessCategory;
 
     @Nullable
     @Column(name="embargo_date")
@@ -50,4 +44,61 @@ public class ExpectedDataset {
 
     @Column(name = "depositor")
     private String depositor;
+
+    public String getDoi() {
+        return doi;
+    }
+
+    public void setDoi(String doi) {
+        this.doi = doi;
+    }
+
+    public String getAccessCategory() {
+        return accessCategory;
+    }
+
+    public void setAccessCategory(AccessCategory accessCategory) {
+        this.accessCategory = accessCategory.toString();
+    }
+
+    @Nullable
+    public String getEmbargoDate() {
+        return embargoDate;
+    }
+
+    public void setEmbargoDate(FileRights fileRights) {
+        // the logic for a date in the future is in the hands of fileRights
+        this.embargoDate = fileRights.getEmbargoDate();
+    }
+
+    public String getDepositor() {
+        return depositor;
+    }
+
+    public void setDepositor(String depositor) {
+        this.depositor = depositor;
+    }
+
+    @Override
+    public String toString() {
+        return "ExpectedDataset{" +
+                "doi='" + doi + '\'' +
+                ", accessCategory='" + accessCategory + '\'' +
+                ", embargoDate='" + embargoDate + '\'' +
+                ", depositor='" + depositor + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExpectedDataset that = (ExpectedDataset) o;
+        return Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(embargoDate, that.embargoDate) && Objects.equals(depositor, that.depositor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(doi, accessCategory, embargoDate, depositor);
+    }
 }

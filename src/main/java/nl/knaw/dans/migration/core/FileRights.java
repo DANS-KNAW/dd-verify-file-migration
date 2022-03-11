@@ -59,10 +59,10 @@ public class FileRights implements Serializable {
 
   public FileRights() {}
 
-  public void setFileRights(DatasetRights rights) {
+  public void setFileRights(AccessCategory rights) {
     String fileRights = rights.getFileRights();
     setAccessibleTo(fileRights);
-    setVisibleTo(DatasetRights.OPEN_ACCESS.getFileRights());
+    setVisibleTo(AccessCategory.OPEN_ACCESS.getFileRights());
   }
 
   public FileRights applyDefaults(FileRights defaultRights){

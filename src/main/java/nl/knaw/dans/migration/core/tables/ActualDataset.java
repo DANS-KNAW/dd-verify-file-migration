@@ -15,9 +15,6 @@
  */
 package nl.knaw.dans.migration.core.tables;
 
-import org.hsqldb.lib.StringUtil;
-import org.joda.time.DateTime;
-
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.util.Objects;
@@ -43,8 +40,8 @@ public class ActualDataset {
   @Column(name="minor_version_nr")
   private int minorVersionNr;
 
-  @Column(name="accessible_to")
-  private String accessibleTo;
+  @Column(name="access_category")
+  private String accessCategory;
 
   @Nullable
   @Column(name="embargo_date")
@@ -53,4 +50,79 @@ public class ActualDataset {
   @Nullable
   @Column(name="depositor")
   private String depositor;
+
+  public String getDoi() {
+    return doi;
+  }
+
+  public void setDoi(String doi) {
+    this.doi = doi;
+  }
+
+  public int getMajorVersionNr() {
+    return majorVersionNr;
+  }
+
+  public void setMajorVersionNr(int majorVersionNr) {
+    this.majorVersionNr = majorVersionNr;
+  }
+
+  public int getMinorVersionNr() {
+    return minorVersionNr;
+  }
+
+  public void setMinorVersionNr(int minorVersionNr) {
+    this.minorVersionNr = minorVersionNr;
+  }
+
+  public String getAccessCategory() {
+    return accessCategory;
+  }
+
+  public void setAccessCategory(String accessCategory) {
+    this.accessCategory = accessCategory;
+  }
+
+  @Nullable
+  public String getEmbargoDate() {
+    return embargoDate;
+  }
+
+  public void setEmbargoDate(@Nullable String embargoDate) {
+    this.embargoDate = embargoDate;
+  }
+
+  @Nullable
+  public String getDepositor() {
+    return depositor;
+  }
+
+  public void setDepositor(@Nullable String depositor) {
+    this.depositor = depositor;
+  }
+
+  @Override
+  public String toString() {
+    return "ActualDataset{" +
+            "doi='" + doi + '\'' +
+            ", majorVersionNr=" + majorVersionNr +
+            ", minorVersionNr=" + minorVersionNr +
+            ", accessCategory='" + accessCategory + '\'' +
+            ", embargoDate='" + embargoDate + '\'' +
+            ", depositor='" + depositor + '\'' +
+            '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ActualDataset that = (ActualDataset) o;
+    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(embargoDate, that.embargoDate) && Objects.equals(depositor, that.depositor);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(doi, majorVersionNr, minorVersionNr, accessCategory, embargoDate, depositor);
+  }
 }
