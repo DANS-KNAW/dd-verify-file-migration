@@ -24,6 +24,7 @@ import nl.knaw.dans.lib.dataverse.ResultItemDeserializer;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.dataverse.DataverseItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
@@ -81,7 +82,7 @@ public class VaultLoader extends ExpectedLoader {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
       if (bagSeq.length == 0)
-        processBag(uuid.toString(), bagInfo.getDoi());
+        processBag(uuid.toString(), bagInfo);
       else {
         List<BagInfo> bagInfos= StreamSupport
             .stream(Arrays.stream(bagSeq).spliterator(), false)
@@ -90,7 +91,7 @@ public class VaultLoader extends ExpectedLoader {
         int count = 0;
         for (BagInfo info : bagInfos) {
           log.trace("{} from sequence {}", ++count, info);
-          processBag(info.getBaseId(), info.getDoi());
+          processBag(info.getBaseId(), info);
         }
       }
     }
@@ -99,11 +100,14 @@ public class VaultLoader extends ExpectedLoader {
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
-  private void processBag(String uuid, String doi) {
+  private void processBag(String uuid, BagInfo bagInfo) {
     Map<String, FileRights> filesXml = readFileMeta(uuid);
-    FileRights defaultFileRights = readDefaultRights(uuid);
-    readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml, defaultFileRights));
-    expectedMigrationFiles(doi, migrationFiles, defaultFileRights);
+    DatasetRights datasetRights = readDDM(uuid);
+    readManifest(uuid).forEach(m ->
+            createExpected(bagInfo.getDoi(), m, filesXml, datasetRights.defaultFileRights)
+    );
+    expectedMigrationFiles(bagInfo.getDoi(), migrationFiles, datasetRights.defaultFileRights);
+    saveExpectedDataset(datasetRights.expectedDataset(bagInfo.getDoi(),bagInfo.getEasyUserAccount()));
   }
 
   private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
@@ -141,7 +145,7 @@ public class VaultLoader extends ExpectedLoader {
     }
   }
 
-  private FileRights readDefaultRights(String uuid) {
+  private DatasetRights readDDM(String uuid) {
     URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid+"/")

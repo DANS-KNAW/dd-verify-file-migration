@@ -24,6 +24,9 @@ public class BagInfo {
   @JsonProperty("base-id")
   private String baseId;
 
+  @JsonProperty("EASY-User-Account")
+  private String easyUserAccount;
+
   private String created;
   private String doi;
   private String urn;
@@ -42,6 +45,14 @@ public class BagInfo {
 
   public void setBaseId(String baseId) {
     this.baseId = baseId;
+  }
+
+  public String getEasyUserAccount() {
+    return easyUserAccount;
+  }
+
+  public void setEasyUserAccount(String easyUserAccount) {
+    this.easyUserAccount = easyUserAccount;
   }
 
   public String getCreated() {
@@ -70,6 +81,13 @@ public class BagInfo {
 
   @Override
   public String toString() {
-    return "BagInfo{" + "bag_id='" + bagId + '\'' + ", base_id='" + baseId + '\'' + ", created='" + created + '\'' + ", doi='" + doi + '\'' + ", urn='" + urn + '\'' + '}';
+    return "BagInfo{" +
+            "bagId='" + bagId + '\'' +
+            ", baseId='" + baseId + '\'' +
+            ", easyUserAccout='" + easyUserAccount + '\'' +
+            ", created='" + created + '\'' +
+            ", doi='" + doi + '\'' +
+            ", urn='" + urn + '\'' +
+            '}';
   }
 }

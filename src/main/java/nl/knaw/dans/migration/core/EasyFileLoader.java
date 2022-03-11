@@ -55,17 +55,12 @@ public class EasyFileLoader extends ExpectedLoader {
       // process fedora files before anything else
       // thus we don't write anything when reading fails
       SolrFields solrFields = new SolrFields(solrInfo(csv.getDatasetId()));
-      FileRights defaultFileRights = solrFields.defaultFileRights();
+      DatasetRights datasetRights = solrFields.datasetRights();
       if (!csv.getComment().contains("no payload")) {
-        fedoraFiles(csv, defaultFileRights);
+        fedoraFiles(csv, datasetRights.defaultFileRights);
       }
-      expectedMigrationFiles(csv.getDoi(), migrationFiles, defaultFileRights);
-      ExpectedDataset expectedDataset = new ExpectedDataset();
-      expectedDataset.setDoi(csv.getDoi());
-      expectedDataset.setDepositor(solrFields.getCreator());
-      expectedDataset.setAccessCategory(solrFields.getAccesCategory());
-      expectedDataset.setEmbargoDate(defaultFileRights);
-      saveExpectedDataset(expectedDataset);
+      expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights);
+      saveExpectedDataset(datasetRights.expectedDataset(csv.getDoi(),solrFields.getCreator()));
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal
       throw new IllegalStateException(e.getMessage(), e);

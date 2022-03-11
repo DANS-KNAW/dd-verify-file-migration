@@ -66,7 +66,7 @@ public class FileRightsHandler extends DefaultHandler {
     return map;
   }
 
-  static public SAXParserFactory configureFactory() {
+  static private SAXParserFactory configureFactory() {
     SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
     saxParserFactory.setNamespaceAware(true);
     return saxParserFactory;

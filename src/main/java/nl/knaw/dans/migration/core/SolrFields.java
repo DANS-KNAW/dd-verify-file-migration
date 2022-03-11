@@ -72,14 +72,17 @@ public class SolrFields {
         return creator;
     }
 
-    public AccessCategory getAccesCategory() {
+    public AccessCategory getAccessCategory() {
         return accessCategory;
     }
 
-    public FileRights defaultFileRights() {
+    public DatasetRights datasetRights() {
         FileRights rights = new FileRights();
         rights.setFileRights(accessCategory);
         rights.setEmbargoDate(available);
-        return rights;
+        DatasetRights datasetRights = new DatasetRights();
+        datasetRights.setAccessCategory(accessCategory);
+        datasetRights.setDefaultFileRights(rights);
+        return datasetRights;
     }
 }
