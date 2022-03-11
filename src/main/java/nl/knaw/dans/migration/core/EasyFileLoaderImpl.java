@@ -16,6 +16,7 @@
 package nl.knaw.dans.migration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.EasyFileDAO;

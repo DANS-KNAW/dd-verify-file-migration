@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.migration.core.tables;
 
-import nl.knaw.dans.migration.core.EasyFile;
 import nl.knaw.dans.migration.core.FileRights;
 import nl.knaw.dans.migration.core.ManifestCsv;
 import org.checkerframework.checker.nullness.qual.NonNull;

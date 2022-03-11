@@ -16,7 +16,7 @@
 package nl.knaw.dans.migration.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
-import nl.knaw.dans.migration.core.EasyFile;
+import nl.knaw.dans.migration.core.tables.EasyFile;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.migration.core;
 
-import nl.knaw.dans.migration.core.tables.ExpectedDataset;
+import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;

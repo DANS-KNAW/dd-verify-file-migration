@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.migration.core;
+package nl.knaw.dans.migration.core.tables;
 
 import javax.persistence.*;
 import java.util.Objects;
