@@ -32,8 +32,10 @@ import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
 import nl.knaw.dans.migration.core.DataverseLoader;
 import nl.knaw.dans.migration.core.DataverseLoaderImpl;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
+import nl.knaw.dans.migration.db.ActualDatasetDAO;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 import org.apache.commons.csv.CSVRecord;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,11 +83,16 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
     protected void run(Environment environment, Namespace namespace, DdVerifyMigrationConfiguration configuration) throws Exception {
         // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
         DataverseClient client = configuration.getDataverse().build();
+        SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
         DataverseLoader proxy = new UnitOfWorkAwareProxyFactory(verificationBundle)
             .create(
                 DataverseLoaderImpl.class,
-                new Class[] { DataverseClient.class, ActualFileDAO.class },
-                new Object[] { client, new ActualFileDAO(verificationBundle.getSessionFactory()) }
+                new Class[] { DataverseClient.class, ActualFileDAO.class , ActualDatasetDAO.class},
+                new Object[] {
+                        client,
+                        new ActualFileDAO(verificationBundleSessionFactory),
+                        new ActualDatasetDAO(verificationBundleSessionFactory)
+                }
             );
         String doi = namespace.getString("doi");
         String file = namespace.getString("csv");

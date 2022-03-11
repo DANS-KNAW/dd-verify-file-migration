@@ -23,6 +23,7 @@ public class DatasetRights {
     }
 
     public ExpectedDataset expectedDataset(String doi, String depositor) {
+        // TODO apply account-substitutes.csv to depositor
         ExpectedDataset expectedDataset = new ExpectedDataset();
         expectedDataset.setDoi(doi);
         expectedDataset.setDepositor(depositor);

@@ -18,10 +18,13 @@ package nl.knaw.dans.migration.core;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
+import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.Embargo;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
+import nl.knaw.dans.migration.core.tables.ActualDataset;
 import nl.knaw.dans.migration.core.tables.ActualFile;
+import nl.knaw.dans.migration.db.ActualDatasetDAO;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 import org.hsqldb.lib.StringUtil;
 import org.slf4j.Logger;
@@ -34,15 +37,22 @@ public class DataverseLoader {
 
     private final ActualFileDAO actualFileDAO;
     private final DataverseClient client;
+    private ActualDatasetDAO actualDatasetDAO;
 
-    public DataverseLoader(DataverseClient client, ActualFileDAO actualFileDAO) {
+    public DataverseLoader(DataverseClient client, ActualFileDAO actualFileDAO, ActualDatasetDAO actualDatasetDAO) {
         this.actualFileDAO = actualFileDAO;
         this.client = client;
+        this.actualDatasetDAO = actualDatasetDAO;
     }
 
-    public void saveActual(ActualFile actual) {
+    public void saveActualFile(ActualFile actual) {
         log.debug(actual.toString());
         actualFileDAO.create(actual);
+    }
+
+    public void saveActualDataset(ActualDataset actual) {
+        log.debug(actual.toString());
+        actualDatasetDAO.create(actual);
     }
 
     public void loadFromDataset(String doi) {
@@ -67,10 +77,19 @@ public class DataverseLoader {
         for (DatasetVersion v : versions) {
             int fileCount = 0;
             for (FileMeta f : v.getFiles()) {
-                saveActual(toActual(f, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.isFileAccessRequest()));
+                saveActualFile(toActual(f, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.isFileAccessRequest()));
                 ++fileCount;
             }
             log.info("Stored {} actual files for DOI {}, Version {}.{} State {}", fileCount, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
+            List<MetadataField> citation = v.getMetadataBlocks().get("citation").getFields();
+            MetadataField depositor = citation.stream().filter(f -> "depositor".equals(f.getTypeName())).findFirst().orElse(null);
+            ActualDataset actualDataset = new ActualDataset();
+            actualDataset.setMajorVersionNr(v.getVersionNumber());
+            actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
+            actualDataset.setDoi(doi);
+            actualDataset.setDepositor(depositor.toString());// TODO how to cast and get the value ???
+            actualDataset.setAccessCategory(null);
+            saveActualDataset(actualDataset);
         }
     }
 

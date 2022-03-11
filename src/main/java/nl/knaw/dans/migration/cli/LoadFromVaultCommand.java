@@ -26,8 +26,10 @@ import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
 import nl.knaw.dans.migration.core.VaultLoader;
 import nl.knaw.dans.migration.core.VaultLoaderImpl;
+import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import org.apache.commons.io.FileUtils;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,7 @@ import java.util.UUID;
 public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVerifyMigrationConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(LoadFromVaultCommand.class);
-    private final HibernateBundle<DdVerifyMigrationConfiguration> expectedBundle;
+    private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle;
 
     /**
      * Creates a new environment command.
@@ -51,7 +53,7 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         HibernateBundle<DdVerifyMigrationConfiguration> expectedBundle
     ) {
         super(application, "load-from-vault", "Load expected table with info from manifest-sha1.txt of bags in the vault");
-        this.expectedBundle = expectedBundle;
+        this.verificationBundle = expectedBundle;
     }
 
     @Override
@@ -76,12 +78,16 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
     protected void run(Environment environment, Namespace namespace, DdVerifyMigrationConfiguration configuration) throws Exception {
         log.info(namespace.getAttrs().toString());
         // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
-        ExpectedFileDAO expectedDAO = new ExpectedFileDAO(expectedBundle.getSessionFactory());
-        VaultLoader proxy = new UnitOfWorkAwareProxyFactory(expectedBundle)
+        SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
+        VaultLoader proxy = new UnitOfWorkAwareProxyFactory(verificationBundle)
             .create(
                 VaultLoaderImpl.class,
-                new Class[] { ExpectedFileDAO.class, URI.class, URI.class },
-                new Object[] { expectedDAO, configuration.getBagStoreBaseUri(), configuration.getBagIndexBaseUri() }
+                new Class[] { ExpectedFileDAO.class, ExpectedDatasetDAO.class , URI.class, URI.class },
+                new Object[] {
+                        new ExpectedFileDAO(verificationBundleSessionFactory),
+                        new ExpectedDatasetDAO(verificationBundleSessionFactory),
+                        configuration.getBagStoreBaseUri(), configuration.getBagIndexBaseUri()
+                }
             );
         String uuid = namespace.getString("uuid");
         String file = namespace.getString("uuids");

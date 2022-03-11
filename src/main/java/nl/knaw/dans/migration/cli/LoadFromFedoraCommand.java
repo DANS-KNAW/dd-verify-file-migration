@@ -28,8 +28,10 @@ import nl.knaw.dans.migration.core.EasyFileLoader;
 import nl.knaw.dans.migration.core.EasyFileLoaderImpl;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
 import nl.knaw.dans.migration.db.EasyFileDAO;
+import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import org.apache.commons.csv.CSVRecord;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +43,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
 
     private static final Logger log = LoggerFactory.getLogger(LoadFromFedoraCommand.class);
     private final HibernateBundle<DdVerifyMigrationConfiguration> easyBundle;
-    private final HibernateBundle<DdVerifyMigrationConfiguration> expectedBundle;
+    private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle;
 
     /**
      * Creates a new environment command.
@@ -55,7 +57,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
     ) {
         super(application, "load-from-fedora", "Load expected table with info from easy_files in fs-rdb and transformation rules", true);
         this.easyBundle = easyBundle;
-        this.expectedBundle = expectedBundle;
+        this.verificationBundle = expectedBundle;
     }
 
     @Override
@@ -87,13 +89,17 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyMigrationConfiguration configuration) throws Exception {
         // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
-        EasyFileDAO easyFileDAO = new EasyFileDAO(easyBundle.getSessionFactory());
-        ExpectedFileDAO expectedDAO = new ExpectedFileDAO(expectedBundle.getSessionFactory());
-        EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, expectedBundle)
+        SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
+        EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, verificationBundle)
             .create(
                 EasyFileLoaderImpl.class,
                 new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, URI.class},
-                new Object[] { easyFileDAO, expectedDAO, configuration.getSolrBaseUri()}
+                new Object[] {
+                        new EasyFileDAO(easyBundle.getSessionFactory()),
+                        new ExpectedFileDAO(verificationBundleSessionFactory),
+                        new ExpectedDatasetDAO(verificationBundleSessionFactory),
+                        configuration.getSolrBaseUri()
+                }
             );
         for (File file : namespace.<File> getList("csv")) {
             log.info(file.toString());

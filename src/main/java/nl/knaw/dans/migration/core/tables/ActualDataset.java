@@ -44,10 +44,6 @@ public class ActualDataset {
   private String accessCategory;
 
   @Nullable
-  @Column(name="embargo_date")
-  private String embargoDate;
-
-  @Nullable
   @Column(name="depositor")
   private String depositor;
 
@@ -84,15 +80,6 @@ public class ActualDataset {
   }
 
   @Nullable
-  public String getEmbargoDate() {
-    return embargoDate;
-  }
-
-  public void setEmbargoDate(@Nullable String embargoDate) {
-    this.embargoDate = embargoDate;
-  }
-
-  @Nullable
   public String getDepositor() {
     return depositor;
   }
@@ -108,7 +95,6 @@ public class ActualDataset {
             ", majorVersionNr=" + majorVersionNr +
             ", minorVersionNr=" + minorVersionNr +
             ", accessCategory='" + accessCategory + '\'' +
-            ", embargoDate='" + embargoDate + '\'' +
             ", depositor='" + depositor + '\'' +
             '}';
   }
@@ -118,11 +104,11 @@ public class ActualDataset {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ActualDataset that = (ActualDataset) o;
-    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(embargoDate, that.embargoDate) && Objects.equals(depositor, that.depositor);
+    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(depositor, that.depositor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, majorVersionNr, minorVersionNr, accessCategory, embargoDate, depositor);
+    return Objects.hash(doi, majorVersionNr, minorVersionNr, accessCategory, depositor);
   }
 }
