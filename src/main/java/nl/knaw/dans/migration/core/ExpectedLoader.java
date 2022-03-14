@@ -37,7 +37,7 @@ public class ExpectedLoader {
   public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, File configDir) {
     this.expectedFileDAO = expectedFileDAO;
     this.expectedDatasetDAO = expectedDatasetDAO;
-    this.accountSubStitues = AccountSubstitutes.load(configDir);
+    this.accountSubStitues = Accounts.load(configDir);
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights) {

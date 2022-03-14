@@ -29,17 +29,17 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.csv.CSVFormat.RFC4180;
 
-public class AccountSubstitutes {
-    private static final String removedAccount = "removed-account";
-    private static final String chosenAccount = "chosen-account";
-    private static final CSVFormat format = RFC4180.withHeader(removedAccount, chosenAccount)
+public class Accounts {
+    private static final String id = "UID";
+    private static final String email = "email";
+    private static final CSVFormat format = RFC4180.withHeader(id, email)
             .withDelimiter(',')
             .withFirstRecordAsHeader()
             .withIgnoreSurroundingSpaces()
             .withRecordSeparator(System.lineSeparator());
 
     static public Map<String, String> load(File configDir) {
-        File csvFile = new File(configDir + "/account-substitutes.csv");
+        File csvFile = new File(configDir + "/easy-users.csv");
         if (!csvFile.exists() || 0 == csvFile.length()) {
             throw new IllegalStateException("No (content in) " + csvFile);
         }
@@ -51,7 +51,7 @@ public class AccountSubstitutes {
         }
         HashMap<String, String> accountSubstitutes = new HashMap<>();
         records.forEach(csvRecord -> accountSubstitutes.put(
-                csvRecord.get(removedAccount), csvRecord.get(chosenAccount))
+                csvRecord.get(id), csvRecord.get(email))
         );
         return accountSubstitutes;
     }
