@@ -55,7 +55,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         HibernateBundle<DdVerifyMigrationConfiguration> easyBundle,
         HibernateBundle<DdVerifyMigrationConfiguration> expectedBundle
     ) {
-        super(application, "load-from-fedora", "Load expected table with info from easy_files in fs-rdb and transformation rules", true);
+        super(application, "load-from-fedora", "Load expected tables with info from easy_files in fs-rdb and transformation rules", true);
         this.easyBundle = easyBundle;
         this.verificationBundle = expectedBundle;
     }
@@ -93,12 +93,13 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, verificationBundle)
             .create(
                 EasyFileLoaderImpl.class,
-                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, URI.class},
+                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, URI.class, File.class},
                 new Object[] {
                         new EasyFileDAO(easyBundle.getSessionFactory()),
                         new ExpectedFileDAO(verificationBundleSessionFactory),
                         new ExpectedDatasetDAO(verificationBundleSessionFactory),
-                        configuration.getSolrBaseUri()
+                        configuration.getSolrBaseUri(),
+                        new File(namespace.getString("file")).getParentFile(),
                 }
             );
         for (File file : namespace.<File> getList("csv")) {

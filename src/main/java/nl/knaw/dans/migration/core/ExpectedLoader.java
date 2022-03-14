@@ -24,16 +24,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.PersistenceException;
+import java.io.File;
+import java.util.Map;
 
 public class ExpectedLoader {
   private static final Logger log = LoggerFactory.getLogger(ExpectedLoader.class);
 
   private final ExpectedFileDAO expectedFileDAO;
   private ExpectedDatasetDAO expectedDatasetDAO;
+  private final Map<String, String> accountSubStitues;
 
-  public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO) {
+  public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, File configDir) {
     this.expectedFileDAO = expectedFileDAO;
     this.expectedDatasetDAO = expectedDatasetDAO;
+    this.accountSubStitues = AccountSubstitutes.load(configDir);
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights) {
@@ -80,6 +84,8 @@ public class ExpectedLoader {
   }
 
   public void saveExpectedDataset(ExpectedDataset expected) {
+      String depositor = expected.getDepositor();
+      expected.setDepositor(accountSubStitues.getOrDefault(depositor, depositor));
       log.trace(expected.toString());
       expectedDatasetDAO.create(expected);
   }

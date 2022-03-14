@@ -26,6 +26,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.PersistenceException;
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class EasyFileLoaderTest {
 
     private final String expectedSolr;
     public Loader(String expectedSolr, EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO) {
-      super(easyFileDAO, expectedFileDAO, expectedDatasetDAO, solrBaseUri());
+      super(easyFileDAO, expectedFileDAO, expectedDatasetDAO, solrBaseUri(), new File("src/test/resources/debug-etc"));
       this.expectedSolr = expectedSolr;
     }
 

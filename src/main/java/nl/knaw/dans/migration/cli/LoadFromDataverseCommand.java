@@ -60,7 +60,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         Application<DdVerifyMigrationConfiguration> application,
         HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle
     ) {
-        super(application, "load-from-dataverse", "Load actual table with file info from dataverse");
+        super(application, "load-from-dataverse", "Load actual tables with info from dataverse");
         this.verificationBundle = verificationBundle;
     }
 

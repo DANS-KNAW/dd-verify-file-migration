@@ -52,7 +52,7 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         Application<DdVerifyMigrationConfiguration> application,
         HibernateBundle<DdVerifyMigrationConfiguration> expectedBundle
     ) {
-        super(application, "load-from-vault", "Load expected table with info from manifest-sha1.txt of bags in the vault");
+        super(application, "load-from-vault", "Load expected tables with info from manifest-sha1.txt of bags in the vault");
         this.verificationBundle = expectedBundle;
     }
 
@@ -82,11 +82,13 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         VaultLoader proxy = new UnitOfWorkAwareProxyFactory(verificationBundle)
             .create(
                 VaultLoaderImpl.class,
-                new Class[] { ExpectedFileDAO.class, ExpectedDatasetDAO.class , URI.class, URI.class },
+                new Class[] { ExpectedFileDAO.class, ExpectedDatasetDAO.class , URI.class, URI.class, File.class },
                 new Object[] {
                         new ExpectedFileDAO(verificationBundleSessionFactory),
                         new ExpectedDatasetDAO(verificationBundleSessionFactory),
-                        configuration.getBagStoreBaseUri(), configuration.getBagIndexBaseUri()
+                        configuration.getBagStoreBaseUri(),
+                        configuration.getBagIndexBaseUri(),
+                        new File(namespace.getString("file")).getParentFile(),
                 }
             );
         String uuid = namespace.getString("uuid");

@@ -21,12 +21,13 @@ import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 
+import java.io.File;
 import java.net.URI;
 
 public class VaultLoaderImpl extends VaultLoader {
 
-  public VaultLoaderImpl(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
-    super(expectedFileDAO, expectedDatasetDAO, bagStoreBaseUri, bagIndexBaseUri);
+  public VaultLoaderImpl(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
+    super(expectedFileDAO, expectedDatasetDAO, bagStoreBaseUri, bagIndexBaseUri, configDir);
   }
 
   @UnitOfWork("hibernate")
