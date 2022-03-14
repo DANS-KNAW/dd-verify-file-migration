@@ -31,7 +31,7 @@ public class ExpectedLoader {
   private static final Logger log = LoggerFactory.getLogger(ExpectedLoader.class);
 
   private final ExpectedFileDAO expectedFileDAO;
-  private ExpectedDatasetDAO expectedDatasetDAO;
+  private final ExpectedDatasetDAO expectedDatasetDAO;
   private final Map<String, String> accountSubStitues;
 
   public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, File configDir) {

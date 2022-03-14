@@ -23,7 +23,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@IdClass(ExpectedFileKey.class)
+@IdClass(ExpectedDatasetKey.class)
 @Table(name = "expected_datasets")
 public class ExpectedDataset {
     // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation

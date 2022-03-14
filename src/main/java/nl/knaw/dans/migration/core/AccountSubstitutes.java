@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.migration.core;
 
-import net.sourceforge.argparse4j.inf.Namespace;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
