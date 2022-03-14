@@ -38,10 +38,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -107,7 +104,7 @@ public class VaultLoader extends ExpectedLoader {
             createExpected(bagInfo.getDoi(), m, filesXml, datasetRights.defaultFileRights)
     );
     expectedMigrationFiles(bagInfo.getDoi(), migrationFiles, datasetRights.defaultFileRights);
-    saveExpectedDataset(datasetRights.expectedDataset(bagInfo.getDoi(),bagInfo.getEasyUserAccount()));
+    saveExpectedDataset(datasetRights.expectedDataset(bagInfo.getDoi(),readDepositor(uuid)));
   }
 
   private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
@@ -154,6 +151,26 @@ public class VaultLoader extends ExpectedLoader {
     try {
       String xmlString = executeReq(new HttpGet(uri), true);
       return DatasetRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private String readDepositor(String uuid) {
+    URI uri = bagStoreBaseUri
+        .resolve("bags/")
+        .resolve(uuid+"/")
+        .resolve("bag-info.txt");
+    try {
+      Optional<String> account = Arrays.stream(executeReq(new HttpGet(uri), true)
+              .split(System.lineSeparator()))
+              .filter(l -> l.startsWith("EASY-User-Account"))
+              .map(l -> l.replaceAll(".*:","").trim())
+              .findFirst();
+      if (!account.isPresent())
+        throw new IllegalStateException("No EASY-User-Account in bag-info.txt of "+ uuid);
+      return account.get();
     }
     catch (IOException e) {
       throw new RuntimeException(e);
