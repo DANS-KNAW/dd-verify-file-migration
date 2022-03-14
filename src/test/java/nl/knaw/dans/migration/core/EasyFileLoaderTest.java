@@ -141,8 +141,8 @@ public class EasyFileLoaderTest {
 
     FedoraToBagCsv csv = mockCSV("OK", "blabla");
     EasyFileDAO easyFileDAO = mockEasyFileDAO(
-        new EasyFile("easy-file:2","easy-folder:1",datasetId,"some_/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123"),
-        new EasyFile("easy-file:1","easy-folder:1",datasetId,"some?/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123")
+        mockEasyFile("easy-file:2", "some_/file.txt","file.txt", "text"),
+        mockEasyFile("easy-file:1", "some?/file.txt","file.txt", "text")
     );
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
     expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:2","some_/file.txt",false,false,false, "ANONYMOUS", "ANONYMOUS"));
@@ -161,8 +161,8 @@ public class EasyFileLoaderTest {
 
     FedoraToBagCsv csv = mockCSV("OK", "original_versioned");
     EasyFileDAO easyFileDAO = mockEasyFileDAO(
-        new EasyFile("easy-file:2","easy-folder:1",datasetId,"some_/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123"),
-        new EasyFile("easy-file:1","easy-folder:1",datasetId,"original/some?/file.txt","file.txt",10,"text","DEPOSITOR","ANONYMOUS","ANONYMOUS","123")
+        mockEasyFile("easy-file:2", "some_/file.txt","file.txt", "text"),
+        mockEasyFile("easy-file:1", "original/some?/file.txt","file.txt", "text")
     );
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
     expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_/file.txt",0,false,"123","easy-file:2","some_/file.txt",false,false,false, "ANONYMOUS", "ANONYMOUS"));
@@ -182,7 +182,7 @@ public class EasyFileLoaderTest {
 
     FedoraToBagCsv csv = mockCSV("OK", "blabla");
     EasyFileDAO easyFileDAO = mockEasyFileDAO(
-        new EasyFile("easy-file:1","easy-folder:1",datasetId,"some_thumbnails/image_small.png","image_small.png",10,"png","DEPOSITOR","ANONYMOUS","ANONYMOUS","123")
+        mockEasyFile("easy-file:1", "some_thumbnails/image_small.png","image_small.png", "png")
     );
     ExpectedFileDAO expectedFileDAO = createMock(ExpectedFileDAO.class);
     expectSuccess(expectedFileDAO, new ExpectedFile(doi,"some_thumbnails/image_small.png",0,false,"123","easy-file:1","some_thumbnails/image_small.png",false,true,false, "ANONYMOUS", "ANONYMOUS"));
@@ -239,5 +239,21 @@ public class EasyFileLoaderTest {
     EasyFileDAO mock = createMock(EasyFileDAO.class);
     expect(mock.findByDatasetId(datasetId)).andReturn(Arrays.asList(easyFiles)).once();
     return mock;
+  }
+
+  private EasyFile mockEasyFile(String pid, String path, String filename, String mimetype) {
+    EasyFile easyFile = new EasyFile();
+    easyFile.setPid(pid);
+    easyFile.setParentSid("easy-folder:1");
+    easyFile.setDatasetSid(EasyFileLoaderTest.datasetId);
+    easyFile.setPath(path);
+    easyFile.setFilename(filename);
+    easyFile.setSize(10);
+    easyFile.setMimetype(mimetype);
+    easyFile.setCreatorRole("DEPOSITOR");
+    easyFile.setVisibleTo("ANONYMOUS");
+    easyFile.setAccessibleTo("ANONYMOUS");
+    easyFile.setSha1Checksum("123");
+    return easyFile;
   }
 }

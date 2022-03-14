@@ -38,21 +38,6 @@ public class EasyFile {
     public EasyFile() {
     }
 
-    public EasyFile(String pid, String parentSid, String datasetSid, String path, String filename, long size, String mimetype, String creatorRole, String visibleTo, String accessibleTo,
-        String sha1checksum) {
-        this.pid = pid;
-        this.parentSid = parentSid;
-        this.datasetSid = datasetSid;
-        this.path = path;
-        this.filename = filename;
-        this.size = size;
-        this.mimetype = mimetype;
-        this.creatorRole = creatorRole;
-        this.visibleTo = visibleTo;
-        this.accessibleTo = accessibleTo;
-        this.sha1Checksum = sha1checksum;
-    }
-
     @Id
     @Column(nullable = false)
     private String pid = "";
