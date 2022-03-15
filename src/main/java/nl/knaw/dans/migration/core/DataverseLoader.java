@@ -75,10 +75,11 @@ public class DataverseLoader {
                 log.error("Could not retrieve file metas for DOI: {}", doi, e);
             return;
         }
+        String shortDoi = doi.replace("doi:", "");
         for (DatasetVersion v : versions) {
             int fileCount = 0;
             for (FileMeta f : v.getFiles()) {
-                saveActualFile(toActual(f, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.isFileAccessRequest()));
+                saveActualFile(toActual(f, shortDoi, v.getVersionNumber(), v.getVersionMinorNumber(), v.isFileAccessRequest()));
                 ++fileCount;
             }
             log.info("Stored {} actual files for DOI {}, Version {}.{} State {}", fileCount, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
@@ -87,7 +88,7 @@ public class DataverseLoader {
             ActualDataset actualDataset = new ActualDataset();
             actualDataset.setMajorVersionNr(v.getVersionNumber());
             actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
-            actualDataset.setDoi(doi);
+            actualDataset.setDoi(shortDoi);
             actualDataset.setDepositor(depositor.getValue());
             actualDataset.setAccessCategory(null);
             saveActualDataset(actualDataset);
