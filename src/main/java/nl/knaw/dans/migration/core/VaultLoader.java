@@ -25,6 +25,7 @@ import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.dataverse.DataverseItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
+import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -32,14 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -55,8 +54,8 @@ public class VaultLoader extends ExpectedLoader {
   private final URI bagSeqUri;
   private final ObjectMapper mapper;
 
-  public VaultLoader(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
-    super(expectedDAO);
+  public VaultLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
+    super(expectedFileDAO, expectedDatasetDAO, configDir);
     bagSeqUri = bagIndexBaseUri.resolve("bag-sequence");
     this.bagStoreBaseUri = bagStoreBaseUri;
     this.bagIndexBaseUri = bagIndexBaseUri;
@@ -80,7 +79,7 @@ public class VaultLoader extends ExpectedLoader {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
       if (bagSeq.length == 0)
-        processBag(uuid.toString(), bagInfo.getDoi());
+        processBag(uuid.toString(), bagInfo);
       else {
         List<BagInfo> bagInfos= StreamSupport
             .stream(Arrays.stream(bagSeq).spliterator(), false)
@@ -89,7 +88,7 @@ public class VaultLoader extends ExpectedLoader {
         int count = 0;
         for (BagInfo info : bagInfos) {
           log.trace("{} from sequence {}", ++count, info);
-          processBag(info.getBaseId(), info.getDoi());
+          processBag(info.getBaseId(), info);
         }
       }
     }
@@ -98,11 +97,14 @@ public class VaultLoader extends ExpectedLoader {
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
-  private void processBag(String uuid, String doi) {
+  private void processBag(String uuid, BagInfo bagInfo) {
     Map<String, FileRights> filesXml = readFileMeta(uuid);
-    FileRights defaultFileRights = readDefaultRights(uuid);
-    readManifest(uuid).forEach(m -> createExpected(doi, m, filesXml, defaultFileRights));
-    expectedMigrationFiles(doi, migrationFiles, defaultFileRights);
+    DatasetRights datasetRights = readDDM(uuid);
+    readManifest(uuid).forEach(m ->
+            createExpected(bagInfo.getDoi(), m, filesXml, datasetRights.defaultFileRights)
+    );
+    expectedMigrationFiles(bagInfo.getDoi(), migrationFiles, datasetRights.defaultFileRights);
+    saveExpectedDataset(datasetRights.expectedDataset(bagInfo.getDoi(),readDepositor(uuid)));
   }
 
   private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
@@ -140,7 +142,7 @@ public class VaultLoader extends ExpectedLoader {
     }
   }
 
-  private FileRights readDefaultRights(String uuid) {
+  private DatasetRights readDDM(String uuid) {
     URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid+"/")
@@ -149,6 +151,26 @@ public class VaultLoader extends ExpectedLoader {
     try {
       String xmlString = executeReq(new HttpGet(uri), true);
       return DatasetRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private String readDepositor(String uuid) {
+    URI uri = bagStoreBaseUri
+        .resolve("bags/")
+        .resolve(uuid+"/")
+        .resolve("bag-info.txt");
+    try {
+      Optional<String> account = Arrays.stream(executeReq(new HttpGet(uri), true)
+              .split(System.lineSeparator()))
+              .filter(l -> l.startsWith("EASY-User-Account"))
+              .map(l -> l.replaceAll(".*:","").trim())
+              .findFirst();
+      if (!account.isPresent())
+        throw new IllegalStateException("No EASY-User-Account in bag-info.txt of "+ uuid);
+      return account.get();
     }
     catch (IOException e) {
       throw new RuntimeException(e);

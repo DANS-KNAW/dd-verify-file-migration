@@ -33,7 +33,13 @@ public class DatasetRightsHandler extends DefaultHandler {
 
   private static final SAXParserFactory parserFactory = configureFactory();
   private StringBuilder chars; // collected since the last startElement
-  private final FileRights defaultFileRights = new FileRights();
+  private final DatasetRights datasetRights = initDatasetRights();
+
+  private static DatasetRights initDatasetRights() {
+    DatasetRights datasetRights = new DatasetRights();
+    datasetRights.setDefaultFileRights(new FileRights());
+    return datasetRights;
+  }
 
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes) {
@@ -44,27 +50,29 @@ public class DatasetRightsHandler extends DefaultHandler {
   public void endElement(String uri, String localName, String qName) {
 
     if ("accessRights".equalsIgnoreCase(localName)) {
-      defaultFileRights.setFileRights(DatasetRights.valueOf(chars.toString()));
+      AccessCategory accessCategory = AccessCategory.valueOf(chars.toString());
+      datasetRights.setAccessCategory(accessCategory);
+      datasetRights.getDefaultFileRights().setFileRights(accessCategory);
     }
     else if ("available".equalsIgnoreCase(localName)) {
-      defaultFileRights.setEmbargoDate(chars.toString());
+      datasetRights.getDefaultFileRights().setEmbargoDate(chars.toString());
     }
   }
 
   @Override
-  public void characters(char[] ch, int start, int length) throws SAXException {
+  public void characters(char[] ch, int start, int length) {
     chars.append(new String(ch, start, length));
   }
 
-  private FileRights get() {
-    if (defaultFileRights.getAccessibleTo()==null) {
+  private DatasetRights get() {
+    if (datasetRights.getDefaultFileRights().getAccessibleTo()==null) {
       // note that embargoDate==null does not mean there was no date available
       throw new IllegalArgumentException("Invalid dataset.xml: no accessRights");
     }
-    return defaultFileRights;
+    return datasetRights;
   }
 
-  static public SAXParserFactory configureFactory() {
+  private static SAXParserFactory configureFactory() {
     SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
     saxParserFactory.setNamespaceAware(true);
     return saxParserFactory;
@@ -74,7 +82,7 @@ public class DatasetRightsHandler extends DefaultHandler {
    * @return key: filepath attribute of file elements
    * value: content of the elements: accessibleToRights and visibleToRights
    */
-  static public FileRights parseRights(InputStream xml) {
+  static public DatasetRights parseRights(InputStream xml) {
     DatasetRightsHandler handler = new DatasetRightsHandler();
     try {
       parserFactory.newSAXParser().parse(xml, handler);

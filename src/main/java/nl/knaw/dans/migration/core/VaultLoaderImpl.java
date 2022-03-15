@@ -16,19 +16,27 @@
 package nl.knaw.dans.migration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
+import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 
+import java.io.File;
 import java.net.URI;
 
 public class VaultLoaderImpl extends VaultLoader {
 
-  public VaultLoaderImpl(ExpectedFileDAO expectedDAO, URI bagStoreBaseUri, URI bagIndexBaseUri) {
-    super(expectedDAO, bagStoreBaseUri, bagIndexBaseUri);
+  public VaultLoaderImpl(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
+    super(expectedFileDAO, expectedDatasetDAO, bagStoreBaseUri, bagIndexBaseUri, configDir);
   }
 
   @UnitOfWork("hibernate")
-  public void saveExpected(ExpectedFile expected) {
-    super.saveExpected(expected);
+  public void saveExpectedFile(ExpectedFile expected) {
+    super.saveExpectedFile(expected);
+  }
+
+  @UnitOfWork("hibernate")
+  public void saveExpectedDataset(ExpectedDataset expected) {
+    super.saveExpectedDataset(expected);
   }
 }

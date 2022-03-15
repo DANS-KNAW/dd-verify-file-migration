@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.migration.core;
+package nl.knaw.dans.migration.core.tables;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -36,21 +36,6 @@ public class EasyFile {
     public static final String DATASET_ID = "datasetSid";
 
     public EasyFile() {
-    }
-
-    public EasyFile(String pid, String parentSid, String datasetSid, String path, String filename, long size, String mimetype, String creatorRole, String visibleTo, String accessibleTo,
-        String sha1checksum) {
-        this.pid = pid;
-        this.parentSid = parentSid;
-        this.datasetSid = datasetSid;
-        this.path = path;
-        this.filename = filename;
-        this.size = size;
-        this.mimetype = mimetype;
-        this.creatorRole = creatorRole;
-        this.visibleTo = visibleTo;
-        this.accessibleTo = accessibleTo;
-        this.sha1Checksum = sha1checksum;
     }
 
     @Id

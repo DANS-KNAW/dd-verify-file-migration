@@ -70,6 +70,12 @@ public class BagInfo {
 
   @Override
   public String toString() {
-    return "BagInfo{" + "bag_id='" + bagId + '\'' + ", base_id='" + baseId + '\'' + ", created='" + created + '\'' + ", doi='" + doi + '\'' + ", urn='" + urn + '\'' + '}';
+    return "BagInfo{" +
+            "bagId='" + bagId + '\'' +
+            ", baseId='" + baseId + '\'' +
+            ", created='" + created + '\'' +
+            ", doi='" + doi + '\'' +
+            ", urn='" + urn + '\'' +
+            '}';
   }
 }

@@ -26,9 +26,7 @@ import io.dropwizard.setup.Environment;
 import nl.knaw.dans.migration.cli.LoadFromDataverseCommand;
 import nl.knaw.dans.migration.cli.LoadFromFedoraCommand;
 import nl.knaw.dans.migration.cli.LoadFromVaultCommand;
-import nl.knaw.dans.migration.core.tables.ActualFile;
-import nl.knaw.dans.migration.core.EasyFile;
-import nl.knaw.dans.migration.core.tables.ExpectedFile;
+import nl.knaw.dans.migration.core.tables.*;
 
 public class DdVerifyMigrationApplication extends Application<DdVerifyMigrationConfiguration> {
 
@@ -47,7 +45,8 @@ public class DdVerifyMigrationApplication extends Application<DdVerifyMigrationC
         }
     };
 
-    private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle = new HibernateBundle<DdVerifyMigrationConfiguration>(ExpectedFile.class, ActualFile.class) {
+    private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle =
+            new HibernateBundle<DdVerifyMigrationConfiguration>(ExpectedFile.class, ActualFile.class, ExpectedDataset.class, ActualDataset.class) {
 
         @Override
         public DataSourceFactory getDataSourceFactory(DdVerifyMigrationConfiguration configuration) {

@@ -17,17 +17,24 @@ package nl.knaw.dans.migration.core;
 
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
+import nl.knaw.dans.migration.core.tables.ActualDataset;
 import nl.knaw.dans.migration.core.tables.ActualFile;
+import nl.knaw.dans.migration.db.ActualDatasetDAO;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 
 public class DataverseLoaderImpl extends DataverseLoader {
 
-  public DataverseLoaderImpl(DataverseClient client, ActualFileDAO actualFileDAO) {
-    super(client, actualFileDAO);
+  public DataverseLoaderImpl(DataverseClient client, ActualFileDAO actualFileDAO, ActualDatasetDAO actualDatasetDAO) {
+    super(client, actualFileDAO, actualDatasetDAO);
   }
 
   @UnitOfWork("hibernate")
-  public void saveActual(ActualFile actualFile) {
-    super.saveActual(actualFile);
+  public void saveActualFile(ActualFile actualFile) {
+    super.saveActualFile(actualFile);
+  }
+
+  @UnitOfWork("hibernate")
+  public void saveActualDataset(ActualDataset actualDataset) {
+    super.saveActualDataset(actualDataset);
   }
 }

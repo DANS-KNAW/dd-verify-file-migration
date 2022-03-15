@@ -15,21 +15,29 @@
  */
 package nl.knaw.dans.migration.core;
 
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
+import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.PersistenceException;
+import java.io.File;
+import java.util.Map;
 
 public class ExpectedLoader {
   private static final Logger log = LoggerFactory.getLogger(ExpectedLoader.class);
 
-  private final ExpectedFileDAO expectedDAO;
+  private final ExpectedFileDAO expectedFileDAO;
+  private final ExpectedDatasetDAO expectedDatasetDAO;
+  private final Map<String, String> accountSubStitues;
 
-  public ExpectedLoader(ExpectedFileDAO expectedDAO) {
-    this.expectedDAO = expectedDAO;
+  public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, File configDir) {
+    this.expectedFileDAO = expectedFileDAO;
+    this.expectedDatasetDAO = expectedDatasetDAO;
+    this.accountSubStitues = Accounts.load(configDir);
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights) {
@@ -45,16 +53,14 @@ public class ExpectedLoader {
       expectedFile.setRemovedOriginalDirectory(false);
       expectedFile.setRemovedDuplicateFileCount(0);
       expectedFile.setTransformedName(false);
-      expectedFile.setVisibleTo(datasetRights.getVisibleTo());
-      expectedFile.setAccessibleTo(datasetRights.getAccessibleTo());
-      expectedFile.setEmbargoDate(datasetRights.getEmbargoDate());
+      expectedFile.setDefaultRights(datasetRights);
       retriedSave(expectedFile);
     }
   }
 
   public void retriedSave(ExpectedFile expected) {
     try {
-      saveExpected(expected);
+      saveExpectedFile(expected);
     } catch(PersistenceException e){
       // logged as error by org.hibernate.engine.jdbc.spi.SqlExceptionHelper
       if (!(e.getCause() instanceof ConstraintViolationException))
@@ -72,8 +78,15 @@ public class ExpectedLoader {
     }
   }
 
-  public void saveExpected(ExpectedFile expected) {
+  public void saveExpectedFile(ExpectedFile expected) {
       log.trace(expected.toString());
-      expectedDAO.create(expected);
+      expectedFileDAO.create(expected);
+  }
+
+  public void saveExpectedDataset(ExpectedDataset expected) {
+      String depositor = expected.getDepositor();
+      expected.setDepositor(accountSubStitues.getOrDefault(depositor, depositor));
+      log.trace(expected.toString());
+      expectedDatasetDAO.create(expected);
   }
 }

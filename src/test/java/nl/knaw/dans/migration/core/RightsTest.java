@@ -18,17 +18,19 @@ package nl.knaw.dans.migration.core;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class FileRightsTest {
+public class RightsTest {
 
     @Test
     public void parseEmbargoedDdm() throws IOException {
         FileRights datasetRights = DatasetRightsHandler
-                .parseRights(new FileInputStream("src/test/resources/ddm/embargoed.xml"));
+                .parseRights(new FileInputStream("src/test/resources/ddm/embargoed.xml"))
+                .defaultFileRights;
         assertEquals("ANONYMOUS", datasetRights.getAccessibleTo());
         assertEquals("ANONYMOUS", datasetRights.getVisibleTo());
         assertEquals("2062-02-14", datasetRights.getEmbargoDate());
@@ -37,7 +39,8 @@ public class FileRightsTest {
     @Test
     public void parseQuotedEmptyEmbargoDdm() throws IOException {
         FileRights datasetRights = DatasetRightsHandler
-                .parseRights(new FileInputStream("src/test/resources/ddm/quoted-empty-embargo.xml"));
+                .parseRights(new FileInputStream("src/test/resources/ddm/quoted-empty-embargo.xml"))
+                .defaultFileRights;
         assertEquals("ANONYMOUS", datasetRights.getAccessibleTo());
         assertEquals("ANONYMOUS", datasetRights.getVisibleTo());
         assertNull(datasetRights.getEmbargoDate());
@@ -45,8 +48,10 @@ public class FileRightsTest {
 
     @Test
     public void parseDD_874() throws IOException {
+        // In fact, we are parsing an EMD not a DDM. Both have the required elements.
         FileRights datasetRights = DatasetRightsHandler
-                .parseRights(new FileInputStream("src/test/resources/ddm/DD-874.xml"));
+                .parseRights(new FileInputStream("src/test/resources/ddm/DD-874.xml"))
+                .defaultFileRights;
         assertEquals("ANONYMOUS", datasetRights.getAccessibleTo());
         assertEquals("ANONYMOUS", datasetRights.getVisibleTo());
         assertNull(datasetRights.getEmbargoDate());
@@ -55,7 +60,8 @@ public class FileRightsTest {
     @Test
     public void parseRestrictedDdm() throws IOException {
         FileRights datasetRights = DatasetRightsHandler
-                .parseRights(new FileInputStream("src/test/resources/ddm/restricted.xml"));
+                .parseRights(new FileInputStream("src/test/resources/ddm/restricted.xml"))
+                .defaultFileRights;
         assertEquals("RESTRICTED_REQUEST", datasetRights.getAccessibleTo());
         assertEquals("ANONYMOUS", datasetRights.getVisibleTo());
         assertNull(datasetRights.getEmbargoDate());
@@ -63,12 +69,7 @@ public class FileRightsTest {
 
     @Test
     public void applyEmbargoed() throws IOException {
-        FileRights fileRights = FileRightsHandler
-                .parseRights(new FileInputStream("src/test/resources/files.xml"))
-                .get("data/secret.txt")
-                .applyDefaults(DatasetRightsHandler
-                        .parseRights(new FileInputStream("src/test/resources/ddm/embargoed.xml"))
-                );
+        FileRights fileRights = parseRights("src/test/resources/ddm/embargoed.xml");
         assertEquals("NONE", fileRights.getAccessibleTo());
         assertEquals("NONE", fileRights.getVisibleTo());
         assertEquals("2062-02-14", fileRights.getEmbargoDate());
@@ -76,15 +77,20 @@ public class FileRightsTest {
 
     @Test
     public void applyRestricted() throws IOException {
-        FileRights fileRights = FileRightsHandler
-                .parseRights(new FileInputStream("src/test/resources/files.xml"))
-                .get("data/secret.txt")
-                .applyDefaults(DatasetRightsHandler
-                        .parseRights(new FileInputStream("src/test/resources/ddm/restricted.xml"))
-                );
+        FileRights fileRights = parseRights("src/test/resources/ddm/restricted.xml");
         // note the priority for individual file rights over dataset rights
         assertEquals("NONE", fileRights.getAccessibleTo());
         assertEquals("NONE", fileRights.getVisibleTo());
         assertNull(fileRights.getEmbargoDate());
+    }
+
+    private FileRights parseRights(String name) throws FileNotFoundException {
+        return FileRightsHandler
+                .parseRights(new FileInputStream("src/test/resources/files.xml"))
+                .get("data/secret.txt")
+                .applyDefaults(DatasetRightsHandler
+                        .parseRights(new FileInputStream(name))
+                        .defaultFileRights
+                );
     }
 }

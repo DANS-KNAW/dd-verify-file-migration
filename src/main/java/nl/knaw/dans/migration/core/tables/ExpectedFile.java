@@ -15,11 +15,10 @@
  */
 package nl.knaw.dans.migration.core.tables;
 
-import nl.knaw.dans.migration.core.EasyFile;
 import nl.knaw.dans.migration.core.FileRights;
 import nl.knaw.dans.migration.core.ManifestCsv;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hsqldb.lib.StringUtil;
-import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
 import javax.persistence.*;
@@ -259,9 +258,11 @@ public class ExpectedFile {
         return embargoDate;
     }
 
-    public void setEmbargoDate(@Nullable String dateAvailable) {
-        if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
-            this.embargoDate = dateAvailable;
+    public void setDefaultRights(@NonNull FileRights fileRights) {
+        accessibleTo = fileRights.getAccessibleTo();
+        visibleTo = fileRights.getVisibleTo();
+        // the logic for a date in the future is in the hands of fileRights
+        embargoDate = fileRights.getEmbargoDate();
     }
 
     public String getAccessibleTo() {
@@ -269,7 +270,9 @@ public class ExpectedFile {
     }
 
     public void setAccessibleTo(String accessibleTo) {
-        this.accessibleTo = accessibleTo;
+        // do not override the effect of setDefaultRights with nothing
+        if (!StringUtil.isEmpty(accessibleTo))
+            this.accessibleTo = accessibleTo;
     }
 
     public String getVisibleTo() {
@@ -277,7 +280,9 @@ public class ExpectedFile {
     }
 
     public void setVisibleTo(String visibleTo) {
-        this.visibleTo = visibleTo;
+        // do not override the effect of setDefaultRights with nothing
+        if (!StringUtil.isEmpty(visibleTo))
+            this.visibleTo = visibleTo;
     }
 
     @Override

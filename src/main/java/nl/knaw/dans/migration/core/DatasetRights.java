@@ -15,25 +15,35 @@
  */
 package nl.knaw.dans.migration.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 
-public enum DatasetRights {
+public class DatasetRights {
+    AccessCategory accessCategory;
+    FileRights defaultFileRights;
 
-    OPEN_ACCESS("ANONYMOUS"),
-    OPEN_ACCESS_FOR_REGISTERED_USERS("KNOWN"),
-    REQUEST_PERMISSION("RESTRICTED_REQUEST"),
-    NO_ACCESS("NONE"),
-    GROUP_ACCESS("RESTRICTED_REQUEST");
-    private static final Logger log = LoggerFactory.getLogger(DatasetRights.class);
-
-    private final String fileRights;
-
-    DatasetRights(String fileRights) {
-        this.fileRights = fileRights;
+    public AccessCategory getAccessCategory() {
+        return accessCategory;
     }
 
-    public String getFileRights() {
-        return fileRights;
+    public void setAccessCategory(AccessCategory accessCategory) {
+        this.accessCategory = accessCategory;
+    }
+
+    public FileRights getDefaultFileRights() {
+        return defaultFileRights;
+    }
+
+    public void setDefaultFileRights(FileRights defaultFileRights) {
+        this.defaultFileRights = defaultFileRights;
+    }
+
+    public ExpectedDataset expectedDataset(String doi, String depositor) {
+        // TODO apply account-substitutes.csv to depositor
+        ExpectedDataset expectedDataset = new ExpectedDataset();
+        expectedDataset.setDoi(doi);
+        expectedDataset.setDepositor(depositor);
+        expectedDataset.setAccessCategory(accessCategory);
+        expectedDataset.setEmbargoDate(defaultFileRights);
+        return expectedDataset;
     }
 }
