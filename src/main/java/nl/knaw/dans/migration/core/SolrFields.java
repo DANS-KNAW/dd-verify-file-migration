@@ -31,7 +31,7 @@ public class SolrFields {
 
     private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
-    public static String requestedFields = "emd_date_available_formatted,dc_rights,dc_creator";
+    public static String requestedFields = "emd_date_available_formatted,dc_rights,amd_depositor_id";
     private static final CSVFormat solrFormat = CSVFormat.RFC4180.withDelimiter(',');
     final String available;
     final String creator;
