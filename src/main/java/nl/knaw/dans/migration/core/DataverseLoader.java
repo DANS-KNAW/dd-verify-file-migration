@@ -15,13 +15,17 @@
  */
 package nl.knaw.dans.migration.core;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
+import nl.knaw.dans.lib.dataverse.DataverseHttpResponse;
+import nl.knaw.dans.lib.dataverse.DataverseResponse;
 import nl.knaw.dans.lib.dataverse.model.RoleAssignment;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.Embargo;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
+import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
 import nl.knaw.dans.migration.core.tables.ActualDataset;
 import nl.knaw.dans.migration.core.tables.ActualFile;
 import nl.knaw.dans.migration.db.ActualDatasetDAO;
@@ -30,7 +34,9 @@ import org.hsqldb.lib.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class DataverseLoader {
     private static final Logger log = LoggerFactory.getLogger(DataverseLoader.class);
@@ -59,17 +65,22 @@ public class DataverseLoader {
         if (StringUtil.isEmpty(doi))
             return; // workaround
         log.info("Reading {} from dataverse", doi);
-        List<DatasetVersion> versions;
-        String depositor;
+        List<DatasetVersion> versions = new ArrayList<>();
+        String depositor = "";
         try {
             versions = client.dataset(doi).getAllVersions().getData();
-            depositor = client.dataset(doi).listRoles().getData().stream()
+            depositor = client.dataset(doi).listRoleAssignments().getData().stream()
                     .filter(ra -> "contributorplus".equals(ra.get_roleAlias()))
                     .findFirst()
                     .map(RoleAssignment::getAssignee)
                     .orElse("not.found@dans.knaw.nl")
                     .replace("@","");
-            // TODO get email address of depositor
+            depositor = client.admin().listSingleUser(depositor).getData().getEmail();
+        }
+        catch (JsonParseException e) {
+            // a developer may encounter: "Endpoint available from localhost only" and/or receive an HTML page
+            if (!"".equals(depositor))
+                log.error("Could not access email {} {}", doi, depositor);
         }
         catch (UnrecognizedPropertyException e) {
             log.error("Skipping {} {}", doi, e.getMessage());
