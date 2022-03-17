@@ -17,9 +17,8 @@ package nl.knaw.dans.migration.core;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
+import nl.knaw.dans.lib.dataverse.model.RoleAssignment;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
-import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
-import nl.knaw.dans.lib.dataverse.model.dataset.PrimitiveSingleValueField;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.Embargo;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
@@ -38,7 +37,7 @@ public class DataverseLoader {
 
     private final ActualFileDAO actualFileDAO;
     private final DataverseClient client;
-    private ActualDatasetDAO actualDatasetDAO;
+    private final ActualDatasetDAO actualDatasetDAO;
 
     public DataverseLoader(DataverseClient client, ActualFileDAO actualFileDAO, ActualDatasetDAO actualDatasetDAO) {
         this.actualFileDAO = actualFileDAO;
@@ -61,8 +60,16 @@ public class DataverseLoader {
             return; // workaround
         log.info("Reading {} from dataverse", doi);
         List<DatasetVersion> versions;
+        String depositor;
         try {
             versions = client.dataset(doi).getAllVersions().getData();
+            depositor = client.dataset(doi).listRoles().getData().stream()
+                    .filter(ra -> "contributorplus".equals(ra.get_roleAlias()))
+                    .findFirst()
+                    .map(RoleAssignment::getAssignee)
+                    .orElse("not.found@dans.knaw.nl")
+                    .replace("@","");
+            // TODO get email address of depositor
         }
         catch (UnrecognizedPropertyException e) {
             log.error("Skipping {} {}", doi, e.getMessage());
@@ -83,14 +90,12 @@ public class DataverseLoader {
                 ++fileCount;
             }
             log.info("Stored {} actual files for DOI {}, Version {}.{} State {}", fileCount, doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
-            List<MetadataField> citation = v.getMetadataBlocks().get("citation").getFields();
-            PrimitiveSingleValueField depositor = (PrimitiveSingleValueField) citation.stream().filter(f -> "depositor".equals(f.getTypeName())).findFirst().orElse(null);
             ActualDataset actualDataset = new ActualDataset();
             actualDataset.setMajorVersionNr(v.getVersionNumber());
             actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
             actualDataset.setDoi(shortDoi);
-            actualDataset.setDepositor(depositor.getValue());
-            actualDataset.setAccessCategory(null);
+            actualDataset.setDepositor(depositor);
+            actualDataset.setAccessCategory("FileAccessRequest="+v.isFileAccessRequest());// TODO change table field?
             saveActualDataset(actualDataset);
         }
     }
