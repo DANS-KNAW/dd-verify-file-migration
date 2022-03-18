@@ -66,11 +66,11 @@ public class DataverseLoader {
         try {
             versions = client.dataset(doi).getAllVersions().getData();
             depositor = client.dataset(doi).listRoleAssignments().getData().stream()
-                    .filter(ra -> "contributorplus".equals(ra.get_roleAlias()))
-                    .findFirst()
-                    .map(RoleAssignmentReadOnly::getAssignee)
-                    .orElse("not.found@dans.knaw.nl")
-                    .replace("@","");
+                .filter(ra -> "contributorplus".equals(ra.get_roleAlias()))
+                .findFirst()
+                .map(RoleAssignmentReadOnly::getAssignee)
+                .orElse("not.found@dans.knaw.nl")
+                .replace("@", "");
             depositor = client.admin().listSingleUser(depositor).getData().getEmail();
         }
         catch (JsonParseException e) {
