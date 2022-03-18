@@ -45,7 +45,7 @@ public class ActualDataset {
   private int minorVersionNr;
 
   @Column(name="access_category")
-  private String accessCategory;
+  private boolean fileAccessRequest;
 
   @Nullable
   @Column(name="depositor")
@@ -75,12 +75,12 @@ public class ActualDataset {
     this.minorVersionNr = minorVersionNr;
   }
 
-  public String getAccessCategory() {
-    return accessCategory;
+  public boolean isFileAccessRequest() {
+    return fileAccessRequest;
   }
 
-  public void setAccessCategory(String accessCategory) {
-    this.accessCategory = accessCategory;
+  public void setFileAccessRequest(boolean fileAccessRequest) {
+    this.fileAccessRequest = fileAccessRequest;
   }
 
   @Nullable
@@ -98,7 +98,7 @@ public class ActualDataset {
             "doi='" + doi + '\'' +
             ", majorVersionNr=" + majorVersionNr +
             ", minorVersionNr=" + minorVersionNr +
-            ", accessCategory='" + accessCategory + '\'' +
+            ", accessCategory='" + fileAccessRequest + '\'' +
             ", depositor='" + depositor + '\'' +
             '}';
   }
@@ -108,11 +108,11 @@ public class ActualDataset {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ActualDataset that = (ActualDataset) o;
-    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(depositor, that.depositor);
+    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(fileAccessRequest, that.fileAccessRequest) && Objects.equals(depositor, that.depositor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, majorVersionNr, minorVersionNr, accessCategory, depositor);
+    return Objects.hash(doi, majorVersionNr, minorVersionNr, fileAccessRequest, depositor);
   }
 }

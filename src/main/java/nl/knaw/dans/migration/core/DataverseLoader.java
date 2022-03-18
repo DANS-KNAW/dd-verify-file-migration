@@ -102,7 +102,7 @@ public class DataverseLoader {
             actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
             actualDataset.setDoi(shortDoi);
             actualDataset.setDepositor(depositor);
-            actualDataset.setAccessCategory("FileAccessRequest="+v.isFileAccessRequest());// TODO change table field?
+            actualDataset.setFileAccessRequest(v.isFileAccessRequest());
             saveActualDataset(actualDataset);
         }
     }
