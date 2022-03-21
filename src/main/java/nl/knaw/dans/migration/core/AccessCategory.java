@@ -18,22 +18,31 @@ package nl.knaw.dans.migration.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static nl.knaw.dans.migration.core.DatasetLicenseHandler.cc0;
+import static nl.knaw.dans.migration.core.DatasetLicenseHandler.dansLicense;
+
 public enum AccessCategory {
 
-    OPEN_ACCESS("ANONYMOUS"),
-    OPEN_ACCESS_FOR_REGISTERED_USERS("KNOWN"),
-    REQUEST_PERMISSION("RESTRICTED_REQUEST"),
-    NO_ACCESS("NONE"),
-    GROUP_ACCESS("RESTRICTED_REQUEST");
+    OPEN_ACCESS("ANONYMOUS", cc0),
+    OPEN_ACCESS_FOR_REGISTERED_USERS("KNOWN", dansLicense),
+    REQUEST_PERMISSION("RESTRICTED_REQUEST", dansLicense),
+    NO_ACCESS("NONE", null),
+    GROUP_ACCESS("RESTRICTED_REQUEST", dansLicense);
     private static final Logger log = LoggerFactory.getLogger(AccessCategory.class);
 
     private final String fileRights;
+    private String defaultLicense;
 
-    AccessCategory(String fileRights) {
+    AccessCategory(String fileRights, String defaultLicense) {
         this.fileRights = fileRights;
+        this.defaultLicense = defaultLicense;
     }
 
     public String getFileRights() {
         return fileRights;
+    }
+
+    public String getDefaultLicense() {
+        return defaultLicense;
     }
 }

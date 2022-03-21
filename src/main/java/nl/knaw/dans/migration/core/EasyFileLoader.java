@@ -16,6 +16,7 @@
 package nl.knaw.dans.migration.core;
 
 import nl.knaw.dans.migration.core.tables.EasyFile;
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
@@ -25,12 +26,15 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static nl.knaw.dans.migration.core.DatasetLicenseHandler.parseLicense;
 import static nl.knaw.dans.migration.core.HttpHelper.executeReq;
 
 public class EasyFileLoader extends ExpectedLoader {
@@ -39,29 +43,39 @@ public class EasyFileLoader extends ExpectedLoader {
 
   private final EasyFileDAO easyFileDAO;
   private final URI solrUri;
+  private URI fedoraUri;
 
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
 
-  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI solrBaseUri, File configDir) {
+  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI solrBaseUri, URI fedoraBaseUri, File configDir) {
     super(expectedFileDAO, expectedDatasetDAO, configDir);
     this.easyFileDAO = easyFileDAO;
     this.solrUri = solrBaseUri.resolve("datasets/select");
+    this.fedoraUri = fedoraBaseUri.resolve("objects/");
   }
 
   public void loadFromCsv(FedoraToBagCsv csv) {
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {
-      // process fedora files before anything else
-      // thus we don't write anything when reading fails
       SolrFields solrFields = new SolrFields(solrInfo(csv.getDatasetId()));
       DatasetRights datasetRights = solrFields.datasetRights();
+      ExpectedDataset expected = datasetRights.expectedDataset(solrFields.creator);
+      expected.setDoi(csv.getDoi());
+      if (!AccessCategory.NO_ACCESS.equals(solrFields.accessCategory)) {
+        byte[] emdBytes = readEmd(csv.getDatasetId())
+            .getBytes(StandardCharsets.UTF_8);
+        String license = parseLicense(new ByteArrayInputStream(emdBytes), solrFields.accessCategory);
+       expected.setLicense(license);
+      }
+      // so far we collected dataset metadata, we will store it into the DB as the very last action
+      // thus we don't write anything when reading something fails
       if (!csv.getComment().contains("no payload")) {
         fedoraFiles(csv, datasetRights.defaultFileRights);
       }
       expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights);
-      saveExpectedDataset(datasetRights.expectedDataset(csv.getDoi(),solrFields.getCreator()));
+      saveExpectedDataset(expected);
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal
       throw new IllegalStateException(e.getMessage(), e);
@@ -76,6 +90,12 @@ public class EasyFileLoader extends ExpectedLoader {
             .setParameter("csv.header", "false")
             .setParameter("version", "2.2");
     return executeReq(new HttpGet(builder.build()), false);
+  }
+
+  protected String readEmd(String datasetId) throws IOException, URISyntaxException {
+    // the colon in datasetId spoils URI.resolve
+    URI uri = URI.create(fedoraUri + datasetId + "/datastreams/EMD/content");
+    return executeReq(new HttpGet(new URIBuilder(uri).build()), false);
   }
 
   /**

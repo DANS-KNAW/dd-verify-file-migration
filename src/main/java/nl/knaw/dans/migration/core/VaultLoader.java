@@ -24,6 +24,7 @@ import nl.knaw.dans.lib.dataverse.ResultItemDeserializer;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.dataverse.DataverseItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
@@ -104,11 +105,14 @@ public class VaultLoader extends ExpectedLoader {
   private void processBag(String uuid, BagInfo bagInfo) {
     Map<String, FileRights> filesXml = readFileMeta(uuid);
     DatasetRights datasetRights = readDDM(uuid);
+    String doi = bagInfo.getDoi();
     readManifest(uuid).forEach(m ->
-            createExpected(bagInfo.getDoi(), m, filesXml, datasetRights.defaultFileRights)
+            createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
     );
-    expectedMigrationFiles(bagInfo.getDoi(), migrationFiles, datasetRights.defaultFileRights);
-    saveExpectedDataset(datasetRights.expectedDataset(bagInfo.getDoi(),readDepositor(uuid)));
+    expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
+    ExpectedDataset expectedDataset = datasetRights.expectedDataset(readDepositor(uuid));
+    expectedDataset.setDoi(doi);
+    saveExpectedDataset(expectedDataset);
   }
 
   private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {

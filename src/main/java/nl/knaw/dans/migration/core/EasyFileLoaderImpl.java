@@ -29,8 +29,8 @@ import java.util.List;
 
 public class EasyFileLoaderImpl extends EasyFileLoader {
 
-    public EasyFileLoaderImpl(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI solrBaseUri, File configDir) {
-        super(easyFileDAO, expectedFileDAO, expectedDatasetDAO, solrBaseUri, configDir);
+    public EasyFileLoaderImpl(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI solrBaseUri, URI fedoraBaseUri, File configDir) {
+        super(easyFileDAO, expectedFileDAO, expectedDatasetDAO, solrBaseUri, fedoraBaseUri, configDir);
     }
 
   @UnitOfWork("easyBundle")

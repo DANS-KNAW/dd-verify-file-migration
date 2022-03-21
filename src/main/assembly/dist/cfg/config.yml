@@ -30,6 +30,7 @@ dataverse:
 #
 
 solrBaseUri: 'http://localhost:8080/solr/'
+fedoraBaseUri: 'http://localhost:8080/fedora/'
 
 # null on a datastation (read system without easy_db)
 easyDb:

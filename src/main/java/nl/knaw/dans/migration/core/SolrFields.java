@@ -67,14 +67,6 @@ public class SolrFields {
         }
     }
 
-    public String getCreator() {
-        return creator;
-    }
-
-    public AccessCategory getAccessCategory() {
-        return accessCategory;
-    }
-
     public DatasetRights datasetRights() {
         FileRights rights = new FileRights();
         rights.setFileRights(accessCategory);
