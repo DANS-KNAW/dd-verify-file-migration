@@ -19,7 +19,11 @@ import nl.knaw.dans.migration.core.AccessCategory;
 import nl.knaw.dans.migration.core.FileRights;
 
 import javax.annotation.Nullable;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity

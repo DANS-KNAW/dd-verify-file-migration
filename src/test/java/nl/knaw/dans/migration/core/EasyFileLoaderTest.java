@@ -33,7 +33,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
