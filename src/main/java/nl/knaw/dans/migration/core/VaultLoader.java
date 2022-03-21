@@ -104,7 +104,8 @@ public class VaultLoader extends ExpectedLoader {
 
   private void processBag(String uuid, BagInfo bagInfo) {
     Map<String, FileRights> filesXml = readFileMeta(uuid);
-    DatasetRights datasetRights = readDDM(uuid);
+    byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
+    DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
     String doi = bagInfo.getDoi();
     readManifest(uuid).forEach(m ->
             createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
@@ -112,6 +113,7 @@ public class VaultLoader extends ExpectedLoader {
     expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
     ExpectedDataset expectedDataset = datasetRights.expectedDataset(readDepositor(uuid));
     expectedDataset.setDoi(doi);
+    expectedDataset.setLicense(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes),datasetRights.accessCategory));
     saveExpectedDataset(expectedDataset);
   }
 
@@ -150,15 +152,14 @@ public class VaultLoader extends ExpectedLoader {
     }
   }
 
-  private DatasetRights readDDM(String uuid) {
+  private String readDDM(String uuid) {
     URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid+"/")
         .resolve("metadata/")
         .resolve("dataset.xml");
     try {
-      String xmlString = executeReq(new HttpGet(uri), true);
-      return DatasetRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+      return executeReq(new HttpGet(uri), true);
     }
     catch (IOException e) {
       throw new RuntimeException(e);

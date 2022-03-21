@@ -33,7 +33,7 @@ public class DatasetLicenseHandler extends DefaultHandler {
   private static final Logger log = LoggerFactory.getLogger(DatasetLicenseHandler.class);
 
   static final String dansLicense = "http://dans.knaw.nl/en/about/organisation-and-policy/legal-information/DANSLicence.pdf";
-  static final String cc0 = "http://creativecommons.org/licenses/by-nc-sa/4.0/";
+  static final String cc0 = "http://creativecommons.org/licenses/by/4.0";
   private static final SAXParserFactory parserFactory = configureFactory();
   private StringBuilder chars; // collected since the last startElement
   private String license = null;
@@ -53,7 +53,9 @@ public class DatasetLicenseHandler extends DefaultHandler {
   public void endElement(String uri, String localName, String qName) {
 
     if ("license".equalsIgnoreCase(localName)) {
-      license = chars.toString();
+      String s = chars.toString();
+      if(s.startsWith("http"))
+        this.license = s;
     }
   }
 
