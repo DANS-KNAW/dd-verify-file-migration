@@ -29,6 +29,7 @@ import javax.persistence.PersistenceException;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +48,7 @@ public class EasyFileLoaderTest {
 
     private final String expectedSolr;
     public Loader(String expectedSolr, EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO) {
-      super(easyFileDAO, expectedFileDAO, expectedDatasetDAO, solrBaseUri(), new File("src/test/resources/debug-etc"));
+      super(easyFileDAO, expectedFileDAO, expectedDatasetDAO, dummyBaseUri(), dummyBaseUri(), new File("src/test/resources/debug-etc"));
       this.expectedSolr = expectedSolr;
     }
 
@@ -56,7 +57,12 @@ public class EasyFileLoaderTest {
       return expectedSolr;
     }
 
-    static URI solrBaseUri(){
+    @Override
+    protected String readEmd(String datasetId) {
+      return "<ddm><license>blabla</license></ddm>";
+    }
+
+    static URI dummyBaseUri(){
       try {
         return new URI("http://does.not.exist.dans.knaw.nl:8080/solr/");
       } catch (URISyntaxException e) {

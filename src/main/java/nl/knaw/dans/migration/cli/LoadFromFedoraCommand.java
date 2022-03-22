@@ -93,12 +93,13 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, verificationBundle)
             .create(
                 EasyFileLoaderImpl.class,
-                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, ExpectedDatasetDAO.class, URI.class, File.class},
+                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, ExpectedDatasetDAO.class, URI.class, URI.class, File.class},
                 new Object[] {
                         new EasyFileDAO(easyBundle.getSessionFactory()),
                         new ExpectedFileDAO(verificationBundleSessionFactory),
                         new ExpectedDatasetDAO(verificationBundleSessionFactory),
                         configuration.getSolrBaseUri(),
+                        configuration.getFedoraBaseUri(),
                         new File(namespace.getString("file")).getParentFile(),
                 }
             );

@@ -44,6 +44,10 @@ public class DdVerifyMigrationConfiguration extends Configuration {
   private URI solrBaseUri;
 
   @Valid
+  @NotNull
+  private URI fedoraBaseUri;
+
+  @Valid
   @Nullable
   private DataSourceFactory easyDb = new DataSourceFactory();
 
@@ -99,5 +103,13 @@ public class DdVerifyMigrationConfiguration extends Configuration {
 
   public void setSolrBaseUri(URI solrBaseUri) {
     this.solrBaseUri = solrBaseUri;
+  }
+
+  public URI getFedoraBaseUri() {
+    return fedoraBaseUri;
+  }
+
+  public void setFedoraBaseUri(URI fedoraBaseUri) {
+    this.fedoraBaseUri = fedoraBaseUri;
   }
 }

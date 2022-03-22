@@ -45,7 +45,13 @@ public class ActualDataset {
   private int minorVersionNr;
 
   @Column(name="access_category")
-  private String accessCategory;
+  private boolean fileAccessRequest;
+
+  @Column(name="license_name")
+  private String licenseName;
+
+  @Column(name="license_url")
+  private String licenseUri;
 
   @Nullable
   @Column(name="depositor")
@@ -75,12 +81,28 @@ public class ActualDataset {
     this.minorVersionNr = minorVersionNr;
   }
 
-  public String getAccessCategory() {
-    return accessCategory;
+  public boolean isFileAccessRequest() {
+    return fileAccessRequest;
   }
 
-  public void setAccessCategory(String accessCategory) {
-    this.accessCategory = accessCategory;
+  public void setFileAccessRequest(boolean fileAccessRequest) {
+    this.fileAccessRequest = fileAccessRequest;
+  }
+
+  public String getLicenseName() {
+    return licenseName;
+  }
+
+  public void setLicenseName(String licenseName) {
+    this.licenseName = licenseName;
+  }
+
+  public String getLicenseUri() {
+    return licenseUri;
+  }
+
+  public void setLicenseUri(String licenseUri) {
+    this.licenseUri = licenseUri;
   }
 
   @Nullable
@@ -95,24 +117,29 @@ public class ActualDataset {
   @Override
   public String toString() {
     return "ActualDataset{" +
-            "doi='" + doi + '\'' +
-            ", majorVersionNr=" + majorVersionNr +
-            ", minorVersionNr=" + minorVersionNr +
-            ", accessCategory='" + accessCategory + '\'' +
-            ", depositor='" + depositor + '\'' +
-            '}';
+        "doi='" + doi + '\'' +
+        ", majorVersionNr=" + majorVersionNr +
+        ", minorVersionNr=" + minorVersionNr +
+        ", fileAccessRequest=" + fileAccessRequest +
+        ", licenseName='" + licenseName + '\'' +
+        ", licenseUrl='" + licenseUri + '\'' +
+        ", depositor='" + depositor + '\'' +
+        '}';
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
     ActualDataset that = (ActualDataset) o;
-    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(depositor, that.depositor);
+    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && fileAccessRequest == that.fileAccessRequest && Objects.equals(doi, that.doi)
+        && Objects.equals(licenseName, that.licenseName) && Objects.equals(licenseUri, that.licenseUri) && Objects.equals(depositor, that.depositor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, majorVersionNr, minorVersionNr, accessCategory, depositor);
+    return Objects.hash(doi, majorVersionNr, minorVersionNr, fileAccessRequest, licenseName, licenseUri, depositor);
   }
 }

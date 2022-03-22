@@ -46,6 +46,10 @@ public class ExpectedDataset {
     @Column(name="embargo_date")
     private String embargoDate;
 
+    @Nullable
+    @Column(name="license")
+    private String license;
+
     @Column(name = "depositor")
     private String depositor;
 
@@ -83,26 +87,39 @@ public class ExpectedDataset {
         this.depositor = depositor;
     }
 
+    @Nullable
+    public String getLicense() {
+        return license;
+    }
+
+    public void setLicense(@Nullable String license) {
+        this.license = license;
+    }
+
     @Override
     public String toString() {
         return "ExpectedDataset{" +
-                "doi='" + doi + '\'' +
-                ", accessCategory='" + accessCategory + '\'' +
-                ", embargoDate='" + embargoDate + '\'' +
-                ", depositor='" + depositor + '\'' +
-                '}';
+            "doi='" + doi + '\'' +
+            ", accessCategory='" + accessCategory + '\'' +
+            ", embargoDate='" + embargoDate + '\'' +
+            ", license='" + license + '\'' +
+            ", depositor='" + depositor + '\'' +
+            '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         ExpectedDataset that = (ExpectedDataset) o;
-        return Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(embargoDate, that.embargoDate) && Objects.equals(depositor, that.depositor);
+        return Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(embargoDate, that.embargoDate)
+            && Objects.equals(license, that.license) && Objects.equals(depositor, that.depositor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(doi, accessCategory, embargoDate, depositor);
+        return Objects.hash(doi, accessCategory, embargoDate, license, depositor);
     }
 }

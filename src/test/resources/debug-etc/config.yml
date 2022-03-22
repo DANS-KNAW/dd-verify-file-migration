@@ -49,7 +49,7 @@ easyDb:
     hibernate.hbm2ddl.auto: update
 
 solrBaseUri: 'http://deasy.dans.knaw.nl:8080/solr'
-
+  localhost
 verificationDatabase:
   driverClass: org.hsqldb.jdbcDriver
   url: 'jdbc:hsqldb:hsql://localhost:9001/verificationDatabase'

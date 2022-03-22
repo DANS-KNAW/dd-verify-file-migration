@@ -100,9 +100,11 @@ public class DataverseLoader {
             ActualDataset actualDataset = new ActualDataset();
             actualDataset.setMajorVersionNr(v.getVersionNumber());
             actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
+            actualDataset.setLicenseName(v.getLicense().getName());
+            actualDataset.setLicenseUri(v.getLicense().getUri().toString());
             actualDataset.setDoi(shortDoi);
             actualDataset.setDepositor(depositor);
-            actualDataset.setAccessCategory("FileAccessRequest="+v.isFileAccessRequest());// TODO change table field?
+            actualDataset.setFileAccessRequest(v.isFileAccessRequest());
             saveActualDataset(actualDataset);
         }
     }

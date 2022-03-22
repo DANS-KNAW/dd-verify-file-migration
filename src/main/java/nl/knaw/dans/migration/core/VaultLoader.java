@@ -24,6 +24,7 @@ import nl.knaw.dans.lib.dataverse.ResultItemDeserializer;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.dataverse.DataverseItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
+import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
@@ -57,12 +58,15 @@ public class VaultLoader extends ExpectedLoader {
   private final URI bagIndexBaseUri;
   private final URI bagSeqUri;
   private final ObjectMapper mapper;
+  private final Map<String, String> accountSubStitues;
 
   public VaultLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
     super(expectedFileDAO, expectedDatasetDAO, configDir);
     bagSeqUri = bagIndexBaseUri.resolve("bag-sequence");
     this.bagStoreBaseUri = bagStoreBaseUri;
     this.bagIndexBaseUri = bagIndexBaseUri;
+    this.accountSubStitues = Accounts.load(configDir);
+
 
     mapper = new ObjectMapper();
     SimpleModule module = new SimpleModule();
@@ -103,12 +107,18 @@ public class VaultLoader extends ExpectedLoader {
 
   private void processBag(String uuid, BagInfo bagInfo) {
     Map<String, FileRights> filesXml = readFileMeta(uuid);
-    DatasetRights datasetRights = readDDM(uuid);
+    byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
+    DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
+    String doi = bagInfo.getDoi();
     readManifest(uuid).forEach(m ->
-            createExpected(bagInfo.getDoi(), m, filesXml, datasetRights.defaultFileRights)
+            createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
     );
-    expectedMigrationFiles(bagInfo.getDoi(), migrationFiles, datasetRights.defaultFileRights);
-    saveExpectedDataset(datasetRights.expectedDataset(bagInfo.getDoi(),readDepositor(uuid)));
+    expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
+    String depositor = readDepositor(uuid);
+    ExpectedDataset expectedDataset = datasetRights.expectedDataset(accountSubStitues.getOrDefault(depositor, depositor));
+    expectedDataset.setDoi(doi);
+    expectedDataset.setLicense(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes),datasetRights.accessCategory));
+    saveExpectedDataset(expectedDataset);
   }
 
   private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
@@ -146,15 +156,14 @@ public class VaultLoader extends ExpectedLoader {
     }
   }
 
-  private DatasetRights readDDM(String uuid) {
+  private String readDDM(String uuid) {
     URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid+"/")
         .resolve("metadata/")
         .resolve("dataset.xml");
     try {
-      String xmlString = executeReq(new HttpGet(uri), true);
-      return DatasetRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
+      return executeReq(new HttpGet(uri), true);
     }
     catch (IOException e) {
       throw new RuntimeException(e);
