@@ -58,12 +58,15 @@ public class VaultLoader extends ExpectedLoader {
   private final URI bagIndexBaseUri;
   private final URI bagSeqUri;
   private final ObjectMapper mapper;
+  private final Map<String, String> accountSubStitues;
 
   public VaultLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
     super(expectedFileDAO, expectedDatasetDAO, configDir);
     bagSeqUri = bagIndexBaseUri.resolve("bag-sequence");
     this.bagStoreBaseUri = bagStoreBaseUri;
     this.bagIndexBaseUri = bagIndexBaseUri;
+    this.accountSubStitues = Accounts.load(configDir);
+
 
     mapper = new ObjectMapper();
     SimpleModule module = new SimpleModule();
@@ -111,7 +114,8 @@ public class VaultLoader extends ExpectedLoader {
             createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
     );
     expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
-    ExpectedDataset expectedDataset = datasetRights.expectedDataset(readDepositor(uuid));
+    String depositor = readDepositor(uuid);
+    ExpectedDataset expectedDataset = datasetRights.expectedDataset(accountSubStitues.getOrDefault(depositor, depositor));
     expectedDataset.setDoi(doi);
     expectedDataset.setLicense(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes),datasetRights.accessCategory));
     saveExpectedDataset(expectedDataset);
