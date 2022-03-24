@@ -1,0 +1,225 @@
+{
+  "status": "OK",
+  "data": [
+    {
+      "id": 1,
+      "datasetId": 2,
+      "datasetPersistentId": "doi:10.5072/DAR/PISP8Z",
+      "storageIdentifier": "file://10.5072/DAR/PISP8Z",
+      "versionNumber": 1,
+      "versionMinorNumber": 0,
+      "versionState": "DEACCESSIONED",
+      "versionNote": "test",
+      "lastUpdateTime": "2022-03-22T12:20:08Z",
+      "releaseTime": "2022-03-22T12:20:08Z",
+      "createTime": "2022-03-22T12:19:52Z",
+      "license": {
+        "name": "CC0 1.0",
+        "uri": "http://creativecommons.org/publicdomain/zero/1.0"
+      },
+      "fileAccessRequest": false,
+      "metadataBlocks": {
+        "citation": {
+          "displayName": "Citation Metadata",
+          "name": "citation",
+          "fields": [
+            {
+              "typeName": "title",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "blas"
+            },
+            {
+              "typeName": "author",
+              "multiple": true,
+              "typeClass": "compound",
+              "value": [
+                {
+                  "authorName": {
+                    "typeName": "authorName",
+                    "multiple": false,
+                    "typeClass": "primitive",
+                    "value": "User01, Test01"
+                  },
+                  "authorAffiliation": {
+                    "typeName": "authorAffiliation",
+                    "multiple": false,
+                    "typeClass": "primitive",
+                    "value": "DANS"
+                  }
+                }
+              ]
+            },
+            {
+              "typeName": "datasetContact",
+              "multiple": true,
+              "typeClass": "compound",
+              "value": [
+                {
+                  "datasetContactName": {
+                    "typeName": "datasetContactName",
+                    "multiple": false,
+                    "typeClass": "primitive",
+                    "value": "User01, Test01"
+                  },
+                  "datasetContactAffiliation": {
+                    "typeName": "datasetContactAffiliation",
+                    "multiple": false,
+                    "typeClass": "primitive",
+                    "value": "DANS"
+                  }
+                }
+              ]
+            },
+            {
+              "typeName": "dsDescription",
+              "multiple": true,
+              "typeClass": "compound",
+              "value": [
+                {
+                  "dsDescriptionValue": {
+                    "typeName": "dsDescriptionValue",
+                    "multiple": false,
+                    "typeClass": "primitive",
+                    "value": "sah"
+                  }
+                },
+                {
+                  "dsDescriptionValue": {
+                    "typeName": "dsDescriptionValue",
+                    "multiple": false,
+                    "typeClass": "primitive",
+                    "value": "A copy of this dataset is stored in EASY, the DANS CTS certified repository, at <a href=\"http://www.persistent-identifier.nl?identifier=urn:nbn:nl:ui:13-77f15f74-a15b-4c97-add5-d854ff459c43\">urn:nbn:nl:ui:13-77f15f74-a15b-4c97-add5-d854ff459c43</a>. (Note that this link will become resolvable only after the mirroring process has finished, which will take up to several days after first publication of the dataset.)<input type=\"hidden\" value=\"NBN\"></input>"
+                  }
+                }
+              ]
+            },
+            {
+              "typeName": "subject",
+              "multiple": true,
+              "typeClass": "controlledVocabulary",
+              "value": [
+                "Agricultural Sciences"
+              ]
+            },
+            {
+              "typeName": "depositor",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "User01, Test01"
+            },
+            {
+              "typeName": "dateOfDeposit",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "2022-03-22"
+            }
+          ]
+        },
+        "dansRights": {
+          "displayName": "Rights Metadata",
+          "name": "dansRights",
+          "fields": [
+            {
+              "typeName": "dansRightsHolder",
+              "multiple": true,
+              "typeClass": "primitive",
+              "value": [
+                "me"
+              ]
+            },
+            {
+              "typeName": "dansPersonalDataPresent",
+              "multiple": false,
+              "typeClass": "controlledVocabulary",
+              "value": "No"
+            }
+          ]
+        },
+        "dansRelationMetadata": {
+          "displayName": "Relation Metadata",
+          "name": "dansRelationMetadata",
+          "fields": [
+            {
+              "typeName": "dansAudience",
+              "multiple": true,
+              "typeClass": "primitive",
+              "value": [
+                "https://www.narcis.nl/classification/D23360"
+              ],
+              "expandedvalue": [
+                {
+                  "@id": "https://www.narcis.nl/classification/D23360",
+                  "termName": [
+                    {
+                      "lang": "nl",
+                      "value": "Leeftijdgebonden specialismen"
+                    },
+                    {
+                      "lang": "en",
+                      "value": "Age-related medical specialisms"
+                    }
+                  ],
+                  "vocabularyUri": "https://www.narcis.nl/classification/"
+                }
+              ]
+            }
+          ]
+        },
+        "dansDataVaultMetadata": {
+          "displayName": "Data Vault Metadata",
+          "name": "dansDataVaultMetadata",
+          "fields": [
+            {
+              "typeName": "dansDataversePid",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "doi:10.5072/DAR/PISP8Z"
+            },
+            {
+              "typeName": "dansDataversePidVersion",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "1.0"
+            },
+            {
+              "typeName": "dansBagId",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "urn:uuid:b3210282-4a79-46f2-ab15-1402e6e8bdc7"
+            },
+            {
+              "typeName": "dansNbn",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "urn:nbn:nl:ui:13-77f15f74-a15b-4c97-add5-d854ff459c43"
+            }
+          ]
+        }
+      },
+      "files": [
+        {
+          "label": "Screenshot 2022-03-13 at 15.49.29.png",
+          "restricted": false,
+          "version": 1,
+          "datasetVersionId": 1,
+          "dataFile": {
+            "id": 3,
+            "persistentId": "",
+            "pidURL": "",
+            "filename": "Screenshot 2022-03-13 at 15.49.29.png",
+            "contentType": "image/png",
+            "filesize": 193417,
+            "storageIdentifier": "file://17fb1917b62-c0f5b5500bb1",
+            "rootDataFileId": -1,
+            "checksum": {
+              "type": "SHA-1",
+              "value": "ffd6367ccc699d21437254094a2f698dab69251b"
+            },
+            "creationDate": "2022-03-22"
+          }
+        }
+      ]
+    }
+  ]
+}
