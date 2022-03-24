@@ -50,6 +50,10 @@ public class ExpectedDataset {
     @Column(name="license")
     private String license;
 
+    @Nullable
+    @Column(name="deleted")
+    private boolean deleted;
+
     @Column(name = "depositor")
     private String depositor;
 
@@ -96,6 +100,15 @@ public class ExpectedDataset {
         this.license = license;
     }
 
+    @Nullable
+    public boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(@Nullable boolean deleted) {
+        this.deleted = deleted;
+    }
+
     @Override
     public String toString() {
         return "ExpectedDataset{" +
@@ -103,6 +116,7 @@ public class ExpectedDataset {
             ", accessCategory='" + accessCategory + '\'' +
             ", embargoDate='" + embargoDate + '\'' +
             ", license='" + license + '\'' +
+            ", deleted='" + deleted + '\'' +
             ", depositor='" + depositor + '\'' +
             '}';
     }
@@ -115,11 +129,11 @@ public class ExpectedDataset {
             return false;
         ExpectedDataset that = (ExpectedDataset) o;
         return Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(embargoDate, that.embargoDate)
-            && Objects.equals(license, that.license) && Objects.equals(depositor, that.depositor);
+            && Objects.equals(license, that.license) && Objects.equals(deleted, that.deleted) && Objects.equals(depositor, that.depositor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(doi, accessCategory, embargoDate, license, depositor);
+        return Objects.hash(doi, accessCategory, embargoDate, license, deleted, depositor);
     }
 }
