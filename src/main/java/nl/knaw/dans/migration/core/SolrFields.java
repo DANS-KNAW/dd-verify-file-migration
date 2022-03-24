@@ -45,7 +45,6 @@ public class SolrFields {
                 .replaceAll("^\"", "") // strip leading quote
                 .replaceAll("\"$", "") // strip trailing quote
                 .split(", *");
-        // TODO parseHeadlessCsvLine(dcRecord).getRecords().get(0).iterator();
         Optional<AccessCategory> maybeRights= Arrays.stream(dcRights)
                 .filter(this::isDatasetRights)
                 .map(AccessCategory::valueOf)

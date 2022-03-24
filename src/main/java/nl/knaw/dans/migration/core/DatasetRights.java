@@ -38,7 +38,7 @@ public class DatasetRights {
     }
 
     public ExpectedDataset expectedDataset(String depositor) {
-        // TODO apply account-substitutes.csv to depositor
+        // ExpectedLoader.saveExpectedDataset applies account-substitutes.csv to depositor
         ExpectedDataset expectedDataset = new ExpectedDataset();
         expectedDataset.setDepositor(depositor);
         expectedDataset.setAccessCategory(accessCategory);
