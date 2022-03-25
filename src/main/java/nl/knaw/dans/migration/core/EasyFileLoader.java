@@ -76,6 +76,7 @@ public class EasyFileLoader extends ExpectedLoader {
         fedoraFiles(csv, datasetRights.defaultFileRights);
       }
       expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights);
+      log.trace("solr.emd_date_created_formatted: " + solrFields.date.substring(0,4));
       saveExpectedDataset(expected);
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal

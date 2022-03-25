@@ -29,7 +29,6 @@ import javax.persistence.PersistenceException;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +41,7 @@ import static org.easymock.EasyMock.verify;
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
   private static final String doi = "10.80270/test-nySe-x6f-kf66";
-  private static final String expectedSolr = "2022-03-08," + AccessCategory.NO_ACCESS + ",somebody,PUBLISHED";
+  private static final String expectedSolr = "2022-03-08," + AccessCategory.NO_ACCESS + ",somebody,PUBLISHED,2022-03-25";
 
   private static class Loader extends EasyFileLoader {
 
@@ -127,7 +126,8 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\",somebody,PUBLISHED", easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
+    String expectedSolr = "\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\",somebody,PUBLISHED,2022-03-25";
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -141,7 +141,8 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\",somebody,PUBLISHED", easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
+    String expectedSolr = "2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\",somebody,PUBLISHED,2022-03-25";
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
