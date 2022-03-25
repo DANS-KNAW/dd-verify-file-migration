@@ -108,18 +108,24 @@ public class VaultLoader extends ExpectedLoader {
   private void processBag(String uuid, BagInfo bagInfo) {
     String doi = bagInfo.getDoi();
     byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
-    if (ddmBytes.length == 0) return; // not found or deactivated has been logged
-    DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
-    String depositor = readDepositor(uuid);
-    ExpectedDataset expectedDataset = datasetRights.expectedDataset(accountSubStitues.getOrDefault(depositor, depositor));
+    ExpectedDataset expectedDataset;
+    if (ddmBytes.length == 0) {
+      expectedDataset = new ExpectedDataset();
+      // presuming deactivated, logging shows whether it was indeed deactivated or not found
+      expectedDataset.setDeleted(true);
+    } else {
+      String depositor = readDepositor(uuid);
+      DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
+      expectedDataset = datasetRights.expectedDataset(accountSubStitues.getOrDefault(depositor, depositor));
+      expectedDataset.setLicense(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
+      // now that we collected everything from the bag, we start processing the files
+      Map<String, FileRights> filesXml = readFileMeta(uuid);
+      readManifest(uuid).forEach(m ->
+          createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
+      );
+      expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
+    }
     expectedDataset.setDoi(doi);
-    expectedDataset.setLicense(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes),datasetRights.accessCategory));
-    // now that we collected everything from the bag, we start processing the files
-    Map<String, FileRights> filesXml = readFileMeta(uuid);
-    readManifest(uuid).forEach(m ->
-        createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
-    );
-    expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
     saveExpectedDataset(expectedDataset);
   }
 
