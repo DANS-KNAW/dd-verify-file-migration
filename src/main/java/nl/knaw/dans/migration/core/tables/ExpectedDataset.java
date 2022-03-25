@@ -50,7 +50,6 @@ public class ExpectedDataset {
     @Column(name="license")
     private String license;
 
-    @Nullable
     @Column(name="deleted")
     private boolean deleted;
 
@@ -100,12 +99,11 @@ public class ExpectedDataset {
         this.license = license;
     }
 
-    @Nullable
     public boolean getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(@Nullable boolean deleted) {
+    public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
 

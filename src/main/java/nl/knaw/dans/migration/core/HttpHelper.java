@@ -38,6 +38,11 @@ public class HttpHelper {
                 log.error("Could not find {}", req.getURI());
             return "";
         }
+        if (statusCode == 410) {
+            if (logNotFound)
+                log.error("Deactivated {}", req.getURI());
+            return "";
+        }
         else if (statusCode < 200 || statusCode >= 300)
             throw new IOException("not expected response code: " + statusCode);
         else
