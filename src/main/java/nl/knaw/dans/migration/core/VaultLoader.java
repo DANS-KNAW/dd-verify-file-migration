@@ -86,7 +86,7 @@ public class VaultLoader extends ExpectedLoader {
     else {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
-      if (bagSeq.length == 0)
+      if (bagSeq.length <= 1)
         processBag(uuid.toString(), bagInfo);
       else {
         List<BagInfo> bagInfos= StreamSupport
@@ -106,18 +106,26 @@ public class VaultLoader extends ExpectedLoader {
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
   private void processBag(String uuid, BagInfo bagInfo) {
-    Map<String, FileRights> filesXml = readFileMeta(uuid);
-    byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
-    DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
     String doi = bagInfo.getDoi();
-    readManifest(uuid).forEach(m ->
-            createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
-    );
-    expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
-    String depositor = readDepositor(uuid);
-    ExpectedDataset expectedDataset = datasetRights.expectedDataset(accountSubStitues.getOrDefault(depositor, depositor));
+    byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
+    ExpectedDataset expectedDataset;
+    if (ddmBytes.length == 0) {
+      expectedDataset = new ExpectedDataset();
+      // presuming deactivated, logging shows whether it was indeed deactivated or not found
+      expectedDataset.setDeleted(true);
+    } else {
+      String depositor = readDepositor(uuid);
+      DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
+      expectedDataset = datasetRights.expectedDataset(accountSubStitues.getOrDefault(depositor, depositor));
+      expectedDataset.setLicense(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
+      // now that we collected everything from the bag, we start processing the files
+      Map<String, FileRights> filesXml = readFileMeta(uuid);
+      readManifest(uuid).forEach(m ->
+          createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
+      );
+      expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
+    }
     expectedDataset.setDoi(doi);
-    expectedDataset.setLicense(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes),datasetRights.accessCategory));
     saveExpectedDataset(expectedDataset);
   }
 

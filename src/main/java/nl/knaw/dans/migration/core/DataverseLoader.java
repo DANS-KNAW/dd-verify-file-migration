@@ -100,6 +100,7 @@ public class DataverseLoader {
             ActualDataset actualDataset = new ActualDataset();
             actualDataset.setMajorVersionNr(v.getVersionNumber());
             actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
+            actualDataset.setDeaccessioned("DEACCESSIONED".equals(v.getVersionState()));
             actualDataset.setLicenseName(v.getLicense().getName());
             actualDataset.setLicenseUri(v.getLicense().getUri().toString());
             actualDataset.setDoi(shortDoi);

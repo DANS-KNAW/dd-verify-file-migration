@@ -42,7 +42,7 @@ import static org.easymock.EasyMock.verify;
 public class EasyFileLoaderTest {
   private static final String datasetId = "easy-dataset:123";
   private static final String doi = "10.80270/test-nySe-x6f-kf66";
-  private static final String expectedSolr = "2022-03-08," + AccessCategory.NO_ACCESS + ",somebody";
+  private static final String expectedSolr = "2022-03-08," + AccessCategory.NO_ACCESS + ",somebody,PUBLISHED";
 
   private static class Loader extends EasyFileLoader {
 
@@ -127,7 +127,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\",somebody", easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
+    new Loader("\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\",somebody,PUBLISHED", easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 
@@ -141,7 +141,7 @@ public class EasyFileLoaderTest {
       expectSuccess(expectedFileDAO, ef);
 
     replay(csv, easyFileDAO, expectedFileDAO);
-    new Loader("2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\",somebody", easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
+    new Loader("2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\",somebody,PUBLISHED", easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
     verify(csv, easyFileDAO, expectedFileDAO);
   }
 

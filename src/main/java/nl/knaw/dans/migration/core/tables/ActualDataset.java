@@ -44,8 +44,11 @@ public class ActualDataset {
   @Column(name="minor_version_nr")
   private int minorVersionNr;
 
-  @Column(name="access_category")
+  @Column(name="file_access_request")
   private boolean fileAccessRequest;
+
+  @Column(name="deaccessioned")
+  private boolean deaccessioned;
 
   @Column(name="license_name")
   private String licenseName;
@@ -89,6 +92,14 @@ public class ActualDataset {
     this.fileAccessRequest = fileAccessRequest;
   }
 
+  public boolean isDeaccessioned() {
+    return deaccessioned;
+  }
+
+  public void setDeaccessioned(boolean deaccessioned) {
+    this.deaccessioned = deaccessioned;
+  }
+
   public String getLicenseName() {
     return licenseName;
   }
@@ -121,8 +132,9 @@ public class ActualDataset {
         ", majorVersionNr=" + majorVersionNr +
         ", minorVersionNr=" + minorVersionNr +
         ", fileAccessRequest=" + fileAccessRequest +
+        ", deaccessioned=" + deaccessioned +
         ", licenseName='" + licenseName + '\'' +
-        ", licenseUrl='" + licenseUri + '\'' +
+        ", licenseUri='" + licenseUri + '\'' +
         ", depositor='" + depositor + '\'' +
         '}';
   }
@@ -134,12 +146,13 @@ public class ActualDataset {
     if (o == null || getClass() != o.getClass())
       return false;
     ActualDataset that = (ActualDataset) o;
-    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && fileAccessRequest == that.fileAccessRequest && Objects.equals(doi, that.doi)
-        && Objects.equals(licenseName, that.licenseName) && Objects.equals(licenseUri, that.licenseUri) && Objects.equals(depositor, that.depositor);
+    return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && fileAccessRequest == that.fileAccessRequest && deaccessioned == that.deaccessioned
+        && Objects.equals(doi, that.doi) && Objects.equals(licenseName, that.licenseName) && Objects.equals(licenseUri, that.licenseUri) && Objects.equals(
+        depositor, that.depositor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, majorVersionNr, minorVersionNr, fileAccessRequest, licenseName, licenseUri, depositor);
+    return Objects.hash(doi, majorVersionNr, minorVersionNr, fileAccessRequest, deaccessioned, licenseName, licenseUri, depositor);
   }
 }

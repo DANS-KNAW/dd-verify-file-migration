@@ -31,21 +31,23 @@ public class SolrFields {
 
     private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
-    public static String requestedFields = "emd_date_available_formatted,dc_rights,amd_depositor_id";
+    public static String requestedFields = "emd_date_available_formatted,dc_rights,amd_depositor_id,ds_state";
     private static final CSVFormat solrFormat = CSVFormat.RFC4180.withDelimiter(',');
     final String available;
     final String creator;
     final AccessCategory accessCategory;
+    final String state;
+
     SolrFields (String line) throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(line.getBytes(StandardCharsets.UTF_8));
         CSVRecord record = CSVParser.parse(inputStream, StandardCharsets.UTF_8, solrFormat).getRecords().get(0);
         available = record.get(0).trim();
         creator = record.get(2).trim();
+        state = record.get(3).trim();
         String[] dcRights = record.get(1).trim()
                 .replaceAll("^\"", "") // strip leading quote
                 .replaceAll("\"$", "") // strip trailing quote
                 .split(", *");
-        // TODO parseHeadlessCsvLine(dcRecord).getRecords().get(0).iterator();
         Optional<AccessCategory> maybeRights= Arrays.stream(dcRights)
                 .filter(this::isDatasetRights)
                 .map(AccessCategory::valueOf)
