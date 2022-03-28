@@ -20,12 +20,17 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
 @IdClass(ActualDatasetKey.class)
-@Table(name = "actual_datasets")
+@Table(name = "actual_datasets",
+       indexes = {
+           @Index(name = "doi_index", columnList = "doi")
+       }
+)
 public class ActualDataset {
   // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 
