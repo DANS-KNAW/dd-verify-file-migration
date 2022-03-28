@@ -42,14 +42,6 @@ public class ExpectedDataset {
     @Column(name="access_category")
     private String accessCategory;
 
-    @Nullable
-    @Column(name="embargo_date")
-    private String embargoDate;
-
-    @Nullable
-    @Column(name="license")
-    private String license;
-
     @Column(name="deleted")
     private boolean deleted;
 
@@ -58,6 +50,13 @@ public class ExpectedDataset {
 
     @Column(name="citation_year")
     private String citationYear;
+
+    @Column(name="embargo_date")
+    private String embargoDate;
+
+    @Nullable
+    @Column(name="license")
+    private String license;
 
     public String getDoi() {
         return doi;

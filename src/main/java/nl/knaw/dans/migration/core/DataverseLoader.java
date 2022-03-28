@@ -91,6 +91,7 @@ public class DataverseLoader {
             return;
         }
         String shortDoi = doi.replace("doi:", "");
+        DatasetVersion lastVersion = versions.get(versions.size() - 1);
         for (DatasetVersion v : versions) {
             int fileCount = 0;
             for (FileMeta f : v.getFiles()) {
@@ -106,7 +107,7 @@ public class DataverseLoader {
             actualDataset.setLicenseUri(v.getLicense().getUri().toString());
             actualDataset.setDoi(shortDoi);
             actualDataset.setDepositor(depositor);
-            actualDataset.setFileAccessRequest(v.isFileAccessRequest());
+            actualDataset.setFileAccessRequest(lastVersion.isFileAccessRequest());
             v.getMetadataBlocks()
                 .get("citation").getFields().stream()
                 .filter(field -> "dateOfDeposit".equals(field.getTypeName()))
