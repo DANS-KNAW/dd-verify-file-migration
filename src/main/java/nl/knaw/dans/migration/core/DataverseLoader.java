@@ -111,7 +111,7 @@ public class DataverseLoader {
                 .get("citation").getFields().stream()
                 .filter(field -> "dateOfDeposit".equals(field.getTypeName()))
                 .map(field -> ((PrimitiveSingleValueField)field).getValue())
-                .forEach(date -> log.trace("date in citation-block: " + date.substring(0,4))); // TODO assign
+                .forEach(date -> actualDataset.setCitationYear(date.substring(0,4)));
             saveActualDataset(actualDataset);
         }
     }

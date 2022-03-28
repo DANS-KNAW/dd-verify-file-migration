@@ -60,6 +60,9 @@ public class ActualDataset {
   @Column(name="depositor")
   private String depositor;
 
+  @Column(name="citation_year")
+  private String citationYear;
+
   public String getDoi() {
     return doi;
   }
@@ -125,6 +128,14 @@ public class ActualDataset {
     this.depositor = depositor;
   }
 
+  public String getCitationYear() {
+    return citationYear;
+  }
+
+  public void setCitationYear(String citationYear) {
+    this.citationYear = citationYear;
+  }
+
   @Override
   public String toString() {
     return "ActualDataset{" +
@@ -136,6 +147,7 @@ public class ActualDataset {
         ", licenseName='" + licenseName + '\'' +
         ", licenseUri='" + licenseUri + '\'' +
         ", depositor='" + depositor + '\'' +
+        ", citationYear='" + citationYear + '\'' +
         '}';
   }
 
@@ -148,11 +160,11 @@ public class ActualDataset {
     ActualDataset that = (ActualDataset) o;
     return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && fileAccessRequest == that.fileAccessRequest && deaccessioned == that.deaccessioned
         && Objects.equals(doi, that.doi) && Objects.equals(licenseName, that.licenseName) && Objects.equals(licenseUri, that.licenseUri) && Objects.equals(
-        depositor, that.depositor);
+        depositor, that.depositor) && Objects.equals(citationYear, that.citationYear);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, majorVersionNr, minorVersionNr, fileAccessRequest, deaccessioned, licenseName, licenseUri, depositor);
+    return Objects.hash(doi, majorVersionNr, minorVersionNr, fileAccessRequest, deaccessioned, licenseName, licenseUri, depositor, citationYear);
   }
 }

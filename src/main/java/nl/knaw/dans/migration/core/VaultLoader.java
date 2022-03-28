@@ -126,7 +126,7 @@ public class VaultLoader extends ExpectedLoader {
       );
       expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
     }
-    log.trace("bag-info.txt created: " + bagInfo.getCreated().substring(0,4));
+    expectedDataset.setCitationYear(bagInfo.getCreated().substring(0,4));
     expectedDataset.setDoi(doi);
     saveExpectedDataset(expectedDataset);
   }

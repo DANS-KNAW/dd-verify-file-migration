@@ -45,7 +45,7 @@ public class SolrFields {
         available = record.get(0).trim();
         creator = record.get(2).trim();
         state = record.get(3).trim();
-        date = record.get(4).trim();
+        date = record.get(4).trim().substring(0,4);
         String[] dcRights = record.get(1).trim()
                 .replaceAll("^\"", "") // strip leading quote
                 .replaceAll("\"$", "") // strip trailing quote

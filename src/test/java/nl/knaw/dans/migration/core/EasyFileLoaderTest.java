@@ -85,6 +85,7 @@ public class EasyFileLoaderTest {
     expectedDataset.setDepositor("somebody");
     expectedDataset.setDoi("10.80270/test-nySe-x6f-kf66");
     expectedDataset.setAccessCategory(AccessCategory.NO_ACCESS);
+    expectedDataset.setCitationYear("2022");
     ExpectedDatasetDAO expectedDatasetDAO = createMock(ExpectedDatasetDAO.class);
     expectSuccess(expectedDatasetDAO, expectedDataset);
 
