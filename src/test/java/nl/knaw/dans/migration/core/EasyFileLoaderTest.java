@@ -58,7 +58,7 @@ public class EasyFileLoaderTest {
 
     @Override
     protected String readEmd(String datasetId) {
-      return "<ddm><license>blabla</license></ddm>";
+      return "<ddm><license>https://creativecommons.org/publicdomain/zero/1.0/</license></ddm>";
     }
 
     static URI dummyBaseUri(){
@@ -119,6 +119,15 @@ public class EasyFileLoaderTest {
 
   @Test
   public void dd874() {
+    ExpectedDataset expectedDataset = new ExpectedDataset();
+    expectedDataset.setDepositor("somebody");
+    expectedDataset.setDoi("10.80270/test-nySe-x6f-kf66");
+    expectedDataset.setAccessCategory(AccessCategory.OPEN_ACCESS);
+    expectedDataset.setCitationYear("2022");
+    expectedDataset.setLicenseUrl("https://creativecommons.org/publicdomain/zero/1.0/");
+    expectedDataset.setLicenseName("CC0-1.0");
+    ExpectedDatasetDAO expectedDatasetDAO = createMock(ExpectedDatasetDAO.class);
+    expectSuccess(expectedDatasetDAO, expectedDataset);
 
     FedoraToBagCsv csv = mockCSV("OK", "blabla");
     EasyFileDAO easyFileDAO = mockEasyFileDAO();
@@ -126,10 +135,10 @@ public class EasyFileLoaderTest {
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(expectedFileDAO, ef);
 
-    replay(csv, easyFileDAO, expectedFileDAO);
+    replay(csv, easyFileDAO, expectedFileDAO, expectedDatasetDAO);
     String expectedSolr = "\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\",somebody,PUBLISHED,2022-03-25";
-    new Loader(expectedSolr, easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv);
-    verify(csv, easyFileDAO, expectedFileDAO);
+    new Loader(expectedSolr, easyFileDAO, expectedFileDAO, expectedDatasetDAO).loadFromCsv(csv);
+    verify(csv, easyFileDAO, expectedFileDAO, expectedDatasetDAO);
   }
 
   @Test

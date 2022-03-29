@@ -36,8 +36,7 @@ public class Mapping {
             .withIgnoreSurroundingSpaces()
             .withRecordSeparator(System.lineSeparator());
 
-    static public Map<String, String> load(File configDir, String... header) {
-        File csvFile = new File(configDir + "/easy-users.csv");
+    static public Map<String, String> load(File csvFile, String... header) {
         if (!csvFile.exists() || 0 == csvFile.length()) {
             throw new IllegalStateException("No (content in) " + csvFile);
         }
@@ -47,11 +46,11 @@ public class Mapping {
         } catch (IOException e) {
             throw new IllegalStateException("Can't read " + csvFile, e);
         }
-        HashMap<String, String> accountSubstitutes = new HashMap<>();
-        records.forEach(csvRecord -> accountSubstitutes.put(
+        HashMap<String, String> mapping = new HashMap<>();
+        records.forEach(csvRecord -> mapping.put(
                 csvRecord.get(header[0]), csvRecord.get(header[1]))
         );
-        return accountSubstitutes;
+        return mapping;
     }
 
 }

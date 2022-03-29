@@ -39,8 +39,8 @@ public class ExpectedLoader {
   public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, File configDir) {
     this.expectedFileDAO = expectedFileDAO;
     this.expectedDatasetDAO = expectedDatasetDAO;
-    this.userToEmail = Mapping.load(configDir, "UID", "email");
-    this.licensesUrlToName = Mapping.load(configDir,"url","name");
+    this.userToEmail = Mapping.load(new File(configDir + "/easy-users.csv"), "UID", "email");
+    this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"),"url","name");
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights) {
@@ -95,7 +95,7 @@ public class ExpectedLoader {
     if (null != expected.getLicenseUrl()) {
       String url = expected.getLicenseUrl()
               .replace("https://", "http://")
-              .replaceAll("/$", "");
+              .replaceAll("(.html|.txt|.pdf)?/$", "");
       expected.setLicenseName(licensesUrlToName.getOrDefault(url, null));
     }
     log.trace(expected.toString());

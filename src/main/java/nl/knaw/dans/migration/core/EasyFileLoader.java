@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.migration.core;
 
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
@@ -43,7 +44,7 @@ public class EasyFileLoader extends ExpectedLoader {
 
   private final EasyFileDAO easyFileDAO;
   private final URI solrUri;
-  private URI fedoraUri;
+  private final URI fedoraUri;
 
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
@@ -69,7 +70,7 @@ public class EasyFileLoader extends ExpectedLoader {
         byte[] emdBytes = readEmd(csv.getDatasetId())
             .getBytes(StandardCharsets.UTF_8);
         String license = parseLicense(new ByteArrayInputStream(emdBytes), solrFields.accessCategory);
-       expected.setLicenseUrl(license);
+        expected.setLicenseUrl(license);
       }
       // so far we collected dataset metadata, we will store it into the DB as the very last action
       // thus we don't write anything when reading something fails
@@ -119,6 +120,7 @@ public class EasyFileLoader extends ExpectedLoader {
     }
   }
 
+  @UnitOfWork("easyBundle")
   public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {
     return easyFileDAO.findByDatasetId(csv.getDatasetId());
   }
