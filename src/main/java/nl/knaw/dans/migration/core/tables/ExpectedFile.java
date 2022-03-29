@@ -25,12 +25,17 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
 @IdClass(ExpectedFileKey.class)
-@Table(name = "expected_files")
+@Table(name = "expected_files",
+       indexes = {
+           @Index(name = "accessible_index", columnList = "accessible_to")
+       }
+)
 public class ExpectedFile {
     // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 

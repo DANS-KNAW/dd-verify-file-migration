@@ -23,12 +23,17 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
 @IdClass(ActualFileKey.class)
-@Table(name = "actual_files")
+@Table(name = "actual_files",
+       indexes = {
+           @Index(name = "path_index", columnList = "actual_path")
+       }
+)
 public class ActualFile {
   // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 

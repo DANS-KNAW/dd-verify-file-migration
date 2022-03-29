@@ -63,6 +63,7 @@ public class EasyFileLoader extends ExpectedLoader {
       DatasetRights datasetRights = solrFields.datasetRights();
       ExpectedDataset expected = datasetRights.expectedDataset(solrFields.creator);
       expected.setDoi(csv.getDoi());
+      expected.setCitationYear(solrFields.date);
       expected.setDeleted("DELETED".equals(solrFields.state));
       if (!AccessCategory.NO_ACCESS.equals(solrFields.accessCategory)) {
         byte[] emdBytes = readEmd(csv.getDatasetId())
@@ -76,6 +77,7 @@ public class EasyFileLoader extends ExpectedLoader {
         fedoraFiles(csv, datasetRights.defaultFileRights);
       }
       expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights);
+      log.trace("solr.emd_date_created_formatted: " + solrFields.date.substring(0,4));
       saveExpectedDataset(expected);
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal

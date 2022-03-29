@@ -42,19 +42,21 @@ public class ExpectedDataset {
     @Column(name="access_category")
     private String accessCategory;
 
-    @Nullable
+    @Column(name="deleted")
+    private boolean deleted;
+
+    @Column(name = "depositor")
+    private String depositor;
+
+    @Column(name="citation_year")
+    private String citationYear;
+
     @Column(name="embargo_date")
     private String embargoDate;
 
     @Nullable
     @Column(name="license")
     private String license;
-
-    @Column(name="deleted")
-    private boolean deleted;
-
-    @Column(name = "depositor")
-    private String depositor;
 
     public String getDoi() {
         return doi;
@@ -99,12 +101,20 @@ public class ExpectedDataset {
         this.license = license;
     }
 
-    public boolean getDeleted() {
+    public boolean isDeleted() {
         return deleted;
     }
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getCitationYear() {
+        return citationYear;
+    }
+
+    public void setCitationYear(String citationYear) {
+        this.citationYear = citationYear;
     }
 
     @Override
@@ -114,8 +124,9 @@ public class ExpectedDataset {
             ", accessCategory='" + accessCategory + '\'' +
             ", embargoDate='" + embargoDate + '\'' +
             ", license='" + license + '\'' +
-            ", deleted='" + deleted + '\'' +
+            ", deleted=" + deleted +
             ", depositor='" + depositor + '\'' +
+            ", citationYear='" + citationYear + '\'' +
             '}';
     }
 
@@ -126,12 +137,12 @@ public class ExpectedDataset {
         if (o == null || getClass() != o.getClass())
             return false;
         ExpectedDataset that = (ExpectedDataset) o;
-        return Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(embargoDate, that.embargoDate)
-            && Objects.equals(license, that.license) && Objects.equals(deleted, that.deleted) && Objects.equals(depositor, that.depositor);
+        return deleted == that.deleted && Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(embargoDate,
+            that.embargoDate) && Objects.equals(license, that.license) && Objects.equals(depositor, that.depositor) && Objects.equals(citationYear, that.citationYear);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(doi, accessCategory, embargoDate, license, deleted, depositor);
+        return Objects.hash(doi, accessCategory, embargoDate, license, deleted, depositor, citationYear);
     }
 }

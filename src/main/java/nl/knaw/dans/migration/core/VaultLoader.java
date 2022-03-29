@@ -28,6 +28,7 @@ import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -125,6 +126,7 @@ public class VaultLoader extends ExpectedLoader {
       );
       expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
     }
+    expectedDataset.setCitationYear(bagInfo.getCreated().substring(0,4));
     expectedDataset.setDoi(doi);
     saveExpectedDataset(expectedDataset);
   }

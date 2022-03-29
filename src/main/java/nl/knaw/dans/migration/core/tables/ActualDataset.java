@@ -20,12 +20,17 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
 @IdClass(ActualDatasetKey.class)
-@Table(name = "actual_datasets")
+@Table(name = "actual_datasets",
+       indexes = {
+           @Index(name = "doi_index", columnList = "doi")
+       }
+)
 public class ActualDataset {
   // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 
@@ -59,6 +64,9 @@ public class ActualDataset {
   @Nullable
   @Column(name="depositor")
   private String depositor;
+
+  @Column(name="citation_year")
+  private String citationYear;
 
   public String getDoi() {
     return doi;
@@ -125,6 +133,14 @@ public class ActualDataset {
     this.depositor = depositor;
   }
 
+  public String getCitationYear() {
+    return citationYear;
+  }
+
+  public void setCitationYear(String citationYear) {
+    this.citationYear = citationYear;
+  }
+
   @Override
   public String toString() {
     return "ActualDataset{" +
@@ -136,6 +152,7 @@ public class ActualDataset {
         ", licenseName='" + licenseName + '\'' +
         ", licenseUri='" + licenseUri + '\'' +
         ", depositor='" + depositor + '\'' +
+        ", citationYear='" + citationYear + '\'' +
         '}';
   }
 
@@ -148,11 +165,11 @@ public class ActualDataset {
     ActualDataset that = (ActualDataset) o;
     return majorVersionNr == that.majorVersionNr && minorVersionNr == that.minorVersionNr && fileAccessRequest == that.fileAccessRequest && deaccessioned == that.deaccessioned
         && Objects.equals(doi, that.doi) && Objects.equals(licenseName, that.licenseName) && Objects.equals(licenseUri, that.licenseUri) && Objects.equals(
-        depositor, that.depositor);
+        depositor, that.depositor) && Objects.equals(citationYear, that.citationYear);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, majorVersionNr, minorVersionNr, fileAccessRequest, deaccessioned, licenseName, licenseUri, depositor);
+    return Objects.hash(doi, majorVersionNr, minorVersionNr, fileAccessRequest, deaccessioned, licenseName, licenseUri, depositor, citationYear);
   }
 }

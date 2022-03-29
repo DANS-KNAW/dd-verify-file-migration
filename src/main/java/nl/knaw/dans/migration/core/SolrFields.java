@@ -31,12 +31,13 @@ public class SolrFields {
 
     private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
-    public static String requestedFields = "emd_date_available_formatted,dc_rights,amd_depositor_id,ds_state";
+    public static String requestedFields = "emd_date_available_formatted,dc_rights,amd_depositor_id,ds_state,emd_date_created_formatted";
     private static final CSVFormat solrFormat = CSVFormat.RFC4180.withDelimiter(',');
     final String available;
     final String creator;
     final AccessCategory accessCategory;
     final String state;
+    final String date;
 
     SolrFields (String line) throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(line.getBytes(StandardCharsets.UTF_8));
@@ -44,6 +45,7 @@ public class SolrFields {
         available = record.get(0).trim();
         creator = record.get(2).trim();
         state = record.get(3).trim();
+        date = record.get(4).trim().substring(0,4);
         String[] dcRights = record.get(1).trim()
                 .replaceAll("^\"", "") // strip leading quote
                 .replaceAll("\"$", "") // strip trailing quote
