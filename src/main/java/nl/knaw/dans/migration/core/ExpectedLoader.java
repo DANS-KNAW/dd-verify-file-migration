@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.migration.core;
 
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
@@ -81,10 +82,12 @@ public class ExpectedLoader {
     }
   }
 
+  @UnitOfWork("hibernate")
   public void saveExpectedFile(ExpectedFile expected) {
       expectedFileDAO.create(expected);
   }
 
+  @UnitOfWork("hibernate")
   public void saveExpectedDataset(ExpectedDataset expected) {
     String depositor = expected.getDepositor();
     expected.setDepositor(userToEmail.getOrDefault(depositor, depositor));

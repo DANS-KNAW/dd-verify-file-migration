@@ -17,6 +17,7 @@ package nl.knaw.dans.migration.core;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.model.RoleAssignmentReadOnly;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
@@ -48,11 +49,13 @@ public class DataverseLoader {
         this.actualDatasetDAO = actualDatasetDAO;
     }
 
+    @UnitOfWork("hibernate")
     public void saveActualFile(ActualFile actual) {
         log.debug(actual.toString());
         actualFileDAO.create(actual);
     }
 
+    @UnitOfWork("hibernate")
     public void saveActualDataset(ActualDataset actual) {
         log.debug(actual.toString());
         actualDatasetDAO.create(actual);

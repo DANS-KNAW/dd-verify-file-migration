@@ -25,7 +25,6 @@ import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
 import nl.knaw.dans.migration.core.EasyFileLoader;
-import nl.knaw.dans.migration.core.EasyFileLoaderImpl;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
@@ -92,7 +91,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, verificationBundle)
             .create(
-                EasyFileLoaderImpl.class,
+                EasyFileLoader.class,
                 new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, ExpectedDatasetDAO.class, URI.class, URI.class, File.class},
                 new Object[] {
                         new EasyFileDAO(easyBundle.getSessionFactory()),

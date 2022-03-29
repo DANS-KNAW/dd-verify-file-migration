@@ -65,6 +65,7 @@ public class VaultLoader extends ExpectedLoader {
     this.bagStoreBaseUri = bagStoreBaseUri;
     this.bagIndexBaseUri = bagIndexBaseUri;
 
+
     mapper = new ObjectMapper();
     SimpleModule module = new SimpleModule();
     module.addDeserializer(MetadataField.class, new MetadataFieldDeserializer());

@@ -30,7 +30,6 @@ import nl.knaw.dans.lib.dataverse.model.search.SearchItemType;
 import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
 import nl.knaw.dans.migration.core.DataverseLoader;
-import nl.knaw.dans.migration.core.DataverseLoaderImpl;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
 import nl.knaw.dans.migration.db.ActualDatasetDAO;
 import nl.knaw.dans.migration.db.ActualFileDAO;
@@ -86,7 +85,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
         DataverseLoader proxy = new UnitOfWorkAwareProxyFactory(verificationBundle)
             .create(
-                DataverseLoaderImpl.class,
+                DataverseLoader.class,
                 new Class[] { DataverseClient.class, ActualFileDAO.class , ActualDatasetDAO.class},
                 new Object[] {
                         client,
