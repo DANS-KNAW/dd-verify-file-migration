@@ -53,8 +53,8 @@ public class ExpectedLoader {
       expectedFile.setRemovedOriginalDirectory(false);
       expectedFile.setRemovedDuplicateFileCount(0);
       expectedFile.setTransformedName(false);
-      expectedFile.setDefaultRights(datasetRights);
       expectedFile.setVisibleTo("ANONYMOUS");
+      expectedFile.setAccessibleTo("ANONYMOUS");
       retriedSave(expectedFile);
     }
   }
