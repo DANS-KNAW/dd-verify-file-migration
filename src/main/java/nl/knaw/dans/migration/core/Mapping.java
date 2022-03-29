@@ -29,29 +29,27 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.csv.CSVFormat.RFC4180;
 
-public class Accounts {
-    private static final String id = "UID";
-    private static final String email = "email";
-    private static final CSVFormat format = RFC4180.withHeader(id, email)
+public class Mapping {
+    private static final CSVFormat format = RFC4180
             .withDelimiter(',')
             .withFirstRecordAsHeader()
             .withIgnoreSurroundingSpaces()
             .withRecordSeparator(System.lineSeparator());
 
-    static public Map<String, String> load(File configDir) {
+    static public Map<String, String> load(File configDir, String... header) {
         File csvFile = new File(configDir + "/easy-users.csv");
         if (!csvFile.exists() || 0 == csvFile.length()) {
             throw new IllegalStateException("No (content in) " + csvFile);
         }
         List<CSVRecord> records;
         try {
-            records = CSVParser.parse(new FileInputStream(csvFile), UTF_8, format).getRecords();
+            records = CSVParser.parse(new FileInputStream(csvFile), UTF_8, format.withHeader(header)).getRecords();
         } catch (IOException e) {
             throw new IllegalStateException("Can't read " + csvFile, e);
         }
         HashMap<String, String> accountSubstitutes = new HashMap<>();
         records.forEach(csvRecord -> accountSubstitutes.put(
-                csvRecord.get(id), csvRecord.get(email))
+                csvRecord.get(header[0]), csvRecord.get(header[1]))
         );
         return accountSubstitutes;
     }

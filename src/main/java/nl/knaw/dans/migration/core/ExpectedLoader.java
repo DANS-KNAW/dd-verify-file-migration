@@ -32,12 +32,14 @@ public class ExpectedLoader {
 
   private final ExpectedFileDAO expectedFileDAO;
   private final ExpectedDatasetDAO expectedDatasetDAO;
-  private final Map<String, String> accountSubStitues;
+  private final Map<String, String> userToEmail;
+  private final Map<String, String> licensesUrlToName;
 
   public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, File configDir) {
     this.expectedFileDAO = expectedFileDAO;
     this.expectedDatasetDAO = expectedDatasetDAO;
-    this.accountSubStitues = Accounts.load(configDir);
+    this.userToEmail = Mapping.load(configDir, "UID", "email");
+    this.licensesUrlToName = Mapping.load(configDir,"url","name");
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights) {
@@ -80,14 +82,20 @@ public class ExpectedLoader {
   }
 
   public void saveExpectedFile(ExpectedFile expected) {
-      log.trace(expected.toString());
       expectedFileDAO.create(expected);
   }
 
   public void saveExpectedDataset(ExpectedDataset expected) {
-      String depositor = expected.getDepositor();
-      expected.setDepositor(accountSubStitues.getOrDefault(depositor, depositor));
-      log.trace(expected.toString());
-      expectedDatasetDAO.create(expected);
+    String depositor = expected.getDepositor();
+    expected.setDepositor(userToEmail.getOrDefault(depositor, depositor));
+
+    if (null != expected.getLicenseUrl()) {
+      String url = expected.getLicenseUrl()
+              .replace("https://", "http://")
+              .replaceAll("/$", "");
+      expected.setLicenseName(licensesUrlToName.getOrDefault(url, null));
+    }
+    log.trace(expected.toString());
+    expectedDatasetDAO.create(expected);
   }
 }

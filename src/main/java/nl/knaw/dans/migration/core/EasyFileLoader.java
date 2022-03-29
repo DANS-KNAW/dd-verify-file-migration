@@ -69,7 +69,7 @@ public class EasyFileLoader extends ExpectedLoader {
         byte[] emdBytes = readEmd(csv.getDatasetId())
             .getBytes(StandardCharsets.UTF_8);
         String license = parseLicense(new ByteArrayInputStream(emdBytes), solrFields.accessCategory);
-       expected.setLicense(license);
+        expected.setLicenseUrl(license);
       }
       // so far we collected dataset metadata, we will store it into the DB as the very last action
       // thus we don't write anything when reading something fails
