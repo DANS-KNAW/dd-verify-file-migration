@@ -93,10 +93,7 @@ public class ExpectedLoader {
     expected.setDepositor(userToEmail.getOrDefault(depositor, depositor));
 
     if (null != expected.getLicenseUrl()) {
-      String url = expected.getLicenseUrl()
-              .replace("https://", "http://")
-              .replaceAll("(.html|.txt|.pdf)?/$", "");
-      expected.setLicenseName(licensesUrlToName.getOrDefault(url, null));
+      expected.setLicenseName(licensesUrlToName.getOrDefault(expected.getLicenseUrl(), null));
     }
     log.trace(expected.toString());
     expectedDatasetDAO.create(expected);

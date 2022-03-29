@@ -58,7 +58,7 @@ public class EasyFileLoaderTest {
 
     @Override
     protected String readEmd(String datasetId) {
-      return "<ddm><license>https://creativecommons.org/publicdomain/zero/1.0/</license></ddm>";
+      return "<ddm><license>http://creativecommons.org/publicdomain/zero/1.0</license></ddm>";
     }
 
     static URI dummyBaseUri(){
@@ -124,7 +124,7 @@ public class EasyFileLoaderTest {
     expectedDataset.setDoi("10.80270/test-nySe-x6f-kf66");
     expectedDataset.setAccessCategory(AccessCategory.OPEN_ACCESS);
     expectedDataset.setCitationYear("2022");
-    expectedDataset.setLicenseUrl("https://creativecommons.org/publicdomain/zero/1.0/");
+    expectedDataset.setLicenseUrl("http://creativecommons.org/publicdomain/zero/1.0");
     expectedDataset.setLicenseName("CC0-1.0");
     ExpectedDatasetDAO expectedDatasetDAO = createMock(ExpectedDatasetDAO.class);
     expectSuccess(expectedDatasetDAO, expectedDataset);
