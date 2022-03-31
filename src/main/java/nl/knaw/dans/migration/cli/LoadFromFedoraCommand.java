@@ -43,6 +43,8 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
     private static final Logger log = LoggerFactory.getLogger(LoadFromFedoraCommand.class);
     private final HibernateBundle<DdVerifyMigrationConfiguration> easyBundle;
     private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle;
+    private final String WITH_FILES = "withFiles";
+    private final String CSV = "csv";
 
     /**
      * Creates a new environment command.
@@ -62,7 +64,11 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
     @Override
     public void configure(Subparser subparser) {
         super.configure(subparser);
-        subparser.addArgument("csv")
+        subparser.addArgument("-f", "--withFiles")
+            .dest(WITH_FILES)
+            .type(Boolean.class)
+            .help("The table expected_files is not filled without this option");
+        subparser.addArgument(CSV)
             .type(File.class)
             .nargs("+")
             .help("CSV file produced by easy-fedora-to-bag");
@@ -102,10 +108,10 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
                         new File(namespace.getString("file")).getParentFile(),
                 }
             );
-        for (File file : namespace.<File> getList("csv")) {
+        for (File file : namespace.<File> getList(CSV)) {
             log.info(file.toString());
             for (CSVRecord r : FedoraToBagCsv.parse(file)) {
-                proxy.loadFromCsv(new FedoraToBagCsv(r));
+                proxy.loadFromCsv(new FedoraToBagCsv(r), namespace.getBoolean(WITH_FILES));
             }
         }
     }

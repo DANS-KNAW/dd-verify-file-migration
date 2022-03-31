@@ -56,7 +56,7 @@ public class EasyFileLoader extends ExpectedLoader {
     this.fedoraUri = fedoraBaseUri.resolve("objects/");
   }
 
-  public void loadFromCsv(FedoraToBagCsv csv) {
+  public void loadFromCsv(FedoraToBagCsv csv, boolean withFiles) {
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {
@@ -74,11 +74,12 @@ public class EasyFileLoader extends ExpectedLoader {
       }
       // so far we collected dataset metadata, we will store it into the DB as the very last action
       // thus we don't write anything when reading something fails
-      if (!csv.getComment().contains("no payload")) {
-        fedoraFiles(csv, datasetRights.defaultFileRights);
+      if (withFiles) {
+        if (!csv.getComment().contains("no payload")) {
+          fedoraFiles(csv, datasetRights.defaultFileRights);
+        }
+        expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights);
       }
-      expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights);
-      log.trace("solr.emd_date_created_formatted: " + solrFields.date.substring(0,4));
       saveExpectedDataset(expected);
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal
