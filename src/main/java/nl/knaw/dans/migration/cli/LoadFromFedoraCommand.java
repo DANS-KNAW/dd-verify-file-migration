@@ -67,6 +67,9 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         subparser.addArgument("-f", "--withFiles")
             .dest(WITH_FILES)
             .type(Boolean.class)
+            .setConst(true)
+            .setDefault(false)
+            .nargs("?")
             .help("The table expected_files is not filled without this option");
         subparser.addArgument(CSV)
             .type(File.class)
