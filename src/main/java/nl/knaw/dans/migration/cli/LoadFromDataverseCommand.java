@@ -25,7 +25,6 @@ import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.SearchOptions;
 import nl.knaw.dans.lib.dataverse.model.search.DatasetResultItem;
-import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 import nl.knaw.dans.lib.dataverse.model.search.SearchItemType;
 import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
@@ -39,9 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 import static java.util.Collections.singletonList;
 
@@ -99,8 +95,11 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
             proxy.loadFromDataset(doi);
         else if (file == null) {
             log.info("No DOI(s) provided, loading all datasets");
-            Iterator<ResultItem> resultItems = client.search().iterator("*", datasetOption());
-            toDoiSet(resultItems).forEach(proxy::loadFromDataset);
+            client.search()
+                .iterator("*", datasetOption())
+                .forEachRemaining(item ->
+                    proxy.loadFromDataset(((DatasetResultItem) item).getGlobalId())
+                );
         }
         else {
             log.info("Loading DOIs found in {}", file);
@@ -116,16 +115,5 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         SearchOptions searchOptions = new SearchOptions();
         searchOptions.setTypes(singletonList(SearchItemType.dataset));
         return searchOptions;
-    }
-
-    private Set<String> toDoiSet(Iterator<ResultItem> itemIterator) {
-        Set<String> set = new HashSet<>();
-        while (itemIterator.hasNext()) {
-            DatasetResultItem ri = (DatasetResultItem) itemIterator.next();
-            String doi = ri.getGlobalId();
-            log.debug("id={} duplicate={} majorVersion={} minorVersion={} fileCount={} versionId={} ", doi, set.contains(doi), ri.getMajorVersion(), ri.getMinorVersion(), ri.getFileCount(), ri.getVersionId());
-            set.add(doi);
-        }
-        return set;
     }
 }
