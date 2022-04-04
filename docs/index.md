@@ -34,6 +34,7 @@ ARGUMENTS
         -d DOI, --doi DOI            The DOI for which to load the files,
                                      for example: 'doi:10.17026/dans-xtz-qa6j'
         --csv CSV                    CSV file produced by easy-fedora-to-bag
+        --UUIDs UUIDS                .txt file with bag ids
         -h, --help                   show this help message and exit
 
     load-from-vault [-h] (-u UUIDS | -U UUID | -s STORE) [file]
