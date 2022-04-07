@@ -28,7 +28,6 @@ import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -59,14 +58,12 @@ public class VaultLoader extends ExpectedLoader {
   private final URI bagIndexBaseUri;
   private final URI bagSeqUri;
   private final ObjectMapper mapper;
-  private final Map<String, String> accountSubStitues;
 
   public VaultLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
     super(expectedFileDAO, expectedDatasetDAO, configDir);
     bagSeqUri = bagIndexBaseUri.resolve("bag-sequence");
     this.bagStoreBaseUri = bagStoreBaseUri;
     this.bagIndexBaseUri = bagIndexBaseUri;
-    this.accountSubStitues = Accounts.load(configDir);
 
 
     mapper = new ObjectMapper();
@@ -117,8 +114,8 @@ public class VaultLoader extends ExpectedLoader {
     } else {
       String depositor = readDepositor(uuid);
       DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
-      expectedDataset = datasetRights.expectedDataset(accountSubStitues.getOrDefault(depositor, depositor));
-      expectedDataset.setLicense(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
+      expectedDataset = datasetRights.expectedDataset(depositor);
+      expectedDataset.setLicenseUrl(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
       // now that we collected everything from the bag, we start processing the files
       Map<String, FileRights> filesXml = readFileMeta(uuid);
       readManifest(uuid).forEach(m ->

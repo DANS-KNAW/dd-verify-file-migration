@@ -25,7 +25,6 @@ import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
 import nl.knaw.dans.migration.core.EasyFileLoader;
-import nl.knaw.dans.migration.core.EasyFileLoaderImpl;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
@@ -44,6 +43,8 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
     private static final Logger log = LoggerFactory.getLogger(LoadFromFedoraCommand.class);
     private final HibernateBundle<DdVerifyMigrationConfiguration> easyBundle;
     private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle;
+    private final String WITH_FILES = "withFiles";
+    private final String CSV = "csv";
 
     /**
      * Creates a new environment command.
@@ -63,7 +64,14 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
     @Override
     public void configure(Subparser subparser) {
         super.configure(subparser);
-        subparser.addArgument("csv")
+        subparser.addArgument("-f", "--withFiles")
+            .dest(WITH_FILES)
+            .type(Boolean.class)
+            .setConst(true)
+            .setDefault(false)
+            .nargs("?")
+            .help("The table expected_files is not filled without this option");
+        subparser.addArgument(CSV)
             .type(File.class)
             .nargs("+")
             .help("CSV file produced by easy-fedora-to-bag");
@@ -92,7 +100,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, verificationBundle)
             .create(
-                EasyFileLoaderImpl.class,
+                EasyFileLoader.class,
                 new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, ExpectedDatasetDAO.class, URI.class, URI.class, File.class},
                 new Object[] {
                         new EasyFileDAO(easyBundle.getSessionFactory()),
@@ -103,10 +111,10 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
                         new File(namespace.getString("file")).getParentFile(),
                 }
             );
-        for (File file : namespace.<File> getList("csv")) {
+        for (File file : namespace.<File> getList(CSV)) {
             log.info(file.toString());
             for (CSVRecord r : FedoraToBagCsv.parse(file)) {
-                proxy.loadFromCsv(new FedoraToBagCsv(r));
+                proxy.loadFromCsv(new FedoraToBagCsv(r), namespace.getBoolean(WITH_FILES));
             }
         }
     }

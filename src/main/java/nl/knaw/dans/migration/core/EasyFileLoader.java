@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.migration.core;
 
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
@@ -43,7 +44,7 @@ public class EasyFileLoader extends ExpectedLoader {
 
   private final EasyFileDAO easyFileDAO;
   private final URI solrUri;
-  private URI fedoraUri;
+  private final URI fedoraUri;
 
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
@@ -55,7 +56,7 @@ public class EasyFileLoader extends ExpectedLoader {
     this.fedoraUri = fedoraBaseUri.resolve("objects/");
   }
 
-  public void loadFromCsv(FedoraToBagCsv csv) {
+  public void loadFromCsv(FedoraToBagCsv csv, boolean withFiles) {
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {
@@ -69,15 +70,16 @@ public class EasyFileLoader extends ExpectedLoader {
         byte[] emdBytes = readEmd(csv.getDatasetId())
             .getBytes(StandardCharsets.UTF_8);
         String license = parseLicense(new ByteArrayInputStream(emdBytes), solrFields.accessCategory);
-       expected.setLicense(license);
+        expected.setLicenseUrl(license);
       }
       // so far we collected dataset metadata, we will store it into the DB as the very last action
       // thus we don't write anything when reading something fails
-      if (!csv.getComment().contains("no payload")) {
-        fedoraFiles(csv, datasetRights.defaultFileRights);
+      if (withFiles) {
+        if (!csv.getComment().contains("no payload")) {
+          fedoraFiles(csv, datasetRights.defaultFileRights);
+        }
+        expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights);
       }
-      expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights);
-      log.trace("solr.emd_date_created_formatted: " + solrFields.date.substring(0,4));
       saveExpectedDataset(expected);
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal
@@ -119,6 +121,7 @@ public class EasyFileLoader extends ExpectedLoader {
     }
   }
 
+  @UnitOfWork("easyBundle")
   public List<EasyFile> getByDatasetId(FedoraToBagCsv csv) {
     return easyFileDAO.findByDatasetId(csv.getDatasetId());
   }

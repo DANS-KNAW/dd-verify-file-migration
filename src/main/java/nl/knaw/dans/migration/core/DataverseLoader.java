@@ -17,6 +17,8 @@ package nl.knaw.dans.migration.core;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import io.dropwizard.hibernate.UnitOfWork;
+import nl.knaw.dans.lib.dataverse.DatasetApi;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.model.RoleAssignmentReadOnly;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
@@ -48,11 +50,13 @@ public class DataverseLoader {
         this.actualDatasetDAO = actualDatasetDAO;
     }
 
+    @UnitOfWork("hibernate")
     public void saveActualFile(ActualFile actual) {
         log.debug(actual.toString());
         actualFileDAO.create(actual);
     }
 
+    @UnitOfWork("hibernate")
     public void saveActualDataset(ActualDataset actual) {
         log.debug(actual.toString());
         actualDatasetDAO.create(actual);
@@ -64,9 +68,12 @@ public class DataverseLoader {
         log.info("Reading {} from dataverse", doi);
         List<DatasetVersion> versions = new ArrayList<>();
         String depositor = "";
+        String publicationDate = "";
         try {
-            versions = client.dataset(doi).getAllVersions().getData();
-            depositor = client.dataset(doi).listRoleAssignments().getData().stream()
+            DatasetApi dataset = client.dataset(doi);
+            versions = dataset.getAllVersions().getData();
+            publicationDate = dataset.viewLatestVersion().getData().getPublicationDate();
+            depositor = dataset.listRoleAssignments().getData().stream()
                 .filter(ra -> "contributorplus".equals(ra.get_roleAlias()))
                 .findFirst()
                 .map(RoleAssignmentReadOnly::getAssignee)
@@ -108,11 +115,7 @@ public class DataverseLoader {
             actualDataset.setDoi(shortDoi);
             actualDataset.setDepositor(depositor);
             actualDataset.setFileAccessRequest(lastVersion.isFileAccessRequest());
-            v.getMetadataBlocks()
-                .get("citation").getFields().stream()
-                .filter(field -> "dateOfDeposit".equals(field.getTypeName()))
-                .map(field -> ((PrimitiveSingleValueField)field).getValue())
-                .forEach(date -> actualDataset.setCitationYear(date.substring(0,4)));
+            actualDataset.setCitationYear(publicationDate.substring(0,4));
             saveActualDataset(actualDataset);
         }
     }

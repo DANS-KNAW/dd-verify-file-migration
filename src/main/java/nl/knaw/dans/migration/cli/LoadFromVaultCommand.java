@@ -25,7 +25,6 @@ import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
 import nl.knaw.dans.migration.core.VaultLoader;
-import nl.knaw.dans.migration.core.VaultLoaderImpl;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import org.apache.commons.io.FileUtils;
@@ -81,7 +80,7 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
         VaultLoader proxy = new UnitOfWorkAwareProxyFactory(verificationBundle)
             .create(
-                VaultLoaderImpl.class,
+                VaultLoader.class,
                 new Class[] { ExpectedFileDAO.class, ExpectedDatasetDAO.class , URI.class, URI.class, File.class },
                 new Object[] {
                         new ExpectedFileDAO(verificationBundleSessionFactory),

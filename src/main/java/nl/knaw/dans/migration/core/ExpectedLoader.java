@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.migration.core;
 
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
@@ -32,12 +33,14 @@ public class ExpectedLoader {
 
   private final ExpectedFileDAO expectedFileDAO;
   private final ExpectedDatasetDAO expectedDatasetDAO;
-  private final Map<String, String> accountSubStitues;
+  private final Map<String, String> userToEmail;
+  private final Map<String, String> licensesUrlToName;
 
   public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, File configDir) {
     this.expectedFileDAO = expectedFileDAO;
     this.expectedDatasetDAO = expectedDatasetDAO;
-    this.accountSubStitues = Accounts.load(configDir);
+    this.userToEmail = Mapping.load(new File(configDir + "/easy-users.csv"), "UID", "email");
+    this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"),"url","name");
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights) {
@@ -79,15 +82,20 @@ public class ExpectedLoader {
     }
   }
 
+  @UnitOfWork("hibernate")
   public void saveExpectedFile(ExpectedFile expected) {
-      log.trace(expected.toString());
       expectedFileDAO.create(expected);
   }
 
+  @UnitOfWork("hibernate")
   public void saveExpectedDataset(ExpectedDataset expected) {
-      String depositor = expected.getDepositor();
-      expected.setDepositor(accountSubStitues.getOrDefault(depositor, depositor));
-      log.trace(expected.toString());
-      expectedDatasetDAO.create(expected);
+    String depositor = expected.getDepositor();
+    expected.setDepositor(userToEmail.getOrDefault(depositor, depositor));
+
+    if (null != expected.getLicenseUrl()) {
+      expected.setLicenseName(licensesUrlToName.getOrDefault(expected.getLicenseUrl(), null));
+    }
+    log.trace(expected.toString());
+    expectedDatasetDAO.create(expected);
   }
 }
