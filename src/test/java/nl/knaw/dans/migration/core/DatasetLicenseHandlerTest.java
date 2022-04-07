@@ -31,7 +31,7 @@ public class DatasetLicenseHandlerTest {
     public void parseDD_874() throws IOException {
         String license = DatasetLicenseHandler
             .parseLicense(new FileInputStream("src/test/resources/ddm/DD-874.xml"), AccessCategory.OPEN_ACCESS_FOR_REGISTERED_USERS);
-        assertEquals(DatasetLicenseHandler.cc0, license);
+        assertEquals("http://creativecommons.org/licenses/by/4.0", license);
     }
 
     @Test
