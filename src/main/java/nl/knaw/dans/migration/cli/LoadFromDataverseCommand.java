@@ -25,6 +25,7 @@ import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
 import nl.knaw.dans.lib.dataverse.SearchOptions;
 import nl.knaw.dans.lib.dataverse.model.search.DatasetResultItem;
+import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 import nl.knaw.dans.lib.dataverse.model.search.SearchItemType;
 import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
@@ -33,12 +34,16 @@ import nl.knaw.dans.migration.core.FedoraToBagCsv;
 import nl.knaw.dans.migration.db.ActualDatasetDAO;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.function.Consumer;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
 
 public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<DdVerifyMigrationConfiguration> {
@@ -72,6 +77,11 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
             .dest("csv")
             .type(File.class)
             .help("CSV file produced by easy-fedora-to-bag");
+
+        g.addArgument("--UUIDs")
+            .dest("uuids")
+            .type(File.class)
+            .help(".txt file with bag ids");
     }
 
     @Override
@@ -91,15 +101,23 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
             );
         String doi = namespace.getString("doi");
         String file = namespace.getString("csv");
+        String uuids = namespace.getString("uuids");
         if (doi != null)
             proxy.loadFromDataset(doi);
+        else if (uuids != null) {
+            log.info("Loading UUIDs found in {}", uuids);
+            FileUtils.readLines(new File(uuids), UTF_8).forEach(line ->
+                doFirst(
+                    datasetIterator(client, "dansBagId:urn:uuid:" + line),
+                    item -> proxy.loadFromDataset(((DatasetResultItem) item).getGlobalId())
+                )
+            );
+        }
         else if (file == null) {
-            log.info("No DOI(s) provided, loading all datasets");
-            client.search()
-                .iterator("*", datasetOption())
-                .forEachRemaining(item ->
-                    proxy.loadFromDataset(((DatasetResultItem) item).getGlobalId())
-                );
+            log.info("No DOI(s)/UUIDs provided, loading all datasets");
+            datasetIterator(client, "*").forEachRemaining(
+                item -> proxy.loadFromDataset(((DatasetResultItem) item).getGlobalId())
+            );
         }
         else {
             log.info("Loading DOIs found in {}", file);
@@ -111,9 +129,15 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         }
     }
 
-    private SearchOptions datasetOption() {
+    private void doFirst(Iterator<ResultItem> iterator, Consumer<ResultItem> action) {
+        if (iterator.hasNext())
+            action.accept(iterator.next());
+    }
+
+    private Iterator<ResultItem> datasetIterator(DataverseClient client, String s) {
+        log.info("searching " + s);
         SearchOptions searchOptions = new SearchOptions();
         searchOptions.setTypes(singletonList(SearchItemType.dataset));
-        return searchOptions;
+        return client.search().iterator(s, searchOptions);
     }
 }
