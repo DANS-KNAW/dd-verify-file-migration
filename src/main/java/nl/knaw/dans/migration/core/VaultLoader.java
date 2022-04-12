@@ -85,16 +85,16 @@ public class VaultLoader extends ExpectedLoader {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
       if (bagSeq.length <= 1)
-        processBag(uuid.toString(), bagInfo);
+        processBag(uuid.toString(), bagInfo, 1, bagInfo.getDoi());
       else {
         List<BagInfo> bagInfos= StreamSupport
             .stream(Arrays.stream(bagSeq).spliterator(), false)
             .map(this::readBagInfo)
             .sorted(new BagInfoComparator()).collect(Collectors.toList());
-        int count = 0;
-        for (BagInfo info : bagInfos) {
-          log.trace("{} from sequence {}", ++count, info);
-          processBag(info.getBaseId(), info);
+        for (int i = 0; i < bagInfos.size(); i++) {
+          BagInfo info = bagInfos.get(i);
+          log.trace("{} from sequence {}", i, info);
+          processBag(info.getBaseId(), info, i, bagInfos.get(0).getDoi());
         }
       }
     }
@@ -103,8 +103,7 @@ public class VaultLoader extends ExpectedLoader {
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
-  private void processBag(String uuid, BagInfo bagInfo) {
-    String doi = bagInfo.getDoi();
+  private void processBag(String uuid, BagInfo bagInfo, int seqNr, String baseDoi) {
     byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
     ExpectedDataset expectedDataset;
     if (ddmBytes.length == 0) {
@@ -117,14 +116,17 @@ public class VaultLoader extends ExpectedLoader {
       expectedDataset = datasetRights.expectedDataset(depositor);
       expectedDataset.setLicenseUrl(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
       // now that we collected everything from the bag, we start processing the files
+      String currentDoi = bagInfo.getDoi(); // TODO use baseDoi, but what about seqNr?
       Map<String, FileRights> filesXml = readFileMeta(uuid);
       readManifest(uuid).forEach(m ->
-          createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
+          createExpected(currentDoi, m, filesXml, datasetRights.defaultFileRights)
       );
-      expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
+      expectedMigrationFiles(currentDoi, migrationFiles, datasetRights.defaultFileRights);
     }
     expectedDataset.setCitationYear(bagInfo.getCreated().substring(0,4));
-    expectedDataset.setDoi(doi);
+    // TODO Note that for fedora only one record is saved for original-versioned datasets
+    expectedDataset.setDoi(baseDoi);// TODO save currentDoi too, to match up with expectedFiles?
+    expectedDataset.setExpectedVersions(seqNr);
     saveExpectedDataset(expectedDataset);
   }
 

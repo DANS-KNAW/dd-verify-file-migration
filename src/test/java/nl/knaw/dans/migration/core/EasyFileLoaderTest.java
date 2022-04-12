@@ -87,6 +87,7 @@ public class EasyFileLoaderTest {
     expectedDataset.setDoi("10.80270/test-nySe-x6f-kf66");
     expectedDataset.setAccessCategory(AccessCategory.NO_ACCESS);
     expectedDataset.setCitationYear("2022");
+    expectedDataset.setExpectedVersions(1);
     ExpectedDatasetDAO expectedDatasetDAO = createMock(ExpectedDatasetDAO.class);
     expectSuccess(expectedDatasetDAO, expectedDataset);
 
@@ -127,6 +128,7 @@ public class EasyFileLoaderTest {
     expectedDataset.setCitationYear("2022");
     expectedDataset.setLicenseUrl("http://creativecommons.org/publicdomain/zero/1.0");
     expectedDataset.setLicenseName("CC0-1.0");
+    expectedDataset.setExpectedVersions(1);
     ExpectedDatasetDAO expectedDatasetDAO = createMock(ExpectedDatasetDAO.class);
     expectSuccess(expectedDatasetDAO, expectedDataset);
 
@@ -285,6 +287,7 @@ public class EasyFileLoaderTest {
     expect(mockedCSV.getComment()).andReturn(comment).anyTimes();
     expect(mockedCSV.getTransformation()).andReturn(type).anyTimes();
     expect(mockedCSV.getDoi()).andReturn(doi).anyTimes();
+    expect(mockedCSV.getUuid2()).andReturn("").anyTimes();
     expect(mockedCSV.getDatasetId()).andReturn(datasetId).anyTimes();
     return mockedCSV;
   }
