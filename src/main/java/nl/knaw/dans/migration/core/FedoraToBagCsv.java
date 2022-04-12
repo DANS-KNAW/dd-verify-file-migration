@@ -29,18 +29,24 @@ public class FedoraToBagCsv {
   private final String doi;
   private final String comment;
   private final String transformation;
+  private final String uuid1;
+  private final String uuid2;
   private final CSVRecord r;
 
   private static final String DATASET_ID_COLUMN = "easyDatasetId";
   private static final String DOI_COLUMN = "doi";
   private static final String COMMENT_COLUMN = "comment";
   private static final String TRANSFORMATION_TYPE_COLUMN = "transformationType";
+  private static final String UUID_1 = "uuid1";
+  private static final String UUID_2 = "uuid2";
 
   public FedoraToBagCsv(CSVRecord r) {
     datasetId = r.get(DATASET_ID_COLUMN);
     doi = r.get(DOI_COLUMN);
     comment = r.get(COMMENT_COLUMN);
     transformation = r.get(TRANSFORMATION_TYPE_COLUMN);
+    uuid1 = r.get(UUID_1);
+    uuid2 = r.get(UUID_2);
     this.r = r;
   }
 
@@ -52,7 +58,7 @@ public class FedoraToBagCsv {
   // see https://github.com/DANS-KNAW/easy-fedora-to-bag/blob/8ef3a0bad/src/main/scala/nl/knaw/dans/easy/fedoratobag/CsvRecord.scala#L42-L46
   private static final CSVFormat csvFormat = CSVFormat
       .RFC4180
-      .withHeader(DATASET_ID_COLUMN, "uuid1", "uuid2", DOI_COLUMN, "depositor", TRANSFORMATION_TYPE_COLUMN, COMMENT_COLUMN)
+      .withHeader(DATASET_ID_COLUMN, UUID_1, UUID_2, DOI_COLUMN, "depositor", TRANSFORMATION_TYPE_COLUMN, COMMENT_COLUMN)
       .withDelimiter(',')
       .withFirstRecordAsHeader()
       .withRecordSeparator(System.lineSeparator())
@@ -87,5 +93,13 @@ public class FedoraToBagCsv {
 
   public String getDatasetId() {
     return datasetId;
+  }
+
+  public String getUuid1() {
+    return uuid1;
+  }
+
+  public String getUuid2() {
+    return uuid2;
   }
 }

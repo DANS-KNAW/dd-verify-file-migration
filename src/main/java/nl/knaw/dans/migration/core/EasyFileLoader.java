@@ -22,6 +22,7 @@ import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -66,6 +67,9 @@ public class EasyFileLoader extends ExpectedLoader {
       expected.setDoi(csv.getDoi());
       expected.setCitationYear(solrFields.date);
       expected.setDeleted("DELETED".equals(solrFields.state));
+      if (StringUtils.isNotBlank(csv.getUuid2()))
+         expected.setExpectedVersions(2);
+      else expected.setExpectedVersions(1);
       if (!AccessCategory.NO_ACCESS.equals(solrFields.accessCategory)) {
         byte[] emdBytes = readEmd(csv.getDatasetId())
             .getBytes(StandardCharsets.UTF_8);
