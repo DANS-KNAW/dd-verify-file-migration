@@ -85,6 +85,7 @@ public class EasyFileLoaderTest {
     ExpectedDataset expectedDataset = new ExpectedDataset();
     expectedDataset.setDepositor("somebody");
     expectedDataset.setDoi("10.80270/test-nySe-x6f-kf66");
+    expectedDataset.setExpectedFilesDoi("10.80270/test-nySe-x6f-kf66");
     expectedDataset.setAccessCategory(AccessCategory.NO_ACCESS);
     expectedDataset.setCitationYear("2022");
     expectedDataset.setExpectedVersions(1);
@@ -124,6 +125,7 @@ public class EasyFileLoaderTest {
     ExpectedDataset expectedDataset = new ExpectedDataset();
     expectedDataset.setDepositor("somebody");
     expectedDataset.setDoi("10.80270/test-nySe-x6f-kf66");
+    expectedDataset.setExpectedFilesDoi("10.80270/test-nySe-x6f-kf66");
     expectedDataset.setAccessCategory(AccessCategory.OPEN_ACCESS);
     expectedDataset.setCitationYear("2022");
     expectedDataset.setLicenseUrl("http://creativecommons.org/publicdomain/zero/1.0");
@@ -169,12 +171,13 @@ public class EasyFileLoaderTest {
     uuidToVersions.forEach((uuid,count) -> {
       FedoraToBagCsv csv = createMock(FedoraToBagCsv.class);
       expect(csv.getComment()).andReturn("OK").once();
-      expect(csv.getDoi()).andReturn(doi).once();
+      expect(csv.getDoi()).andReturn(doi).times(2);
       expect(csv.getUuid2()).andReturn(uuid).once();
       expect(csv.getDatasetId()).andReturn(datasetId).times(2);// once to read solr, once to read EMD
 
       ExpectedDataset ed = new ExpectedDataset();
       ed.setDoi("10.80270/test-nySe-x6f-kf66");
+      ed.setExpectedFilesDoi("10.80270/test-nySe-x6f-kf66");
       ed.setAccessCategory(AccessCategory.GROUP_ACCESS);
       ed.setDeleted(false);
       ed.setDepositor("somebody");

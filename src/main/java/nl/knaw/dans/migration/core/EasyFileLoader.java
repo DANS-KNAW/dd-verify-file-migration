@@ -65,6 +65,7 @@ public class EasyFileLoader extends ExpectedLoader {
       DatasetRights datasetRights = solrFields.datasetRights();
       ExpectedDataset expected = datasetRights.expectedDataset(solrFields.creator);
       expected.setDoi(csv.getDoi());
+      expected.setExpectedFilesDoi(csv.getDoi());
       expected.setCitationYear(solrFields.date);
       expected.setDeleted("DELETED".equals(solrFields.state));
       if (StringUtils.isNotBlank(csv.getUuid2()))
