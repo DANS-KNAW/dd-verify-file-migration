@@ -37,10 +37,9 @@ public class DatasetRights {
         this.defaultFileRights = defaultFileRights;
     }
 
-    public ExpectedDataset expectedDataset(String depositor) {
+    public ExpectedDataset expectedDataset() {
         // ExpectedLoader.saveExpectedDataset applies account-substitutes.csv to depositor
         ExpectedDataset expectedDataset = new ExpectedDataset();
-        expectedDataset.setDepositor(depositor);
         expectedDataset.setAccessCategory(accessCategory);
         expectedDataset.setEmbargoDate(defaultFileRights);
         return expectedDataset;
