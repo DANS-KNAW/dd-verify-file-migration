@@ -49,6 +49,7 @@ public class DataverseLoader {
         this.actualDatasetDAO = actualDatasetDAO;
     }
 
+    @UnitOfWork("hibernate")
     public void loadFromDataset(String doi) {
         if (StringUtil.isEmpty(doi))
             return; // workaround
@@ -98,25 +99,15 @@ public class DataverseLoader {
             actualDataset.setFileAccessRequest(lastVersion.isFileAccessRequest());
             actualDataset.setCitationYear(publicationDate.substring(0,4));
             loadFiles(shortDoi, v, actualDataset);
+            actualDatasetDAO.create(actualDataset);
         }
     }
 
     private void loadFiles(String doi, DatasetVersion v, ActualDataset actualDataset) {
         for (FileMeta f : v.getFiles()) {
-            saveActualFile(toActual(f, doi, v));
+            actualFileDAO.create(toActual(f, doi, v));
         }
         log.info("Stored {} actual files for DOI {}, Version {}.{} State {}", v.getFiles().size(), doi, v.getVersionNumber(), v.getVersionMinorNumber(), v.getVersionState());
-        saveActualDataset(actualDataset);
-    }
-
-    @UnitOfWork("hibernate")
-    public void saveActualFile(ActualFile actual) {
-        actualFileDAO.create(actual);
-    }
-
-    @UnitOfWork("hibernate")
-    public void saveActualDataset(ActualDataset actual) {
-        actualDatasetDAO.create(actual);
     }
 
     private ActualFile toActual(FileMeta fileMeta, String doi, DatasetVersion v) {
