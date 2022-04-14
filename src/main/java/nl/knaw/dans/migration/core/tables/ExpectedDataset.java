@@ -39,10 +39,6 @@ public class ExpectedDataset {
     @Column(length = 255)
     private String doi;
 
-    @Id
-    @Column(length = 255, name="expected_files_doi")
-    private String expectedFilesDoi;
-
     @Column(name="access_category")
     private String accessCategory;
 
@@ -76,14 +72,6 @@ public class ExpectedDataset {
 
     public void setDoi(String doi) {
         this.doi = doi;
-    }
-
-    public String getExpectedFilesDoi() {
-        return expectedFilesDoi;
-    }
-
-    public void setExpectedFilesDoi(String expectedFilesDoi) {
-        this.expectedFilesDoi = expectedFilesDoi;
     }
 
     public String getAccessCategory() {
@@ -159,7 +147,6 @@ public class ExpectedDataset {
     public String toString() {
         return "ExpectedDataset{" +
             "doi='" + doi + '\'' +
-            ", expectedFilesDoi='" + expectedFilesDoi + '\'' +
             ", accessCategory='" + accessCategory + '\'' +
             ", deleted=" + deleted +
             ", depositor='" + depositor + '\'' +
@@ -167,7 +154,7 @@ public class ExpectedDataset {
             ", embargoDate='" + embargoDate + '\'' +
             ", licenseName='" + licenseName + '\'' +
             ", licenseUrl='" + licenseUrl + '\'' +
-            ", expectedVersions=" + expectedVersions +
+            ", expectedVersions='" + expectedVersions + '\'' +
             '}';
     }
 
@@ -178,13 +165,13 @@ public class ExpectedDataset {
         if (o == null || getClass() != o.getClass())
             return false;
         ExpectedDataset that = (ExpectedDataset) o;
-        return deleted == that.deleted && expectedVersions == that.expectedVersions && Objects.equals(doi, that.doi) && Objects.equals(expectedFilesDoi, that.expectedFilesDoi)
-            && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(depositor, that.depositor) && Objects.equals(citationYear, that.citationYear)
-            && Objects.equals(embargoDate, that.embargoDate) && Objects.equals(licenseName, that.licenseName) && Objects.equals(licenseUrl, that.licenseUrl);
+        return deleted == that.deleted && Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(depositor, that.depositor)
+            && Objects.equals(citationYear, that.citationYear) && Objects.equals(embargoDate, that.embargoDate) && Objects.equals(licenseName, that.licenseName)
+            && Objects.equals(licenseUrl, that.licenseUrl) && Objects.equals(expectedVersions, that.expectedVersions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(doi, expectedFilesDoi, accessCategory, deleted, depositor, citationYear, embargoDate, licenseName, licenseUrl, expectedVersions);
+        return Objects.hash(doi, accessCategory, deleted, depositor, citationYear, embargoDate, licenseName, licenseUrl, expectedVersions);
     }
 }

@@ -20,18 +20,18 @@ import java.util.Objects;
 
 public class ExpectedDatasetKey implements Serializable {
 
-  private String expectedFilesDoi;
+  private String doi;
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ExpectedDatasetKey that = (ExpectedDatasetKey) o;
-    return Objects.equals(expectedFilesDoi, that.expectedFilesDoi);
+    return Objects.equals(doi, that.doi);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(expectedFilesDoi);
+    return Objects.hash(doi);
   }
 }
