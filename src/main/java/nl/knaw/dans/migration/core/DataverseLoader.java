@@ -98,12 +98,12 @@ public class DataverseLoader {
             actualDataset.setDepositor(depositor);
             actualDataset.setFileAccessRequest(lastVersion.isFileAccessRequest());
             actualDataset.setCitationYear(publicationDate.substring(0,4));
-            loadFiles(shortDoi, v, actualDataset);
+            loadFiles(shortDoi, v);
             actualDatasetDAO.create(actualDataset);
         }
     }
 
-    private void loadFiles(String doi, DatasetVersion v, ActualDataset actualDataset) {
+    private void loadFiles(String doi, DatasetVersion v) {
         for (FileMeta f : v.getFiles()) {
             actualFileDAO.create(toActual(f, doi, v));
         }

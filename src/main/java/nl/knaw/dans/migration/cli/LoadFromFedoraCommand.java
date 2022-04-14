@@ -96,7 +96,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
 
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyMigrationConfiguration configuration) throws Exception {
-        // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
+        // https://www.dropwizard.io/en/stable/manual/hibernate.html#transactional-resource-methods-outside-jersey-resources
         SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, verificationBundle)
             .create(

@@ -76,7 +76,7 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyMigrationConfiguration configuration) throws Exception {
         log.info(namespace.getAttrs().toString());
-        // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
+        // https://www.dropwizard.io/en/stable/manual/hibernate.html#transactional-resource-methods-outside-jersey-resources
         SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
         VaultLoader proxy = new UnitOfWorkAwareProxyFactory(verificationBundle)
             .create(
