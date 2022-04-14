@@ -31,7 +31,9 @@ import java.util.Objects;
 @IdClass(ActualFileKey.class)
 @Table(name = "actual_files",
        indexes = {
-           @Index(name = "path_index", columnList = "actual_path")
+           @Index(name = "af_path_index", columnList = "actual_path"),
+           @Index(name = "af_checksum_index", columnList = "sha1_checksum"),
+           @Index(name = "af_doi_index", columnList = "doi")
        }
 )
 public class ActualFile {
@@ -39,14 +41,6 @@ public class ActualFile {
 
   public ActualFile() {}
 
-  public ActualFile(String doi, String actualPath, int majorVersionNr, int minorVersionNr, String sha1Checksum, String storageId) {
-    this.doi = doi;
-    this.actualPath = actualPath;
-    this.majorVersionNr = majorVersionNr;
-    this.minorVersionNr = minorVersionNr;
-    this.sha1Checksum = sha1Checksum;
-    this.storageId = storageId;
-  }
   // most lengths from easy-dtap/provisioning/roles/easy-fs-rdb/templates/create-easy-db-tables.sql
   // doi length as in dd-dtap/shared-code/dataverse/scripts/database/create/create_v*.sql
 

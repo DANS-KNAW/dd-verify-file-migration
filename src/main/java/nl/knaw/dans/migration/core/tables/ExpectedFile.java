@@ -33,7 +33,7 @@ import java.util.Objects;
 @IdClass(ExpectedFileKey.class)
 @Table(name = "expected_files",
        indexes = {
-           @Index(name = "accessible_index", columnList = "accessible_to")
+           @Index(name = "ef_accessible_index", columnList = "accessible_to")
        }
 )
 public class ExpectedFile {
