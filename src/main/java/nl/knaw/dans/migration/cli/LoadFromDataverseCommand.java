@@ -115,9 +115,15 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         }
         else if (file == null) {
             log.info("No DOI(s)/UUIDs provided, loading all datasets");
-            datasetIterator(client, "*").forEachRemaining(
-                item -> proxy.loadFromDataset(((DatasetResultItem) item).getGlobalId())
-            );
+            Iterator<ResultItem> iterator = datasetIterator(client, "*");
+            String last = "";
+            while(iterator.hasNext()) {
+                String globalId = ((DatasetResultItem) iterator.next()).getGlobalId();
+                if (!globalId.equals(last))
+                    proxy.loadFromDataset(globalId);
+                last = globalId;
+                log.trace("done with "+last);
+            }
         }
         else {
             log.info("Loading DOIs found in {}", file);
