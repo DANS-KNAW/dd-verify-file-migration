@@ -86,7 +86,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
 
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyMigrationConfiguration configuration) throws Exception {
-        // https://stackoverflow.com/questions/42384671/dropwizard-hibernate-no-session-currently-bound-to-execution-context
+        // https://www.dropwizard.io/en/stable/manual/hibernate.html#transactional-resource-methods-outside-jersey-resources
         DataverseClient client = configuration.getDataverse().build();
         SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
         DataverseLoader proxy = new UnitOfWorkAwareProxyFactory(verificationBundle)
@@ -115,9 +115,15 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         }
         else if (file == null) {
             log.info("No DOI(s)/UUIDs provided, loading all datasets");
-            datasetIterator(client, "*").forEachRemaining(
-                item -> proxy.loadFromDataset(((DatasetResultItem) item).getGlobalId())
-            );
+            Iterator<ResultItem> iterator = datasetIterator(client, "*");
+            String last = "";
+            while(iterator.hasNext()) {
+                String globalId = ((DatasetResultItem) iterator.next()).getGlobalId();
+                if (!globalId.equals(last))
+                    proxy.loadFromDataset(globalId);
+                last = globalId;
+                log.trace("done with "+last);
+            }
         }
         else {
             log.info("Loading DOIs found in {}", file);

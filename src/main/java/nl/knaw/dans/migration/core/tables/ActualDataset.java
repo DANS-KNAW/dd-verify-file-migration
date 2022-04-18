@@ -28,7 +28,7 @@ import java.util.Objects;
 @IdClass(ActualDatasetKey.class)
 @Table(name = "actual_datasets",
        indexes = {
-           @Index(name = "doi_index", columnList = "doi")
+           @Index(name = "ad_doi_index", columnList = "doi")
        }
 )
 public class ActualDataset {

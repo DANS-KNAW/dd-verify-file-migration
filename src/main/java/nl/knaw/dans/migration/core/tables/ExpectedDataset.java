@@ -23,12 +23,17 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
 @IdClass(ExpectedDatasetKey.class)
-@Table(name = "expected_datasets")
+@Table(name = "expected_datasets",
+       indexes = {
+           @Index(name = "ed_doi_index", columnList = "doi")
+       }
+)
 public class ExpectedDataset {
     // https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html#schema-generation
 
