@@ -31,6 +31,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.easymock.EasyMock.createMock;
@@ -86,6 +87,7 @@ public class EasyFileLoaderTest {
     expectedDataset.setDoi("10.80270/test-nySe-x6f-kf66");
     expectedDataset.setAccessCategory(AccessCategory.NO_ACCESS);
     expectedDataset.setCitationYear("2022");
+    expectedDataset.setExpectedVersions(1);
     ExpectedDatasetDAO expectedDatasetDAO = createMock(ExpectedDatasetDAO.class);
     expectSuccess(expectedDatasetDAO, expectedDataset);
 
@@ -126,6 +128,7 @@ public class EasyFileLoaderTest {
     expectedDataset.setCitationYear("2022");
     expectedDataset.setLicenseUrl("http://creativecommons.org/publicdomain/zero/1.0");
     expectedDataset.setLicenseName("CC0-1.0");
+    expectedDataset.setExpectedVersions(1);
     ExpectedDatasetDAO expectedDatasetDAO = createMock(ExpectedDatasetDAO.class);
     expectSuccess(expectedDatasetDAO, expectedDataset);
 
@@ -154,6 +157,40 @@ public class EasyFileLoaderTest {
     String expectedSolr = "2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\",somebody,PUBLISHED,2022-03-25";
     new Loader(expectedSolr, easyFileDAO, expectedFileDAO, createMock(ExpectedDatasetDAO.class)).loadFromCsv(csv, true);
     verify(csv, easyFileDAO, expectedFileDAO);
+  }
+
+  @Test
+  public void withoutFiles() {
+    HashMap<String, Integer> uuidToVersions = new HashMap<>();
+    uuidToVersions.put(null,1);
+    uuidToVersions.put("",1);
+    uuidToVersions.put(" ",1);
+    uuidToVersions.put("00fab9df-0417-460b-bbb0-312aba55ed27",2);
+    uuidToVersions.forEach((uuid,count) -> {
+      FedoraToBagCsv csv = createMock(FedoraToBagCsv.class);
+      expect(csv.getComment()).andReturn("OK").once();
+      expect(csv.getDoi()).andReturn(doi).once();
+      expect(csv.getUuid2()).andReturn(uuid).once();
+      expect(csv.getDatasetId()).andReturn(datasetId).times(2);// once to read solr, once to read EMD
+
+      ExpectedDataset ed = new ExpectedDataset();
+      ed.setDoi("10.80270/test-nySe-x6f-kf66");
+      ed.setAccessCategory(AccessCategory.GROUP_ACCESS);
+      ed.setDeleted(false);
+      ed.setDepositor("somebody");
+      ed.setCitationYear("2022");
+      ed.setLicenseName("CC0-1.0");
+      ed.setLicenseUrl("http://creativecommons.org/publicdomain/zero/1.0");
+      ed.setExpectedVersions(count);
+      ExpectedDatasetDAO expectedDatasetDAO = createMock(ExpectedDatasetDAO.class);
+      expectedDatasetDAO.create(ed);
+      EasyMock.expectLastCall().once();
+
+      replay(csv, expectedDatasetDAO);
+      String expectedSolr = "2009-06-04,GROUP_ACCESS,somebody,PUBLISHED,2022-03-25";
+      new Loader(expectedSolr, null, null, expectedDatasetDAO).loadFromCsv(csv, false);
+      verify(csv, expectedDatasetDAO);
+    });
   }
 
   @Test
@@ -250,6 +287,7 @@ public class EasyFileLoaderTest {
     expect(mockedCSV.getComment()).andReturn(comment).anyTimes();
     expect(mockedCSV.getTransformation()).andReturn(type).anyTimes();
     expect(mockedCSV.getDoi()).andReturn(doi).anyTimes();
+    expect(mockedCSV.getUuid2()).andReturn("").anyTimes();
     expect(mockedCSV.getDatasetId()).andReturn(datasetId).anyTimes();
     return mockedCSV;
   }

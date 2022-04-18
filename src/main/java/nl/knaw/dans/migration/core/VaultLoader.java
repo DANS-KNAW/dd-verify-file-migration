@@ -83,52 +83,52 @@ public class VaultLoader extends ExpectedLoader {
       log.info("Skipping {}, it is another version of {}", uuid, bagInfo.getBaseId());
     else {
       log.trace("Processing {}", bagInfo);
+      ExpectedDataset expectedDataset = processBag(uuid.toString(), bagInfo, bagInfo.getDoi());
       String[] bagSeq = readBagSequence(uuid);
-      if (bagSeq.length <= 1)
-        processBag(uuid.toString(), bagInfo);
-      else {
+      if (bagSeq.length > 1) {
         List<BagInfo> bagInfos= StreamSupport
             .stream(Arrays.stream(bagSeq).spliterator(), false)
             .map(this::readBagInfo)
             .sorted(new BagInfoComparator()).collect(Collectors.toList());
-        int count = 0;
-        for (BagInfo info : bagInfos) {
-          log.trace("{} from sequence {}", ++count, info);
-          processBag(info.getBaseId(), info);
+        for (int i = 1; i < bagInfos.size(); i++) {
+          BagInfo info = bagInfos.get(i);
+          log.trace("{} from sequence {}", i, info);
+          expectedDataset = processBag(info.getBaseId(), info, bagInfos.get(0).getDoi());
         }
       }
+      expectedDataset.setDepositor(readDepositor(uuid.toString()));
+      expectedDataset.setCitationYear(bagInfo.getCreated().substring(0,4));
+      expectedDataset.setDoi(bagInfo.getDoi());
+      expectedDataset.setExpectedVersions(bagSeq.length);
+      saveExpectedDataset(expectedDataset);
     }
   }
 
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
-  private void processBag(String uuid, BagInfo bagInfo) {
-    String doi = bagInfo.getDoi();
+  /** @return either deleted=true or accessCategory, embargoDate and license */
+  private ExpectedDataset processBag(String uuid, BagInfo bagInfo, String baseDoi) {
     byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
     ExpectedDataset expectedDataset;
     if (ddmBytes.length == 0) {
-      expectedDataset = new ExpectedDataset();
       // presuming deactivated, logging shows whether it was indeed deactivated or not found
+      expectedDataset = new ExpectedDataset();
       expectedDataset.setDeleted(true);
     } else {
-      String depositor = readDepositor(uuid);
       DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
-      expectedDataset = datasetRights.expectedDataset(depositor);
+      expectedDataset = datasetRights.expectedDataset();
       expectedDataset.setLicenseUrl(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
-      // now that we collected everything from the bag, we start processing the files
       Map<String, FileRights> filesXml = readFileMeta(uuid);
       readManifest(uuid).forEach(m ->
-          createExpected(doi, m, filesXml, datasetRights.defaultFileRights)
+          createExpectedFile(baseDoi, m, filesXml, datasetRights.defaultFileRights)
       );
-      expectedMigrationFiles(doi, migrationFiles, datasetRights.defaultFileRights);
+      expectedMigrationFiles(baseDoi, migrationFiles, datasetRights.defaultFileRights);
     }
-    expectedDataset.setCitationYear(bagInfo.getCreated().substring(0,4));
-    expectedDataset.setDoi(doi);
-    saveExpectedDataset(expectedDataset);
+    return expectedDataset;
   }
 
-  private void createExpected(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
+  private void createExpectedFile(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
     String path = m.getPath();
     FileRights fileRights = fileRightsMap.get(path).applyDefaults(defaultFileRights);
     log.trace("{} {}", path, fileRights);
@@ -177,7 +177,7 @@ public class VaultLoader extends ExpectedLoader {
     }
   }
 
-  private String readDepositor(String uuid) {
+    private String readDepositor(String uuid) {
     URI uri = bagStoreBaseUri
         .resolve("bags/")
         .resolve(uuid+"/")

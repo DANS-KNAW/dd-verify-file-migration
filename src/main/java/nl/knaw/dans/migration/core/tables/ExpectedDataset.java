@@ -67,6 +67,10 @@ public class ExpectedDataset {
     @Column(name="license_url")
     private String licenseUrl;
 
+    @Nullable
+    @Column(name="expected_versions")
+    private int expectedVersions;
+
     public String getDoi() {
         return doi;
     }
@@ -135,6 +139,15 @@ public class ExpectedDataset {
         this.licenseName = licenseName;
     }
 
+    @Nullable
+    public int getExpectedVersions() {
+        return expectedVersions;
+    }
+
+    public void setExpectedVersions(@Nullable int expectedVersions) {
+        this.expectedVersions = expectedVersions;
+    }
+
     @Override
     public String toString() {
         return "ExpectedDataset{" +
@@ -146,6 +159,7 @@ public class ExpectedDataset {
             ", embargoDate='" + embargoDate + '\'' +
             ", licenseName='" + licenseName + '\'' +
             ", licenseUrl='" + licenseUrl + '\'' +
+            ", expectedVersions='" + expectedVersions + '\'' +
             '}';
     }
 
@@ -158,11 +172,11 @@ public class ExpectedDataset {
         ExpectedDataset that = (ExpectedDataset) o;
         return deleted == that.deleted && Objects.equals(doi, that.doi) && Objects.equals(accessCategory, that.accessCategory) && Objects.equals(depositor, that.depositor)
             && Objects.equals(citationYear, that.citationYear) && Objects.equals(embargoDate, that.embargoDate) && Objects.equals(licenseName, that.licenseName)
-            && Objects.equals(licenseUrl, that.licenseUrl);
+            && Objects.equals(licenseUrl, that.licenseUrl) && Objects.equals(expectedVersions, that.expectedVersions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(doi, accessCategory, deleted, depositor, citationYear, embargoDate, licenseName, licenseUrl);
+        return Objects.hash(doi, accessCategory, deleted, depositor, citationYear, embargoDate, licenseName, licenseUrl, expectedVersions);
     }
 }
