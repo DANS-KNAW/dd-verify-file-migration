@@ -50,24 +50,27 @@ public class DataverseLoader {
     }
 
     @UnitOfWork("hibernate")
-    public void loadFromDataset(String doi) {
+    public void loadFromDataset(String doi, boolean doFiles, boolean doDatasets) {
         if (StringUtil.isEmpty(doi))
             return; // workaround
         log.info("Reading {} from dataverse", doi);
         List<DatasetVersion> versions = new ArrayList<>();
         String depositor = "";
         String publicationDate = "";
+        DatasetApi dataset = client.dataset(doi);
         try {
-            DatasetApi dataset = client.dataset(doi);
             versions = dataset.getAllVersions().getData();
-            publicationDate = dataset.viewLatestVersion().getData().getPublicationDate();
-            depositor = dataset.listRoleAssignments().getData().stream()
-                .filter(ra -> "contributorplus".equals(ra.get_roleAlias()))
-                .findFirst()
-                .map(RoleAssignmentReadOnly::getAssignee)
-                .orElse("not.found@dans.knaw.nl")
-                .replace("@", "");
-            depositor = client.admin().listSingleUser(depositor).getData().getEmail();
+            if (doDatasets) {
+                // ugly to have the same if twice, but otherwise we need to duplicate the catch clauses
+                publicationDate = dataset.viewLatestVersion().getData().getPublicationDate();
+                depositor = dataset.listRoleAssignments().getData().stream()
+                    .filter(ra -> "contributorplus".equals(ra.get_roleAlias()))
+                    .findFirst()
+                    .map(RoleAssignmentReadOnly::getAssignee)
+                    .orElse("not.found@dans.knaw.nl")
+                    .replace("@", "");
+                depositor = client.admin().listSingleUser(depositor).getData().getEmail();
+            }
         }
         catch (JsonParseException e) {
             // a developer may encounter: "Endpoint available from localhost only" and/or receive an HTML page
@@ -82,24 +85,27 @@ public class DataverseLoader {
             if (e.getMessage().toLowerCase().contains("not found"))
                 log.error("{} {} {}", doi, e.getClass(), e.getMessage());
             else
-                log.error("Could not retrieve file metas for DOI: {}", doi, e);
+                log.error("Could not retrieve data for DOI: {}", doi, e);
             return;
         }
         String shortDoi = doi.replace("doi:", "");
         DatasetVersion lastVersion = versions.get(versions.size() - 1);
         for (DatasetVersion v : versions) {
-            ActualDataset actualDataset = new ActualDataset();
-            actualDataset.setMajorVersionNr(v.getVersionNumber());
-            actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
-            actualDataset.setDeaccessioned("DEACCESSIONED".equals(v.getVersionState()));
-            actualDataset.setLicenseName(v.getLicense().getName());
-            actualDataset.setLicenseUri(v.getLicense().getUri().toString());
-            actualDataset.setDoi(shortDoi);
-            actualDataset.setDepositor(depositor);
-            actualDataset.setFileAccessRequest(lastVersion.isFileAccessRequest());
-            actualDataset.setCitationYear(publicationDate.substring(0,4));
-            loadFiles(shortDoi, v);
-            actualDatasetDAO.create(actualDataset);
+            if (doDatasets) {
+                ActualDataset actualDataset = new ActualDataset();
+                actualDataset.setMajorVersionNr(v.getVersionNumber());
+                actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
+                actualDataset.setDeaccessioned("DEACCESSIONED".equals(v.getVersionState()));
+                actualDataset.setLicenseName(v.getLicense().getName());
+                actualDataset.setLicenseUri(v.getLicense().getUri().toString());
+                actualDataset.setDoi(shortDoi);
+                actualDataset.setDepositor(depositor);
+                actualDataset.setFileAccessRequest(lastVersion.isFileAccessRequest());
+                actualDataset.setCitationYear(publicationDate.substring(0, 4));
+                actualDatasetDAO.create(actualDataset);
+            }
+            if (doFiles)
+                loadFiles(shortDoi, v);
         }
     }
 
