@@ -17,14 +17,17 @@ package nl.knaw.dans.migration.core;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import io.dropwizard.hibernate.UnitOfWork;
-import nl.knaw.dans.lib.dataverse.DatasetApi;
 import nl.knaw.dans.lib.dataverse.DataverseClient;
+import nl.knaw.dans.lib.dataverse.DataverseResponse;
 import nl.knaw.dans.lib.dataverse.model.RoleAssignmentReadOnly;
+import nl.knaw.dans.lib.dataverse.model.dataset.DatasetLatestVersion;
 import nl.knaw.dans.lib.dataverse.model.dataset.DatasetVersion;
 import nl.knaw.dans.lib.dataverse.model.file.DataFile;
 import nl.knaw.dans.lib.dataverse.model.file.Embargo;
 import nl.knaw.dans.lib.dataverse.model.file.FileMeta;
+import nl.knaw.dans.lib.dataverse.model.user.AuthenticatedUser;
 import nl.knaw.dans.migration.core.tables.ActualDataset;
 import nl.knaw.dans.migration.core.tables.ActualFile;
 import nl.knaw.dans.migration.db.ActualDatasetDAO;
@@ -33,8 +36,8 @@ import org.hsqldb.lib.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class DataverseLoader {
     private static final Logger log = LoggerFactory.getLogger(DataverseLoader.class);
@@ -54,59 +57,68 @@ public class DataverseLoader {
         if (StringUtil.isEmpty(doi))
             return; // workaround
         log.info("Reading {} from dataverse", doi);
-        List<DatasetVersion> versions = new ArrayList<>();
-        String depositor = "";
-        String publicationDate = "";
-        DatasetApi dataset = client.dataset(doi);
+
+        CacheLoader<String, DataverseResponse<AuthenticatedUser>> userLoader = id -> client.admin().listSingleUser(id);
+        CacheLoader<String, DataverseResponse<List<DatasetVersion>>> versionsLoader = id -> client.dataset(id).getAllVersions();
+        CacheLoader<String, DataverseResponse<List<RoleAssignmentReadOnly>>> rolesLoader = id -> client.dataset(id).listRoleAssignments();
+        CacheLoader<String, DataverseResponse<DatasetLatestVersion>> lastestVersionLoader = id -> client.dataset(id).viewLatestVersion();
+
+        String shortDoi = doi.replace("doi:", "");
+        load(doi, versionsLoader, DatasetVersion.class, doi).ifPresent(versions ->
+            versions.forEach(v -> {
+                if (doDatasets) {
+                    ActualDataset actualDataset = new ActualDataset();
+                    actualDataset.setMajorVersionNr(v.getVersionNumber());
+                    actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
+                    actualDataset.setDeaccessioned("DEACCESSIONED".equals(v.getVersionState()));
+                    actualDataset.setLicenseName(v.getLicense().getName());
+                    actualDataset.setLicenseUri(v.getLicense().getUri().toString());
+                    actualDataset.setDoi(shortDoi);
+                    load(doi, lastestVersionLoader, DatasetLatestVersion.class, doi).ifPresent(lastestVersion -> {
+                        actualDataset.setCitationYear(lastestVersion.getPublicationDate().substring(0, 4));
+                        actualDataset.setFileAccessRequest(lastestVersion.getLatestVersion().isFileAccessRequest());
+                    });
+                    load(doi, rolesLoader, RoleAssignmentReadOnly.class, doi).ifPresent(roles -> {
+                        String depositor = roles.stream()
+                            .filter(ra -> "contributorplus".equals(ra.get_roleAlias()))
+                            .findFirst()
+                            .map(RoleAssignmentReadOnly::getAssignee)
+                            .orElse("contributorplus.not.found")
+                            .replace("@", "");
+                        log.trace("depositor: " + depositor);
+                        actualDataset.setDepositor(depositor); // falling back to ID if email is not found
+                        load(depositor, userLoader, AuthenticatedUser.class, doi).ifPresent(user ->
+                            actualDataset.setDepositor(user.getEmail())
+                        );
+                    });
+                    actualDatasetDAO.create(actualDataset);
+                }
+                if (doFiles)
+                    loadFiles(shortDoi, v);
+            })
+        );
+    }
+
+    private <T> Optional<T> load(String id, CacheLoader<String, DataverseResponse<T>> loader, Class<?> clazz, String doi) {
+        // actually T might be a List of clazz
         try {
-            versions = dataset.getAllVersions().getData();
-            if (doDatasets) {
-                // ugly to have the same if twice, but otherwise we need to duplicate the catch clauses
-                publicationDate = dataset.viewLatestVersion().getData().getPublicationDate();
-                depositor = dataset.listRoleAssignments().getData().stream()
-                    .filter(ra -> "contributorplus".equals(ra.get_roleAlias()))
-                    .findFirst()
-                    .map(RoleAssignmentReadOnly::getAssignee)
-                    .orElse("not.found@dans.knaw.nl")
-                    .replace("@", "");
-                depositor = client.admin().listSingleUser(depositor).getData().getEmail();
-            }
+            DataverseResponse<T> response = loader.load(id);
+            if (null != response)
+                return Optional.ofNullable(response.getData());
         }
-        catch (JsonParseException e) {
-            // a developer may encounter: "Endpoint available from localhost only" and/or receive an HTML page
-            if (!"".equals(depositor))
-                log.error("Could not access email {} {}", doi, depositor);
-        }
-        catch (UnrecognizedPropertyException e) {
-            log.error("Skipping {} {}", doi, e.getMessage());
-            return;
+        catch (JsonParseException | UnrecognizedPropertyException  e) {
+            // e.g: Could not parse AuthenticatedUser(user001) ... JsonParseException Unexpected character ('<' ...)
+            // when not running on localhost of dataverse.
+            // response.getEnvelopeAsString() is the dataverse Home page, in this specific case.
+            log.error("Could not parse {}({}) while processing {}: {} {}", clazz.getSimpleName() , id, doi, e.getClass(), e.getMessage());
         }
         catch (Exception e) {
             if (e.getMessage().toLowerCase().contains("not found"))
-                log.error("{} {} {}", doi, e.getClass(), e.getMessage());
+                log.error("Could not find {}({}) while processing {}: {} {}", clazz.getSimpleName() , id, doi, e.getClass(), e.getMessage());
             else
-                log.error("Could not retrieve data for DOI: {}", doi, e);
-            return;
+                log.error("Could not retrieve {}({}) while processing {}: {}", clazz.getSimpleName(), id, doi, e);
         }
-        String shortDoi = doi.replace("doi:", "");
-        DatasetVersion lastVersion = versions.get(versions.size() - 1);
-        for (DatasetVersion v : versions) {
-            if (doDatasets) {
-                ActualDataset actualDataset = new ActualDataset();
-                actualDataset.setMajorVersionNr(v.getVersionNumber());
-                actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
-                actualDataset.setDeaccessioned("DEACCESSIONED".equals(v.getVersionState()));
-                actualDataset.setLicenseName(v.getLicense().getName());
-                actualDataset.setLicenseUri(v.getLicense().getUri().toString());
-                actualDataset.setDoi(shortDoi);
-                actualDataset.setDepositor(depositor);
-                actualDataset.setFileAccessRequest(lastVersion.isFileAccessRequest());
-                actualDataset.setCitationYear(publicationDate.substring(0, 4));
-                actualDatasetDAO.create(actualDataset);
-            }
-            if (doFiles)
-                loadFiles(shortDoi, v);
-        }
+        return Optional.empty();
     }
 
     private void loadFiles(String doi, DatasetVersion v) {
