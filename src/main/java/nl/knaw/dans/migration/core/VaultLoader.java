@@ -18,6 +18,7 @@ package nl.knaw.dans.migration.core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.lib.dataverse.DataverseItemDeserializer;
 import nl.knaw.dans.lib.dataverse.MetadataFieldDeserializer;
 import nl.knaw.dans.lib.dataverse.ResultItemDeserializer;
@@ -74,6 +75,7 @@ public class VaultLoader extends ExpectedLoader {
     mapper.registerModule(module);
   }
 
+  @UnitOfWork("hibernate")
   public void loadFromVault(UUID uuid) {
     final BagInfo bagInfo = readBagInfo(uuid.toString());
     log.trace("from input {}", bagInfo);
@@ -83,24 +85,28 @@ public class VaultLoader extends ExpectedLoader {
       log.info("Skipping {}, it is another version of {}", uuid, bagInfo.getBaseId());
     else {
       log.trace("Processing {}", bagInfo);
-      ExpectedDataset expectedDataset = processBag(uuid.toString(), bagInfo, bagInfo.getDoi());
+      ExpectedDataset expectedDataset = null;
       String[] bagSeq = readBagSequence(uuid);
-      if (bagSeq.length > 1) {
+      if (bagSeq.length <= 1)
+        expectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi());
+      else {
         List<BagInfo> bagInfos= StreamSupport
             .stream(Arrays.stream(bagSeq).spliterator(), false)
             .map(this::readBagInfo)
             .sorted(new BagInfoComparator()).collect(Collectors.toList());
-        for (int i = 1; i < bagInfos.size(); i++) {
+        for (int i = 0; i < bagInfos.size(); i++) {
           BagInfo info = bagInfos.get(i);
           log.trace("{} from sequence {}", i, info);
-          expectedDataset = processBag(info.getBaseId(), info, bagInfos.get(0).getDoi());
+          expectedDataset = processBag(info.getBagId(), i, bagInfos.get(0).getDoi());
         }
       }
-      expectedDataset.setDepositor(readDepositor(uuid.toString()));
-      expectedDataset.setCitationYear(bagInfo.getCreated().substring(0,4));
-      expectedDataset.setDoi(bagInfo.getDoi());
-      expectedDataset.setExpectedVersions(bagSeq.length);
-      saveExpectedDataset(expectedDataset);
+      if (expectedDataset != null) {
+        expectedDataset.setDepositor(readDepositor(uuid.toString()));
+        expectedDataset.setCitationYear(bagInfo.getCreated().substring(0, 4));
+        expectedDataset.setDoi(bagInfo.getDoi());
+        expectedDataset.setExpectedVersions(bagSeq.length);
+        saveExpectedDataset(expectedDataset);
+      }
     }
   }
 
@@ -108,7 +114,7 @@ public class VaultLoader extends ExpectedLoader {
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
   /** @return either deleted=true or accessCategory, embargoDate and license */
-  private ExpectedDataset processBag(String uuid, BagInfo bagInfo, String baseDoi) {
+  public ExpectedDataset processBag(String uuid, int bagSeqNr, String baseDoi) {
     byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
     ExpectedDataset expectedDataset;
     if (ddmBytes.length == 0) {
@@ -121,18 +127,20 @@ public class VaultLoader extends ExpectedLoader {
       expectedDataset.setLicenseUrl(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
       Map<String, FileRights> filesXml = readFileMeta(uuid);
       readManifest(uuid).forEach(m ->
-          createExpectedFile(baseDoi, m, filesXml, datasetRights.defaultFileRights)
+          createExpectedFile(baseDoi, bagSeqNr, m, filesXml, datasetRights.defaultFileRights)
       );
-      expectedMigrationFiles(baseDoi, migrationFiles, datasetRights.defaultFileRights);
+      expectedMigrationFiles(baseDoi, migrationFiles, datasetRights.defaultFileRights, String.valueOf(bagSeqNr));
     }
     return expectedDataset;
   }
 
-  private void createExpectedFile(String doi, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
+  private void createExpectedFile(String doi, int bagSeqNr, ManifestCsv m, Map<String, FileRights> fileRightsMap, FileRights defaultFileRights) {
     String path = m.getPath();
     FileRights fileRights = fileRightsMap.get(path).applyDefaults(defaultFileRights);
     log.trace("{} {}", path, fileRights);
-    retriedSave(new ExpectedFile(doi, m, fileRights));
+    ExpectedFile expectedFile = new ExpectedFile(doi, m, fileRights);
+    expectedFile.setEasyFileId(String.valueOf(bagSeqNr));
+    saveExpectedFile(expectedFile);
   }
 
   private Stream<ManifestCsv> readManifest(String uuid) {

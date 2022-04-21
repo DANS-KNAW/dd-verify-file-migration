@@ -57,6 +57,7 @@ public class EasyFileLoader extends ExpectedLoader {
     this.fedoraUri = fedoraBaseUri.resolve("objects/");
   }
 
+  @UnitOfWork("hibernate")
   public void loadFromCsv(FedoraToBagCsv csv, boolean withFiles) {
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
@@ -81,9 +82,10 @@ public class EasyFileLoader extends ExpectedLoader {
       // thus we don't write anything when reading something fails
       if (withFiles) {
         if (!csv.getComment().contains("no payload")) {
-          fedoraFiles(csv, datasetRights.defaultFileRights);
+          List<EasyFile> easyFiles = getByDatasetId(csv);
+          saveFiles(csv, datasetRights.defaultFileRights, easyFiles);
         }
-        expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights);
+        expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights, "");
       }
       saveExpectedDataset(expected);
     } catch (IOException | URISyntaxException e) {
@@ -108,12 +110,7 @@ public class EasyFileLoader extends ExpectedLoader {
     return executeReq(new HttpGet(new URIBuilder(uri).build()), false);
   }
 
-  /**
-   * @param csv record produced by easy-fedora-to-bag
-   */
-  private void fedoraFiles(FedoraToBagCsv csv, FileRights defaultFileRights) {
-    log.trace(csv.toString());
-    List<EasyFile> easyFiles = getByDatasetId(csv);
+    public void saveFiles(FedoraToBagCsv csv, FileRights defaultFileRights, List<EasyFile> easyFiles) {
     for (EasyFile f : easyFiles) {
       // note: biggest pdf/image option for europeana in easy-fedora-to-bag does not apply to migration
       log.trace("EasyFile = {}", f);
@@ -122,7 +119,7 @@ public class EasyFileLoader extends ExpectedLoader {
       expected.setDefaultRights(defaultFileRights);
       expected.setAccessibleTo(f.getAccessibleTo());
       expected.setVisibleTo(f.getVisibleTo());
-      retriedSave(expected);
+      saveExpectedFile(expected);
     }
   }
 

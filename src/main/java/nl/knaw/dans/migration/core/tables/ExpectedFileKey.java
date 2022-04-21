@@ -22,18 +22,22 @@ public class ExpectedFileKey implements Serializable {
 
   private String doi;
   private String expectedPath;
-  private int removedDuplicateFileCount;
+  private String easyFileId;
+  private String fsRdbPath;
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
     ExpectedFileKey that = (ExpectedFileKey) o;
-    return removedDuplicateFileCount == that.removedDuplicateFileCount && Objects.equals(doi, that.doi) && Objects.equals(expectedPath, that.expectedPath);
+    return Objects.equals(doi, that.doi) && Objects.equals(expectedPath, that.expectedPath) && Objects.equals(easyFileId, that.easyFileId) && Objects.equals(
+        fsRdbPath, that.fsRdbPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(doi, expectedPath, removedDuplicateFileCount);
+    return Objects.hash(doi, expectedPath, easyFileId, fsRdbPath);
   }
 }

@@ -15,16 +15,13 @@
  */
 package nl.knaw.dans.migration.core;
 
-import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
-import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.PersistenceException;
 import java.io.File;
 import java.util.Map;
 
@@ -43,51 +40,28 @@ public class ExpectedLoader {
     this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"),"url","name");
   }
 
-  public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights) {
+  public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights, String easyFileId) {
     for (String f: migrationFiles) {
       ExpectedFile expectedFile = new ExpectedFile();
       expectedFile.setDoi(doi);
       expectedFile.setSha1Checksum("");
-      expectedFile.setEasyFileId("");
+      expectedFile.setEasyFileId(easyFileId);
       expectedFile.setFsRdbPath("");
       expectedFile.setExpectedPath("easy-migration/" + f);
       expectedFile.setAddedDuringMigration(true);
       expectedFile.setRemovedThumbnail(false);
       expectedFile.setRemovedOriginalDirectory(false);
-      expectedFile.setRemovedDuplicateFileCount(0);
       expectedFile.setTransformedName(false);
       expectedFile.setVisibleTo("ANONYMOUS");
       expectedFile.setAccessibleTo("ANONYMOUS");
-      retriedSave(expectedFile);
+      saveExpectedFile(expectedFile);
     }
   }
 
-  public void retriedSave(ExpectedFile expected) {
-    try {
-      saveExpectedFile(expected);
-    } catch(PersistenceException e){
-      // logged as error by org.hibernate.engine.jdbc.spi.SqlExceptionHelper
-      if (!(e.getCause() instanceof ConstraintViolationException))
-        throw e;
-      else {
-        if (expected.getRemovedDuplicateFileCount() > 10) {
-          // TODO temporary safe guard?
-          log.error("too many retries on duplicate file, skipping: {}", expected);
-        }
-        else {
-          expected.incRemoved_duplicate_file_count();
-          retriedSave(expected);
-        }
-      }
-    }
-  }
-
-  @UnitOfWork("hibernate")
   public void saveExpectedFile(ExpectedFile expected) {
       expectedFileDAO.create(expected);
   }
 
-  @UnitOfWork("hibernate")
   public void saveExpectedDataset(ExpectedDataset expected) {
     String depositor = expected.getDepositor();
     expected.setDepositor(userToEmail.getOrDefault(depositor, depositor));
