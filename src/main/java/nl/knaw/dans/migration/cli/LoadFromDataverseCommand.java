@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -48,6 +49,11 @@ import static java.util.Collections.singletonList;
 
 public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<DdVerifyMigrationConfiguration> {
 
+    private final String destDoi = "doi";
+    private final String destCsv = "csv";
+    private final String destUuids = "UUIDs";
+    private final String destMode = "mode";
+    private enum Mode {ALL, FILES, DATASETS};
     private static final Logger log = LoggerFactory.getLogger(LoadFromDataverseCommand.class);
     private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle;
 
@@ -69,17 +75,23 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         super.configure(subparser);
 
         MutuallyExclusiveGroup g = subparser.addMutuallyExclusiveGroup();
-        g.addArgument("-d", "--doi")
-            .dest("doi")
+        g.addArgument("-d", "--" + destDoi)
+            .dest(destDoi)
             .help("The DOI for which to load the files, for example: 'doi:10.17026/dans-xtz-qa6j'");
 
-        g.addArgument("--csv")
-            .dest("csv")
+        g.addArgument("--" + destCsv)
+            .dest(destCsv)
             .type(File.class)
             .help("CSV file produced by easy-fedora-to-bag");
 
-        g.addArgument("--UUIDs")
-            .dest("uuids")
+        g.addArgument("--" + destMode)
+            .dest(destMode)
+            .setDefault(Mode.ALL)
+            .type(Mode.class)
+            .help("files require more writing, dataset require more reading");
+
+        g.addArgument("--" + destUuids)
+            .dest(destUuids)
             .type(File.class)
             .help(".txt file with bag ids");
     }
@@ -99,17 +111,20 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
                         new ActualDatasetDAO(verificationBundleSessionFactory)
                 }
             );
-        String doi = namespace.getString("doi");
-        String file = namespace.getString("csv");
-        String uuids = namespace.getString("uuids");
+        String doi = namespace.getString(destDoi);
+        String file = namespace.getString(destCsv);
+        String uuids = namespace.getString(destUuids);
+        Mode mode = Mode.valueOf(namespace.getString(destMode));
+        boolean doFiles = Arrays.asList(Mode.FILES, Mode.ALL).contains(mode);
+        boolean doDatasets = Arrays.asList(Mode.DATASETS, Mode.ALL).contains(mode);
         if (doi != null)
-            proxy.loadFromDataset(doi);
+            proxy.loadFromDataset(doi, doFiles, doDatasets);
         else if (uuids != null) {
             log.info("Loading UUIDs found in {}", uuids);
             FileUtils.readLines(new File(uuids), UTF_8).forEach(line ->
                 doFirst(
                     datasetIterator(client, "dansBagId:urn:uuid:" + line),
-                    item -> proxy.loadFromDataset(((DatasetResultItem) item).getGlobalId())
+                    item -> proxy.loadFromDataset(((DatasetResultItem) item).getGlobalId(), doFiles, doDatasets)
                 )
             );
         }
@@ -120,7 +135,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
             while(iterator.hasNext()) {
                 String globalId = ((DatasetResultItem) iterator.next()).getGlobalId();
                 if (!globalId.equals(last))
-                    proxy.loadFromDataset(globalId);
+                    proxy.loadFromDataset(globalId, doFiles, doDatasets);
                 last = globalId;
                 log.trace("done with "+last);
             }
@@ -130,7 +145,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
             for(CSVRecord r: FedoraToBagCsv.parse(new File(file))) {
                 FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
                 if (fedoraToBagCsv.getComment().contains("OK"))
-                    proxy.loadFromDataset("doi:"+ fedoraToBagCsv.getDoi());
+                    proxy.loadFromDataset("doi:" + fedoraToBagCsv.getDoi(), doFiles, doDatasets);
             }
         }
     }
