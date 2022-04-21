@@ -58,7 +58,6 @@ public class ExpectedFile {
         setAddedDuringMigration(false);
         setRemovedThumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
         setRemovedOriginalDirectory(removeOriginal);
-        setRemovedDuplicateFileCount(0);
         setTransformedName(!path.equals(dvPath));
     }
 
@@ -76,7 +75,6 @@ public class ExpectedFile {
         setAddedDuringMigration(false);
         setRemovedThumbnail(path.toLowerCase().matches(".*thumbnails/.*_small.(png|jpg|tiff)"));
         setRemovedOriginalDirectory(false);
-        setRemovedDuplicateFileCount(0);
         setTransformedName(!path.equals(dvPath));
     }
 
@@ -97,11 +95,10 @@ public class ExpectedFile {
         return s;
     }
 
-    public ExpectedFile(String doi, String expectedPath, int removedDuplicateFileCount, boolean removedOriginalDirectory, String sha1Checksum, String easyFileId, String fsRdbPath,
+    public ExpectedFile(String doi, String expectedPath, boolean removedOriginalDirectory, String sha1Checksum, String easyFileId, String fsRdbPath,
         boolean addedDuringMigration, boolean removedThumbnail, boolean transformedName, String accessibleTo, String visibleTo) {
         this.doi = doi;
         this.expectedPath = expectedPath;
-        this.removedDuplicateFileCount = removedDuplicateFileCount;
         this.removedOriginalDirectory = removedOriginalDirectory;
         this.sha1Checksum = sha1Checksum;
         this.easyFileId = easyFileId;
@@ -124,16 +121,15 @@ public class ExpectedFile {
     @Column(name="expected_path", length = 1024) // TODO basic_file_meta has only 1000
     private String expectedPath;
 
-    @Id
-    @Column(name="removed_duplicate_file_count")
-    private int removedDuplicateFileCount;
-
     @Column(name="removed_original_directory")
     private boolean removedOriginalDirectory;
 
     @Column(name="sha1_checksum", length = 40)
     private String sha1Checksum = "";
 
+    /**
+     * abused for the bag sequence nr when loading from the bag-store (alias vault)
+     */
     @Column(name="easy_file_id", length = 64)
     private String easyFileId = "";
 
@@ -164,7 +160,6 @@ public class ExpectedFile {
         return "ExpectedFile{" +
                 "doi='" + doi + '\'' +
                 ", expectedPath='" + expectedPath + '\'' +
-                ", removedDuplicateFileCount=" + removedDuplicateFileCount +
                 ", removedOriginalDirectory=" + removedOriginalDirectory +
                 ", sha1Checksum='" + sha1Checksum + '\'' +
                 ", easyFileId='" + easyFileId + '\'' +
@@ -184,18 +179,6 @@ public class ExpectedFile {
 
     public void setTransformedName(boolean transformedName) {
         this.transformedName = transformedName;
-    }
-
-    public int getRemovedDuplicateFileCount() {
-        return removedDuplicateFileCount;
-    }
-
-    public void setRemovedDuplicateFileCount(int removedDuplicateFileCount) {
-        this.removedDuplicateFileCount = removedDuplicateFileCount;
-    }
-
-    public void incRemoved_duplicate_file_count() {
-        this.removedDuplicateFileCount += 1;
     }
 
     public boolean isRemovedOriginalDirectory() {
@@ -299,11 +282,11 @@ public class ExpectedFile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ExpectedFile that = (ExpectedFile) o;
-        return removedDuplicateFileCount == that.removedDuplicateFileCount && removedOriginalDirectory == that.removedOriginalDirectory && addedDuringMigration == that.addedDuringMigration && removedThumbnail == that.removedThumbnail && transformedName == that.transformedName && Objects.equals(doi, that.doi) && Objects.equals(expectedPath, that.expectedPath) && Objects.equals(sha1Checksum, that.sha1Checksum) && Objects.equals(easyFileId, that.easyFileId) && Objects.equals(fsRdbPath, that.fsRdbPath) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo) && Objects.equals(embargoDate, that.embargoDate);
+        return removedOriginalDirectory == that.removedOriginalDirectory && addedDuringMigration == that.addedDuringMigration && removedThumbnail == that.removedThumbnail && transformedName == that.transformedName && Objects.equals(doi, that.doi) && Objects.equals(expectedPath, that.expectedPath) && Objects.equals(sha1Checksum, that.sha1Checksum) && Objects.equals(easyFileId, that.easyFileId) && Objects.equals(fsRdbPath, that.fsRdbPath) && Objects.equals(accessibleTo, that.accessibleTo) && Objects.equals(visibleTo, that.visibleTo) && Objects.equals(embargoDate, that.embargoDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(doi, expectedPath, removedDuplicateFileCount, removedOriginalDirectory, sha1Checksum, easyFileId, fsRdbPath, addedDuringMigration, removedThumbnail, transformedName, accessibleTo, visibleTo, embargoDate);
+        return Objects.hash(doi, expectedPath, removedOriginalDirectory, sha1Checksum, easyFileId, fsRdbPath, addedDuringMigration, removedThumbnail, transformedName, accessibleTo, visibleTo, embargoDate);
     }
 }
