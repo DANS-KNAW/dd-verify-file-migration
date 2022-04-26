@@ -129,7 +129,7 @@ public class VaultLoader extends ExpectedLoader {
       readManifest(uuid).forEach(m ->
           createExpectedFile(baseDoi, bagSeqNr, m, filesXml, datasetRights.defaultFileRights)
       );
-      expectedMigrationFiles(baseDoi, migrationFiles, datasetRights.defaultFileRights, String.valueOf(bagSeqNr));
+      expectedMigrationFiles(baseDoi, migrationFiles, String.valueOf(bagSeqNr));
     }
     return expectedDataset;
   }

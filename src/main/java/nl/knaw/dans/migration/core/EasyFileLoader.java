@@ -22,6 +22,8 @@ import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -58,36 +60,46 @@ public class EasyFileLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void loadFromCsv(FedoraToBagCsv csv, boolean withFiles) {
+  public void deleteFromCsv(CSVParser csvRecords, Mode mode) throws IOException {
+    for (CSVRecord r : csvRecords) {
+      FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
+      if (fedoraToBagCsv.getComment().contains("OK")) {
+        deleteByDoi(fedoraToBagCsv.getDoi(), mode);
+      }
+    }
+  }
+
+  @UnitOfWork("hibernate")
+  public void loadFromCsv(FedoraToBagCsv csv, Mode mode) {
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {
       SolrFields solrFields = new SolrFields(solrInfo(csv.getDatasetId()));
       DatasetRights datasetRights = solrFields.datasetRights();
-      ExpectedDataset expected = datasetRights.expectedDataset();
-      expected.setDepositor(solrFields.creator);
-      expected.setDoi(csv.getDoi());
-      expected.setCitationYear(solrFields.date);
-      expected.setDeleted("DELETED".equals(solrFields.state));
-      if (StringUtils.isNotBlank(csv.getUuid2()))
-         expected.setExpectedVersions(2);
-      else expected.setExpectedVersions(1);
-      if (!AccessCategory.NO_ACCESS.equals(solrFields.accessCategory)) {
-        byte[] emdBytes = readEmd(csv.getDatasetId())
-            .getBytes(StandardCharsets.UTF_8);
-        String license = parseLicense(new ByteArrayInputStream(emdBytes), solrFields.accessCategory);
-        expected.setLicenseUrl(license);
+      if (mode.doDatasets()) {
+        ExpectedDataset expected = datasetRights.expectedDataset();
+        if (StringUtils.isNotBlank(csv.getUuid2()))
+          expected.setExpectedVersions(2);
+        else expected.setExpectedVersions(1);
+        expected.setDepositor(solrFields.creator);
+        expected.setDoi(csv.getDoi());
+        expected.setCitationYear(solrFields.date);
+        expected.setDeleted("DELETED".equals(solrFields.state));
+        if (!AccessCategory.NO_ACCESS.equals(solrFields.accessCategory)) {
+          byte[] emdBytes = readEmd(csv.getDatasetId())
+              .getBytes(StandardCharsets.UTF_8);
+          String license = parseLicense(new ByteArrayInputStream(emdBytes), solrFields.accessCategory);
+          expected.setLicenseUrl(license);
+        }
+        saveExpectedDataset(expected);
       }
-      // so far we collected dataset metadata, we will store it into the DB as the very last action
-      // thus we don't write anything when reading something fails
-      if (withFiles) {
+      if (mode.doFiles()) {
         if (!csv.getComment().contains("no payload")) {
           List<EasyFile> easyFiles = getByDatasetId(csv);
           saveFiles(csv, datasetRights.defaultFileRights, easyFiles);
         }
-        expectedMigrationFiles(csv.getDoi(), migrationFiles, datasetRights.defaultFileRights, "");
+        expectedMigrationFiles(csv.getDoi(), migrationFiles, "");
       }
-      saveExpectedDataset(expected);
     } catch (IOException | URISyntaxException e) {
       // expecting an empty line when not found, other errors are fatal
       throw new IllegalStateException(e.getMessage(), e);
