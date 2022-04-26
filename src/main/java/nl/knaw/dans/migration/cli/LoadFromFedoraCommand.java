@@ -45,7 +45,6 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
     private static final Logger log = LoggerFactory.getLogger(LoadFromFedoraCommand.class);
     private final HibernateBundle<DdVerifyMigrationConfiguration> easyBundle;
     private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle;
-    private final String WITH_FILES = "withFiles";
     private final String CSV = "csv";
 
     /**
