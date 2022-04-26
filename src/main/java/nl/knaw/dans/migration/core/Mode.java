@@ -30,7 +30,7 @@ public enum Mode {ALL, FILES, DATASETS;
     public static Argument configure(Argument argument) {
         return argument
             .dest("mode")
-            .setDefault(Mode.ALL)
+            .setDefault(Mode.DATASETS)
             .type(Mode.class)
             .help("files require more writing, datasets require more reading");
     }

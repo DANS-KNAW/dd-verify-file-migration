@@ -60,7 +60,7 @@ ARGUMENTS
 
       named arguments:
         -c [FILE], --config [FILE]   application configuration file (default: etc/config.yml)
-        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: ALL)
+        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: DATASETS)
         -h, --help                   show this help message and exit
 
 EXAMPLES
