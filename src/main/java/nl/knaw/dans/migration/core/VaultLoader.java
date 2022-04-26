@@ -76,7 +76,7 @@ public class VaultLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void loadFromVault(UUID uuid) {
+  public void loadFromVault(UUID uuid, Mode mode) {
     final BagInfo bagInfo = readBagInfo(uuid.toString());
     log.trace("from input {}", bagInfo);
     if (bagInfo.getBagId() == null)
@@ -87,8 +87,10 @@ public class VaultLoader extends ExpectedLoader {
       log.trace("Processing {}", bagInfo);
       ExpectedDataset expectedDataset = null;
       String[] bagSeq = readBagSequence(uuid);
-      if (bagSeq.length <= 1)
-        expectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi());
+      deleteByDoi(bagInfo.getDoi(), mode);
+      if (bagSeq.length <= 1) {
+        expectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);
+      }
       else {
         List<BagInfo> bagInfos= StreamSupport
             .stream(Arrays.stream(bagSeq).spliterator(), false)
@@ -97,10 +99,10 @@ public class VaultLoader extends ExpectedLoader {
         for (int i = 0; i < bagInfos.size(); i++) {
           BagInfo info = bagInfos.get(i);
           log.trace("{} from sequence {}", i, info);
-          expectedDataset = processBag(info.getBagId(), i, bagInfos.get(0).getDoi());
+          expectedDataset = processBag(info.getBagId(), i, bagInfos.get(0).getDoi(), mode);
         }
       }
-      if (expectedDataset != null) {
+      if (expectedDataset != null && mode.doDatasets()) {
         expectedDataset.setDepositor(readDepositor(uuid.toString()));
         expectedDataset.setCitationYear(bagInfo.getCreated().substring(0, 4));
         expectedDataset.setDoi(bagInfo.getDoi());
@@ -114,7 +116,7 @@ public class VaultLoader extends ExpectedLoader {
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml" };
 
   /** @return either deleted=true or accessCategory, embargoDate and license */
-  public ExpectedDataset processBag(String uuid, int bagSeqNr, String baseDoi) {
+  public ExpectedDataset processBag(String uuid, int bagSeqNr, String baseDoi, Mode mode) {
     byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
     ExpectedDataset expectedDataset;
     if (ddmBytes.length == 0) {
@@ -125,11 +127,13 @@ public class VaultLoader extends ExpectedLoader {
       DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
       expectedDataset = datasetRights.expectedDataset();
       expectedDataset.setLicenseUrl(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
-      Map<String, FileRights> filesXml = readFileMeta(uuid);
-      readManifest(uuid).forEach(m ->
-          createExpectedFile(baseDoi, bagSeqNr, m, filesXml, datasetRights.defaultFileRights)
-      );
-      expectedMigrationFiles(baseDoi, migrationFiles, String.valueOf(bagSeqNr));
+      if (mode.doFiles()) {
+        Map<String, FileRights> filesXml = readFileMeta(uuid);
+        readManifest(uuid).forEach(m ->
+            createExpectedFile(baseDoi, bagSeqNr, m, filesXml, datasetRights.defaultFileRights)
+        );
+        expectedMigrationFiles(baseDoi, migrationFiles, String.valueOf(bagSeqNr));
+      }
     }
     return expectedDataset;
   }
