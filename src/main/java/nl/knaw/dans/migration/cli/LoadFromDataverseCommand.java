@@ -31,6 +31,7 @@ import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
 import nl.knaw.dans.migration.core.DataverseLoader;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
+import nl.knaw.dans.migration.core.Mode;
 import nl.knaw.dans.migration.db.ActualDatasetDAO;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 import org.apache.commons.csv.CSVRecord;
@@ -40,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -52,8 +52,6 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
     private final String destDoi = "doi";
     private final String destCsv = "csv";
     private final String destUuids = "UUIDs";
-    private final String destMode = "mode";
-    private enum Mode {ALL, FILES, DATASETS};
     private static final Logger log = LoggerFactory.getLogger(LoadFromDataverseCommand.class);
     private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle;
 
@@ -84,11 +82,9 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
             .type(File.class)
             .help("CSV file produced by easy-fedora-to-bag");
 
-        g.addArgument("--" + destMode)
-            .dest(destMode)
-            .setDefault(Mode.ALL)
-            .type(Mode.class)
-            .help("files require more writing, dataset require more reading");
+        nl.knaw.dans.migration.core.Mode.configure(
+            subparser.addArgument("--mode")
+        );
 
         g.addArgument("--" + destUuids)
             .dest(destUuids)
@@ -111,41 +107,48 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
                         new ActualDatasetDAO(verificationBundleSessionFactory)
                 }
             );
-        String doi = namespace.getString(destDoi);
+        String singleDoi = namespace.getString(destDoi);
         String file = namespace.getString(destCsv);
-        String uuids = namespace.getString(destUuids);
-        Mode mode = Mode.valueOf(namespace.getString(destMode));
-        boolean doFiles = Arrays.asList(Mode.FILES, Mode.ALL).contains(mode);
-        boolean doDatasets = Arrays.asList(Mode.DATASETS, Mode.ALL).contains(mode);
-        if (doi != null)
-            proxy.loadFromDataset(doi, doFiles, doDatasets);
-        else if (uuids != null) {
-            log.info("Loading UUIDs found in {}", uuids);
-            FileUtils.readLines(new File(uuids), UTF_8).forEach(line ->
+        String uuidsFile = namespace.getString(destUuids);
+        Mode mode = Mode.from(namespace);
+        if (singleDoi != null) {
+            proxy.deleteSingleDoi(singleDoi, mode);
+            proxy.loadFromDataset(singleDoi, mode);
+        }
+        else if (uuidsFile != null) {
+            log.info("Loading UUIDs found in {}", uuidsFile);
+            FileUtils.readLines(new File(uuidsFile), UTF_8).forEach(line ->
                 doFirst(
                     datasetIterator(client, "dansBagId:urn:uuid:" + line),
-                    item -> proxy.loadFromDataset(((DatasetResultItem) item).getGlobalId(), doFiles, doDatasets)
+                    item -> {
+                        String doi = ((DatasetResultItem) item).getGlobalId();
+                        proxy.deleteSingleDoi(doi, mode);
+                        proxy.loadFromDataset(doi, mode);
+                    }
                 )
             );
         }
         else if (file == null) {
             log.info("No DOI(s)/UUIDs provided, loading all datasets");
+            proxy.deleteAll(mode);
             Iterator<ResultItem> iterator = datasetIterator(client, "*");
             String last = "";
             while(iterator.hasNext()) {
                 String globalId = ((DatasetResultItem) iterator.next()).getGlobalId();
                 if (!globalId.equals(last))
-                    proxy.loadFromDataset(globalId, doFiles, doDatasets);
+                    proxy.loadFromDataset(globalId, mode);
                 last = globalId;
                 log.trace("done with "+last);
             }
         }
         else {
+            File csvFile = new File(file);
+            proxy.deleteCsvDOIs(FedoraToBagCsv.parse(csvFile), mode);
             log.info("Loading DOIs found in {}", file);
-            for(CSVRecord r: FedoraToBagCsv.parse(new File(file))) {
+            for(CSVRecord r: FedoraToBagCsv.parse(csvFile)) {
                 FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
                 if (fedoraToBagCsv.getComment().contains("OK"))
-                    proxy.loadFromDataset("doi:" + fedoraToBagCsv.getDoi(), doFiles, doDatasets);
+                    proxy.loadFromDataset("doi:" + fedoraToBagCsv.getDoi(), mode);
             }
         }
     }

@@ -60,7 +60,7 @@ public class EasyFileLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void deleteFromCsv(CSVParser csvRecords, Mode mode) throws IOException {
+  public void deleteCsvDOIs(CSVParser csvRecords, Mode mode) throws IOException {
     for (CSVRecord r : csvRecords) {
       FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
       if (fedoraToBagCsv.getComment().contains("OK")) {

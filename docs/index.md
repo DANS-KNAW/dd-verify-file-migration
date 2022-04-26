@@ -46,6 +46,7 @@ ARGUMENTS
         file                         application configuration file (default: etc/config.yml)
 
       named arguments:     
+        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: DATASETS)
         -u UUIDS, --uuids UUIDS      file with UUIDs of a bag in the vault
         -U UUID, --UUID UUID         UUID of a bag in the vault
         -s STORE, --store STORE      name of a bag store in the vault

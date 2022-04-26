@@ -32,4 +32,21 @@ public class ActualFileDAO extends AbstractDAO<ActualFileDAO> {
     log.trace(actual.toString());
     currentSession().save(actual);
   }
+
+  public void deleteByDoi(String doi) {
+    log.trace("deleting ActualFile {}", doi);
+    int r = currentSession()
+        .createQuery("DELETE FROM ActualFile WHERE doi = :doi")
+        .setParameter("doi", doi)
+        .executeUpdate();
+    log.trace("deleted {} from ActualFile", r);
+  }
+
+  public void deleteAll() {
+    log.trace("deleting all from ActualFile");
+    int r = currentSession()
+        .createQuery("DELETE FROM ActualFile")
+        .executeUpdate();
+    log.trace("deleted {} from ActualFile", r);
+  }
 }
