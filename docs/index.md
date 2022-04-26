@@ -60,8 +60,7 @@ ARGUMENTS
 
       named arguments:
         -c [FILE], --config [FILE]   application configuration file (default: etc/config.yml)
-        -f [{true,false}], --withFiles [{true,false}]
-                                     The table expected_files is not filled without this option (default: false)
+        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: ALL)
         -h, --help                   show this help message and exit
 
 EXAMPLES
