@@ -24,6 +24,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
+import nl.knaw.dans.migration.core.Mode;
 import nl.knaw.dans.migration.core.VaultLoader;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
@@ -59,6 +60,9 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
     public void configure(Subparser subparser) {
         super.addFileArgument(subparser);
 
+        Mode.configure(
+            subparser.addArgument("--mode")
+        );
         MutuallyExclusiveGroup group = subparser.addMutuallyExclusiveGroup().required(true);
         group.addArgument("-u", "--uuids")
             .dest("uuids")
@@ -93,12 +97,13 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         String uuid = namespace.getString("uuid");
         String file = namespace.getString("uuids");
         String store = namespace.getString("store");
+        Mode mode = Mode.from(namespace);
         if (uuid != null)
-            proxy.loadFromVault(UUID.fromString(uuid));
+            proxy.loadFromVault(UUID.fromString(uuid), mode);
         else if (file != null) {
             String uuids = FileUtils.readFileToString(new File(file), Charset.defaultCharset());
             for (String s : uuids.split(System.lineSeparator())) {
-                proxy.loadFromVault(UUID.fromString(s.trim()));
+                proxy.loadFromVault(UUID.fromString(s.trim()), mode);
             }
         }
         else {

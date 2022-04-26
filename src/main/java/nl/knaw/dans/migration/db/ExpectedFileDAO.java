@@ -16,10 +16,15 @@
 package nl.knaw.dans.migration.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
+import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.persistence.criteria.CriteriaQuery;
+import java.util.List;
 
 public class ExpectedFileDAO extends AbstractDAO<ExpectedFileDAO> {
   private static final Logger log = LoggerFactory.getLogger(ExpectedFileDAO.class);
@@ -31,5 +36,14 @@ public class ExpectedFileDAO extends AbstractDAO<ExpectedFileDAO> {
   public void create(ExpectedFile expected) {
     log.trace(expected.toString());
     currentSession().save(expected);
+  }
+
+  public void deleteByDoi(String doi) {
+    log.trace("deleting ExpectedFile {}", doi);
+    int r = currentSession()
+        .createQuery("DELETE FROM ExpectedFile WHERE doi = :doi")
+        .setParameter("doi", doi)
+        .executeUpdate();
+    log.trace("deleted {} from ExpectedFile", r);
   }
 }

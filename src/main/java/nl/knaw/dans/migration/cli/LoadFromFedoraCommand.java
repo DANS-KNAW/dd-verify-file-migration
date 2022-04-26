@@ -26,6 +26,7 @@ import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
 import nl.knaw.dans.migration.DdVerifyMigrationConfiguration;
 import nl.knaw.dans.migration.core.EasyFileLoader;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
+import nl.knaw.dans.migration.core.Mode;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
@@ -37,13 +38,13 @@ import org.slf4j.LoggerFactory;
 import javax.naming.ConfigurationException;
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 
 public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVerifyMigrationConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(LoadFromFedoraCommand.class);
     private final HibernateBundle<DdVerifyMigrationConfiguration> easyBundle;
     private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle;
-    private final String WITH_FILES = "withFiles";
     private final String CSV = "csv";
 
     /**
@@ -64,14 +65,11 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
     @Override
     public void configure(Subparser subparser) {
         super.configure(subparser);
-        subparser.addArgument("-f", "--withFiles")
-            .dest(WITH_FILES)
-            .type(Boolean.class)
-            .setConst(true)
-            .setDefault(false)
-            .nargs("?")
-            .help("The table expected_files is not filled without this option");
+        Mode.configure(
+            subparser.addArgument("--mode")
+        );
         subparser.addArgument(CSV)
+            .dest(CSV)
             .type(File.class)
             .nargs("+")
             .help("CSV file produced by easy-fedora-to-bag");
@@ -111,10 +109,12 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
                         new File(namespace.getString("file")).getParentFile(),
                 }
             );
-        for (File file : namespace.<File> getList(CSV)) {
-            log.info(file.toString());
-            for (CSVRecord r : FedoraToBagCsv.parse(file)) {
-                proxy.loadFromCsv(new FedoraToBagCsv(r), namespace.getBoolean(WITH_FILES));
+        Mode mode = Mode.from(namespace);
+        for (File csvFile : namespace.<File> getList(CSV)) {
+            log.info(csvFile.toString());
+            proxy.deleteFromCsv(FedoraToBagCsv.parse(csvFile), mode);
+            for (CSVRecord r : FedoraToBagCsv.parse(csvFile)) {
+                proxy.loadFromCsv(new FedoraToBagCsv(r), mode);
             }
         }
     }

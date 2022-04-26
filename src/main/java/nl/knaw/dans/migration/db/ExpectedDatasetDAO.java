@@ -17,7 +17,9 @@ package nl.knaw.dans.migration.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
+import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,5 +33,14 @@ public class ExpectedDatasetDAO extends AbstractDAO<ExpectedDatasetDAO> {
   public void create(ExpectedDataset expected) {
     log.trace(expected.toString());
     currentSession().save(expected);
+  }
+
+  public void deleteByDoi(String doi) {
+    log.trace("deleting ExpectedDataset {}", doi);
+    int r = currentSession()
+        .createQuery("DELETE FROM ExpectedDataset WHERE doi = :doi")
+        .setParameter("doi", doi)
+        .executeUpdate();
+    log.trace("deleted {} from ExpectedDataset", r);
   }
 }

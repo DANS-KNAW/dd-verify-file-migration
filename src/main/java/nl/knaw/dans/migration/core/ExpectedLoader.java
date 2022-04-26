@@ -15,14 +15,18 @@
  */
 package nl.knaw.dans.migration.core;
 
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 public class ExpectedLoader {
@@ -40,7 +44,14 @@ public class ExpectedLoader {
     this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"),"url","name");
   }
 
-  public void expectedMigrationFiles(String doi, String[] migrationFiles, FileRights datasetRights, String easyFileId) {
+  public void deleteByDoi(String doi, Mode mode) {
+    if (mode.doFiles())
+      expectedFileDAO.deleteByDoi(doi);
+    if (mode.doDatasets())
+      expectedDatasetDAO.deleteByDoi(doi);
+  }
+
+  public void expectedMigrationFiles(String doi, String[] migrationFiles, String easyFileId) {
     for (String f: migrationFiles) {
       ExpectedFile expectedFile = new ExpectedFile();
       expectedFile.setDoi(doi);
