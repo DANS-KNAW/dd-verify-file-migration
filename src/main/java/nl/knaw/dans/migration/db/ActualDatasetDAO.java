@@ -32,4 +32,21 @@ public class ActualDatasetDAO extends AbstractDAO<ActualDatasetDAO> {
     log.trace(actual.toString());
     currentSession().save(actual);
   }
+
+  public void deleteByDoi(String doi) {
+    log.trace("deleting ActualDataset {}", doi);
+    int r = currentSession()
+        .createQuery("DELETE FROM ActualDataset WHERE doi = :doi")
+        .setParameter("doi", doi)
+        .executeUpdate();
+    log.trace("deleted {} from ActualDataset", r);
+  }
+
+  public void deleteAll() {
+    log.trace("deleting all from ActualDataset");
+    int r = currentSession()
+        .createQuery("DELETE FROM ActualDataset")
+        .executeUpdate();
+    log.trace("deleted {} from ActualDataset", r);
+  }
 }

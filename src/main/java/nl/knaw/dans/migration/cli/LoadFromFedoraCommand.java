@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import javax.naming.ConfigurationException;
 import java.io.File;
 import java.net.URI;
-import java.util.Arrays;
 
 public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVerifyMigrationConfiguration> {
 
@@ -112,7 +111,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         Mode mode = Mode.from(namespace);
         for (File csvFile : namespace.<File> getList(CSV)) {
             log.info(csvFile.toString());
-            proxy.deleteFromCsv(FedoraToBagCsv.parse(csvFile), mode);
+            proxy.deleteCsvDOIs(FedoraToBagCsv.parse(csvFile), mode);
             for (CSVRecord r : FedoraToBagCsv.parse(csvFile)) {
                 proxy.loadFromCsv(new FedoraToBagCsv(r), mode);
             }

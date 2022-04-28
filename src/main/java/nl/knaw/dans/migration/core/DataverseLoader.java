@@ -32,6 +32,8 @@ import nl.knaw.dans.migration.core.tables.ActualDataset;
 import nl.knaw.dans.migration.core.tables.ActualFile;
 import nl.knaw.dans.migration.db.ActualDatasetDAO;
 import nl.knaw.dans.migration.db.ActualFileDAO;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.hsqldb.lib.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +55,37 @@ public class DataverseLoader {
     }
 
     @UnitOfWork("hibernate")
-    public void loadFromDataset(String doi, boolean doFiles, boolean doDatasets) {
+    public void deleteCsvDOIs(CSVParser csvRecords, Mode mode) {
+        for (CSVRecord r : csvRecords) {
+            FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
+            if (fedoraToBagCsv.getComment().contains("OK")) {
+                deleteByDoi(fedoraToBagCsv.getDoi(), mode);
+            }
+        }
+    }
+
+    @UnitOfWork("hibernate")
+    public void deleteSingleDoi(String doi, Mode mode) {
+        deleteByDoi(doi.replace("doi:",""), mode);
+    }
+
+    @UnitOfWork("hibernate")
+    public void deleteAll(Mode mode) {
+        if (mode.doFiles())
+            actualFileDAO.deleteAll();
+        if (mode.doDatasets())
+            actualDatasetDAO.deleteAll();
+    }
+
+    public void deleteByDoi(String doi, Mode mode) {
+        if (mode.doFiles())
+            actualFileDAO.deleteByDoi(doi);
+        if (mode.doDatasets())
+            actualDatasetDAO.deleteByDoi(doi);
+    }
+
+    @UnitOfWork("hibernate")
+    public void loadFromDataset(String doi, Mode mode) {
         if (StringUtil.isEmpty(doi))
             return; // workaround
         log.info("Reading {} from dataverse", doi);
@@ -66,7 +98,7 @@ public class DataverseLoader {
         String shortDoi = doi.replace("doi:", "");
         load(doi, versionsLoader, DatasetVersion.class, doi).ifPresent(versions ->
             versions.forEach(v -> {
-                if (doDatasets) {
+                if (mode.doDatasets()) {
                     ActualDataset actualDataset = new ActualDataset();
                     actualDataset.setMajorVersionNr(v.getVersionNumber());
                     actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
@@ -93,7 +125,7 @@ public class DataverseLoader {
                     });
                     actualDatasetDAO.create(actualDataset);
                 }
-                if (doFiles)
+                if (mode.doFiles())
                     loadFiles(shortDoi, v);
             })
         );
