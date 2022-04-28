@@ -66,7 +66,7 @@ public class DataverseLoader {
 
     @UnitOfWork("hibernate")
     public void deleteSingleDoi(String doi, Mode mode) {
-        deleteByDoi(doi, mode);
+        deleteByDoi(doi.replace("doi:",""), mode);
     }
 
     @UnitOfWork("hibernate")

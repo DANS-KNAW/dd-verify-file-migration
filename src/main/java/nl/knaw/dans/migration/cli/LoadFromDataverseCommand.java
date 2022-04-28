@@ -95,6 +95,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
     @Override
     protected void run(Environment environment, Namespace namespace, DdVerifyMigrationConfiguration configuration) throws Exception {
         // https://www.dropwizard.io/en/stable/manual/hibernate.html#transactional-resource-methods-outside-jersey-resources
+        log.info("dataverse: {}", configuration.getDataverse().getBaseUrl());
         DataverseClient client = configuration.getDataverse().build();
         SessionFactory verificationBundleSessionFactory = verificationBundle.getSessionFactory();
         DataverseLoader proxy = new UnitOfWorkAwareProxyFactory(verificationBundle)
