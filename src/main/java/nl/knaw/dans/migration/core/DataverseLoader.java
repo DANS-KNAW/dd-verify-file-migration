@@ -106,11 +106,11 @@ public class DataverseLoader {
                     actualDataset.setLicenseName(v.getLicense().getName());
                     actualDataset.setLicenseUri(v.getLicense().getUri().toString());
                     actualDataset.setDoi(shortDoi);
-                    load(doi, lastestVersionLoader, DatasetLatestVersion.class, doi).ifPresent(lastestVersion -> {
-                        if (lastestVersion.getPublicationDate() != null) // probably DRAFT
-                            actualDataset.setCitationYear(lastestVersion.getPublicationDate().substring(0, 4));
-                        if (lastestVersion.getLatestVersion() != null) // probably DEACCESSIONED
-                            actualDataset.setFileAccessRequest(lastestVersion.getLatestVersion().isFileAccessRequest());
+                    load(doi, lastestVersionLoader, DatasetLatestVersion.class, doi).ifPresent(latestVersion -> {
+                        if (latestVersion.getPublicationDate() != null) // probably DRAFT
+                            actualDataset.setCitationYear(latestVersion.getPublicationDate().substring(0, 4));
+                        if (latestVersion.getLatestVersion() != null) // probably DEACCESSIONED
+                            actualDataset.setFileAccessRequest(latestVersion.getLatestVersion().isFileAccessRequest());
                     });
                     load(doi, rolesLoader, RoleAssignmentReadOnly.class, doi).ifPresent(roles -> {
                         String depositor = roles.stream()
