@@ -29,6 +29,7 @@ import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -55,16 +56,16 @@ public class VaultLoader extends ExpectedLoader {
 
   private static final Logger log = LoggerFactory.getLogger(VaultLoader.class);
 
-  private final URI bagStoreBaseUri;
-  private final URI bagIndexBaseUri;
-  private final URI bagSeqUri;
+  private final URI bagStoreBagsUri;
+  private final URI bagIndexBagsUri;
+  private final URI bagIndexSeqUri;
   private final ObjectMapper mapper;
 
   public VaultLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
     super(expectedFileDAO, expectedDatasetDAO, configDir);
-    bagSeqUri = bagIndexBaseUri.resolve("bag-sequence");
-    this.bagStoreBaseUri = bagStoreBaseUri;
-    this.bagIndexBaseUri = bagIndexBaseUri;
+    bagIndexSeqUri = bagIndexBaseUri.resolve("bag-sequence");
+    bagIndexBagsUri = bagIndexBaseUri.resolve("bags/");
+    bagStoreBagsUri = bagStoreBaseUri.resolve("bags/");
 
 
     mapper = new ObjectMapper();
@@ -77,7 +78,7 @@ public class VaultLoader extends ExpectedLoader {
 
   @UnitOfWork("hibernate")
   public void loadFromVault(UUID uuid, Mode mode) {
-    final BagInfo bagInfo = readBagInfo(uuid.toString());
+    final BagInfo bagInfo = bagInfoFromIndex(uuid.toString());
     log.trace("from input {}", bagInfo);
     if (bagInfo.getBagId() == null)
       log.trace("skipping: not found/parsed");
@@ -94,7 +95,7 @@ public class VaultLoader extends ExpectedLoader {
       else {
         List<BagInfo> bagInfos= StreamSupport
             .stream(Arrays.stream(bagSeq).spliterator(), false)
-            .map(this::readBagInfo)
+            .map(this::bagInfoFromIndex)
             .sorted(new BagInfoComparator()).collect(Collectors.toList());
         for (int i = 0; i < bagInfos.size(); i++) {
           BagInfo info = bagInfos.get(i);
@@ -117,7 +118,8 @@ public class VaultLoader extends ExpectedLoader {
 
   /** @return either deleted=true or accessCategory, embargoDate and license */
   public ExpectedDataset processBag(String uuid, int bagSeqNr, String baseDoi, Mode mode) {
-    byte[] ddmBytes = readDDM(uuid).getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
+    byte[] ddmBytes = readBagFile(uuid, "metadata/", "dataset.xml")
+        .getBytes(StandardCharsets.UTF_8);// parsed twice to reuse code shared with EasyFileLoader
     ExpectedDataset expectedDataset;
     if (ddmBytes.length == 0) {
       // presuming deactivated, logging shows whether it was indeed deactivated or not found
@@ -128,7 +130,8 @@ public class VaultLoader extends ExpectedLoader {
       expectedDataset = datasetRights.expectedDataset();
       expectedDataset.setLicenseUrl(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
       if (mode.doFiles()) {
-        Map<String, FileRights> filesXml = readFileMeta(uuid);
+        byte[] xmlBytes = readBagFile(uuid, "metadata/", "files.xml").getBytes(StandardCharsets.UTF_8);
+        Map<String, FileRights> filesXml = FileRightsHandler.parseRights(new ByteArrayInputStream(xmlBytes));
         readManifest(uuid).forEach(m ->
             createExpectedFile(baseDoi, bagSeqNr, m, filesXml, datasetRights.defaultFileRights)
         );
@@ -148,41 +151,8 @@ public class VaultLoader extends ExpectedLoader {
   }
 
   private Stream<ManifestCsv> readManifest(String uuid) {
-    URI uri = bagStoreBaseUri
-        .resolve("bags/")
-        .resolve(uuid+"/")
-        .resolve("manifest-sha1.txt");
     try {
-      return ManifestCsv.parse(executeReq(new HttpGet(uri), true));
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private Map<String, FileRights> readFileMeta(String uuid) {
-    URI uri = bagStoreBaseUri
-        .resolve("bags/")
-        .resolve(uuid+"/")
-        .resolve("metadata/")
-        .resolve("files.xml");
-    try {
-      String xmlString = executeReq(new HttpGet(uri), true);
-      return FileRightsHandler.parseRights(new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8)));
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private String readDDM(String uuid) {
-    URI uri = bagStoreBaseUri
-        .resolve("bags/")
-        .resolve(uuid+"/")
-        .resolve("metadata/")
-        .resolve("dataset.xml");
-    try {
-      return executeReq(new HttpGet(uri), true);
+      return ManifestCsv.parse(readBagFile(uuid,"manifest-sha1.txt"));
     }
     catch (IOException e) {
       throw new RuntimeException(e);
@@ -190,29 +160,19 @@ public class VaultLoader extends ExpectedLoader {
   }
 
     private String readDepositor(String uuid) {
-    URI uri = bagStoreBaseUri
-        .resolve("bags/")
-        .resolve(uuid+"/")
-        .resolve("bag-info.txt");
-    try {
-      Optional<String> account = Arrays.stream(executeReq(new HttpGet(uri), true)
-              .split(System.lineSeparator()))
+      String[] bagInfoLines = (readBagFile(uuid, "bag-info.txt"))
+          .split(System.lineSeparator());
+      Optional<String> account = Arrays.stream(bagInfoLines)
               .filter(l -> l.startsWith("EASY-User-Account"))
               .map(l -> l.replaceAll(".*:","").trim())
               .findFirst();
       if (!account.isPresent())
         throw new IllegalStateException("No EASY-User-Account in bag-info.txt of "+ uuid);
       return account.get();
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
-  private BagInfo readBagInfo(String uuid) {
-    URI uri = bagIndexBaseUri
-        .resolve("bags/")
-        .resolve(uuid);
+  private BagInfo bagInfoFromIndex(String uuid) {
+    URI uri = bagIndexBagsUri.resolve(uuid);
     try {
       String s = executeReq(new HttpGet(uri), true);
       if ("".equals(s)) return new BagInfo(); // not found
@@ -229,12 +189,31 @@ public class VaultLoader extends ExpectedLoader {
     }
   }
 
-
   private String[] readBagSequence(UUID uuid) {
-    URIBuilder builder = new URIBuilder(bagSeqUri)
+    URIBuilder builder = new URIBuilder(bagIndexSeqUri)
         .setParameter("contains", uuid.toString());
     try {
       return executeReq(new HttpGet(builder.build()), false).split(System.lineSeparator());
+    }
+    catch (IOException | URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private String readBagFile(String uuid, String... pathSegments) {
+    log.trace("reading bag file {} {}",pathSegments.length,pathSegments);
+    if (pathSegments.length < 1) throw new NotImplementedException("too few path segments. Minimal 1, actual "+ pathSegments.length);
+    URI initialUri = bagStoreBagsUri
+        .resolve(uuid + "/")
+        .resolve(pathSegments[0]);
+
+    // TODO loop, recursion or reduce? For now keep it simple. https://www.tabnine.com/code/java/methods/feign.RequestTemplate/resolve
+    if (pathSegments.length > 2) throw new NotImplementedException("too many path segments maximum 2, actual "+ pathSegments.length);
+    URI uri = pathSegments.length == 1 ? initialUri : initialUri.resolve(pathSegments[1]);
+
+    URIBuilder builder = new URIBuilder(uri).setCustomQuery("forceInactive");
+    try {
+      return executeReq(new HttpGet(builder.build()), false);
     }
     catch (IOException | URISyntaxException e) {
       throw new RuntimeException(e);
