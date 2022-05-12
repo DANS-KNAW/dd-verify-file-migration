@@ -144,6 +144,7 @@ public class VaultLoader extends ExpectedLoader {
     log.trace("{} {}", path, fileRights);
     ExpectedFile expectedFile = new ExpectedFile(doi, m, fileRights);
     expectedFile.setEasyFileId(String.valueOf(bagSeqNr));
+    expectedFile.setExpectedPath(expectedFile.getExpectedPath().replace("data/",""));
     saveExpectedFile(expectedFile);
   }
 

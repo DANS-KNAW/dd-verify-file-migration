@@ -66,7 +66,6 @@ public class ExpectedLoader {
   }
 
   public void saveExpectedFile(ExpectedFile expected) {
-      expected.setExpectedPath(expected.getExpectedPath().replace("data/",""));
       expectedFileDAO.create(expected);
   }
 
