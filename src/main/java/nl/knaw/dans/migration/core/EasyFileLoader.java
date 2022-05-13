@@ -38,7 +38,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static nl.knaw.dans.migration.core.DatasetLicenseHandler.parseLicense;
 import static nl.knaw.dans.migration.core.HttpHelper.executeReq;
 
 public class EasyFileLoader extends ExpectedLoader {
@@ -88,7 +87,7 @@ public class EasyFileLoader extends ExpectedLoader {
         if (!AccessCategory.NO_ACCESS.equals(solrFields.accessCategory)) {
           byte[] emdBytes = readEmd(csv.getDatasetId())
               .getBytes(StandardCharsets.UTF_8);
-          String license = parseLicense(new ByteArrayInputStream(emdBytes), solrFields.accessCategory);
+          String license = MetadataHandler.parse(new ByteArrayInputStream(emdBytes), solrFields.accessCategory).license;
           expected.setLicenseUrl(license);
         }
         saveExpectedDataset(expected);

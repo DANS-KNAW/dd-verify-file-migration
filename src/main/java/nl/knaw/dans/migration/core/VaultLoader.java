@@ -25,6 +25,7 @@ import nl.knaw.dans.lib.dataverse.ResultItemDeserializer;
 import nl.knaw.dans.lib.dataverse.model.dataset.MetadataField;
 import nl.knaw.dans.lib.dataverse.model.dataverse.DataverseItem;
 import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
+import nl.knaw.dans.migration.core.MetadataHandler.DatasetMetadata;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
@@ -105,7 +106,6 @@ public class VaultLoader extends ExpectedLoader {
       }
       if (expectedDataset != null && mode.doDatasets()) {
         expectedDataset.setDepositor(readDepositor(uuid.toString()));
-        expectedDataset.setCitationYear(bagInfo.getCreated().substring(0, 4));
         expectedDataset.setDoi(bagInfo.getDoi());
         expectedDataset.setExpectedVersions(bagSeq.length);
         saveExpectedDataset(expectedDataset);
@@ -128,7 +128,9 @@ public class VaultLoader extends ExpectedLoader {
     } else {
       DatasetRights datasetRights = DatasetRightsHandler.parseRights(new ByteArrayInputStream(ddmBytes));
       expectedDataset = datasetRights.expectedDataset();
-      expectedDataset.setLicenseUrl(DatasetLicenseHandler.parseLicense(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory));
+      DatasetMetadata metadata = MetadataHandler.parse(new ByteArrayInputStream(ddmBytes), datasetRights.accessCategory);
+      expectedDataset.setCitationYear(metadata.created.substring(0, 4));
+      expectedDataset.setLicenseUrl(metadata.license);
       if (mode.doFiles()) {
         byte[] xmlBytes = readBagFile(uuid, "metadata/", "files.xml").getBytes(StandardCharsets.UTF_8);
         Map<String, FileRights> filesXml = FileRightsHandler.parseRights(new ByteArrayInputStream(xmlBytes));

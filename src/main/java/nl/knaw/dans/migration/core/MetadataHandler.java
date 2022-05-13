@@ -28,15 +28,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-public class DatasetLicenseHandler extends DefaultHandler {
+public class MetadataHandler extends DefaultHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(DatasetLicenseHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(MetadataHandler.class);
 
   static final String dansLicense = "https://dans.knaw.nl/en/about/organisation-and-policy/legal-information/DANSLicence.pdf";
   static final String cc0 = "http://creativecommons.org/publicdomain/zero/1.0";
   private static final SAXParserFactory parserFactory = configureFactory();
   private StringBuilder chars; // collected since the last startElement
   private String license = null;
+  private String created = null;
+  private AccessCategory accessCategory;
+
+  /** applies to EMD as well as DDM TODO even DatasetRightsHandler might apply to both  */
+  class DatasetMetadata {
+    final String license;
+    final String created;
+
+    DatasetMetadata(String license, String created) {
+      this.license = license;
+      this.created = created;
+    }
+  }
+  private MetadataHandler(AccessCategory defaultAccessCategory){
+    this.accessCategory = defaultAccessCategory;
+  }
 
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes) {
@@ -50,7 +66,8 @@ public class DatasetLicenseHandler extends DefaultHandler {
       String s = chars.toString();
       if(s.startsWith("http"))
         this.license = s;
-    }
+    } else if ("created".equalsIgnoreCase(localName))
+        this.created = chars.toString();
   }
 
   @Override
@@ -58,8 +75,9 @@ public class DatasetLicenseHandler extends DefaultHandler {
     chars.append(new String(ch, start, length));
   }
 
-  private String get() {
-    return license;
+  private DatasetMetadata get() {
+    return new DatasetMetadata(Optional.ofNullable(license)
+        .orElse(accessCategory.getDefaultLicense()), created);
   }
 
   private static SAXParserFactory configureFactory() {
@@ -68,12 +86,11 @@ public class DatasetLicenseHandler extends DefaultHandler {
     return saxParserFactory;
   }
 
-  static public String parseLicense(InputStream xml, AccessCategory accessCategory) {
-    DatasetLicenseHandler handler = new DatasetLicenseHandler();
+  static public DatasetMetadata parse(InputStream xml, AccessCategory accessCategory) {
+    MetadataHandler handler = new MetadataHandler(accessCategory);
     try {
       parserFactory.newSAXParser().parse(xml, handler);
-      return Optional.ofNullable(handler.get())
-          .orElse(accessCategory.getDefaultLicense());
+      return handler.get();
     }
     catch (ParserConfigurationException | SAXException | IOException e) {
       throw new RuntimeException(e);
