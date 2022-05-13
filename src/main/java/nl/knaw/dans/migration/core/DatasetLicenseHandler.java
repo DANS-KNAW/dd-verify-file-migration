@@ -38,12 +38,6 @@ public class DatasetLicenseHandler extends DefaultHandler {
   private StringBuilder chars; // collected since the last startElement
   private String license = null;
 
-  private static DatasetRights initDatasetRights() {
-    DatasetRights datasetRights = new DatasetRights();
-    datasetRights.setDefaultFileRights(new FileRights());
-    return datasetRights;
-  }
-
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes) {
     chars = new StringBuilder();
@@ -74,10 +68,6 @@ public class DatasetLicenseHandler extends DefaultHandler {
     return saxParserFactory;
   }
 
-  /**
-   * @return key: filepath attribute of file elements
-   * value: content of the elements: accessibleToRights and visibleToRights
-   */
   static public String parseLicense(InputStream xml, AccessCategory accessCategory) {
     DatasetLicenseHandler handler = new DatasetLicenseHandler();
     try {
