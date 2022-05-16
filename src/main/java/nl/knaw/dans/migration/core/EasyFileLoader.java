@@ -75,7 +75,7 @@ public class EasyFileLoader extends ExpectedLoader {
 
   @UnitOfWork("hibernate")
   public void loadFromCsv(FedoraToBagCsv csv, Mode mode, File csvFile) {
-    //inputDatasetDAO.create(new InputDataset(csv,csvFile));
+    inputDatasetDAO.create(new InputDataset(csv,csvFile));
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {

@@ -56,7 +56,7 @@ public class FedoraToBagCsv {
   }
 
   // see https://github.com/DANS-KNAW/easy-fedora-to-bag/blob/8ef3a0bad/src/main/scala/nl/knaw/dans/easy/fedoratobag/CsvRecord.scala#L42-L46
-  private static final CSVFormat csvFormat = CSVFormat
+  public static final CSVFormat csvFormat = CSVFormat
       .RFC4180
       .withHeader(DATASET_ID_COLUMN, UUID_1, UUID_2, DOI_COLUMN, "depositor", TRANSFORMATION_TYPE_COLUMN, COMMENT_COLUMN)
       .withDelimiter(',')
