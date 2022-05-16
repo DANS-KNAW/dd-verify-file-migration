@@ -30,6 +30,7 @@ import nl.knaw.dans.migration.core.Mode;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import nl.knaw.dans.migration.db.InputDatasetDAO;
 import org.apache.commons.csv.CSVRecord;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -98,11 +99,12 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         EasyFileLoader proxy = new UnitOfWorkAwareProxyFactory(easyBundle, verificationBundle)
             .create(
                 EasyFileLoader.class,
-                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, ExpectedDatasetDAO.class, URI.class, URI.class, File.class},
+                new Class[] { EasyFileDAO.class, ExpectedFileDAO.class, ExpectedDatasetDAO.class, InputDatasetDAO.class, URI.class, URI.class, File.class},
                 new Object[] {
                         new EasyFileDAO(easyBundle.getSessionFactory()),
                         new ExpectedFileDAO(verificationBundleSessionFactory),
                         new ExpectedDatasetDAO(verificationBundleSessionFactory),
+                        new InputDatasetDAO(verificationBundleSessionFactory),
                         configuration.getSolrBaseUri(),
                         configuration.getFedoraBaseUri(),
                         new File(namespace.getString("file")).getParentFile(),
@@ -113,7 +115,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
             log.info(csvFile.toString());
             proxy.deleteCsvDOIs(FedoraToBagCsv.parse(csvFile), mode);
             for (CSVRecord r : FedoraToBagCsv.parse(csvFile)) {
-                proxy.loadFromCsv(new FedoraToBagCsv(r), mode);
+                proxy.loadFromCsv(new FedoraToBagCsv(r), mode, csvFile);
             }
         }
     }

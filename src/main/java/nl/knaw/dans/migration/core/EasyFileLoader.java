@@ -19,14 +19,17 @@ import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
+import nl.knaw.dans.migration.core.tables.InputDataset;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import nl.knaw.dans.migration.db.InputDatasetDAO;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,15 +48,17 @@ public class EasyFileLoader extends ExpectedLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
   private final EasyFileDAO easyFileDAO;
+  private final InputDatasetDAO inputDatasetDAO;
   private final URI solrUri;
   private final URI fedoraUri;
 
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
 
-  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI solrBaseUri, URI fedoraBaseUri, File configDir) {
+  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, InputDatasetDAO inputDatasetDAO, URI solrBaseUri, URI fedoraBaseUri, File configDir) {
     super(expectedFileDAO, expectedDatasetDAO, configDir);
     this.easyFileDAO = easyFileDAO;
+    this.inputDatasetDAO = inputDatasetDAO;
     this.solrUri = solrBaseUri.resolve("datasets/select");
     this.fedoraUri = fedoraBaseUri.resolve("objects/");
   }
@@ -69,7 +74,8 @@ public class EasyFileLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void loadFromCsv(FedoraToBagCsv csv, Mode mode) {
+  public void loadFromCsv(FedoraToBagCsv csv, Mode mode, File csvFile) {
+    //inputDatasetDAO.create(new InputDataset(csv,csvFile));
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {
