@@ -20,7 +20,6 @@ import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import nl.knaw.dans.migration.db.InputDatasetDAO;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,12 +31,14 @@ public class ExpectedLoader {
 
   private final ExpectedFileDAO expectedFileDAO;
   private final ExpectedDatasetDAO expectedDatasetDAO;
+  final InputDatasetDAO inputDatasetDAO;
   private final Map<String, String> userToEmail;
   private final Map<String, String> licensesUrlToName;
 
-  public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, File configDir) {
+  public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, InputDatasetDAO inputDatasetDAO, File configDir) {
     this.expectedFileDAO = expectedFileDAO;
     this.expectedDatasetDAO = expectedDatasetDAO;
+    this.inputDatasetDAO = inputDatasetDAO;
     this.userToEmail = Mapping.load(new File(configDir + "/easy-users.csv"), "UID", "email");
     this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"),"url","name");
   }
@@ -47,6 +48,7 @@ public class ExpectedLoader {
       expectedFileDAO.deleteByDoi(doi);
     if (mode.doDatasets())
       expectedDatasetDAO.deleteByDoi(doi);
+    inputDatasetDAO.deleteByDoi(doi);
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, String easyFileId) {

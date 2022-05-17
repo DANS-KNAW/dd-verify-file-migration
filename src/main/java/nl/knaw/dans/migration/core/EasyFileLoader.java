@@ -48,7 +48,6 @@ public class EasyFileLoader extends ExpectedLoader {
   private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
   private final EasyFileDAO easyFileDAO;
-  private final InputDatasetDAO inputDatasetDAO;
   private final URI solrUri;
   private final URI fedoraUri;
 
@@ -56,9 +55,8 @@ public class EasyFileLoader extends ExpectedLoader {
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
 
   public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, InputDatasetDAO inputDatasetDAO, URI solrBaseUri, URI fedoraBaseUri, File configDir) {
-    super(expectedFileDAO, expectedDatasetDAO, configDir);
+    super(expectedFileDAO, expectedDatasetDAO, inputDatasetDAO, configDir);
     this.easyFileDAO = easyFileDAO;
-    this.inputDatasetDAO = inputDatasetDAO;
     this.solrUri = solrBaseUri.resolve("datasets/select");
     this.fedoraUri = fedoraBaseUri.resolve("objects/");
   }
