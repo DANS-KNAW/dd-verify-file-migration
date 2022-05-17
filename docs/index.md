@@ -33,6 +33,7 @@ ARGUMENTS
       named arguments:      
         -d DOI, --doi DOI            The DOI for which to load the files,
                                      for example: 'doi:10.17026/dans-xtz-qa6j'
+                                     Use csv with csv and comment column to load multiple DOIs.
         --csv CSV                    CSV file produced by easy-fedora-to-bag
         --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: ALL)
         --UUIDs UUIDS                .txt file with bag ids

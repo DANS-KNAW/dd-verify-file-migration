@@ -18,8 +18,8 @@ package nl.knaw.dans.migration.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static nl.knaw.dans.migration.core.DatasetLicenseHandler.cc0;
-import static nl.knaw.dans.migration.core.DatasetLicenseHandler.dansLicense;
+import static nl.knaw.dans.migration.core.MetadataHandler.cc0;
+import static nl.knaw.dans.migration.core.MetadataHandler.dansLicense;
 
 public enum AccessCategory {
 
