@@ -37,12 +37,13 @@ public class InputDatasetDAO extends AbstractDAO<EasyFile> {
     currentSession().save(input);
   }
 
-  public void deleteByDoi(String doi) {
-    log.trace("deleting InputDataset {}", doi);
+  public void deleteByDoi(String doi, String source) {
+    log.trace("deleting InputDataset {} {}", doi, source);
     int r = currentSession()
-        .createQuery("DELETE FROM InputDataset WHERE doi = :doi")
+        .createQuery("DELETE FROM InputDataset WHERE doi = :doi AND source = :source")
         .setParameter("doi", doi)
+        .setParameter("source", source)
         .executeUpdate();
-    log.trace("deleted {} from InputDataset", r);
+    log.trace("deleted {} {} from InputDataset", r, source);
   }
 }
