@@ -43,12 +43,12 @@ public class ExpectedLoader {
     this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"),"url","name");
   }
 
-  public void deleteByDoi(String doi, Mode mode) {
+  public void deleteByDoi(String doi, Mode mode, String source) {
     if (mode.doFiles())
       expectedFileDAO.deleteByDoi(doi);
     if (mode.doDatasets())
       expectedDatasetDAO.deleteByDoi(doi);
-    inputDatasetDAO.deleteByDoi(doi);
+    inputDatasetDAO.deleteByDoi(doi, source);
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, String easyFileId) {

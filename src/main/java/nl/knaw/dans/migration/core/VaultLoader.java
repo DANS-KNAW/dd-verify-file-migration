@@ -28,6 +28,7 @@ import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 import nl.knaw.dans.migration.core.MetadataHandler.DatasetMetadata;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
+import nl.knaw.dans.migration.core.tables.InputDataset;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
 import nl.knaw.dans.migration.db.InputDatasetDAO;
@@ -79,18 +80,19 @@ public class VaultLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void loadFromVault(UUID uuid, Mode mode) {
+  public void loadFromVault(UUID uuid, Mode mode, String batch, String bagStore) {
     final BagInfo bagInfo = bagInfoFromIndex(uuid.toString());
     log.trace("from input {}", bagInfo);
+    deleteByDoi(bagInfo.getDoi(), mode, "vault");
     if (bagInfo.getBagId() == null)
       log.trace("skipping: not found/parsed");
     else if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
       log.info("Skipping {}, it is another version of {}", uuid, bagInfo.getBaseId());
     else {
       log.trace("Processing {}", bagInfo);
-      ExpectedDataset expectedDataset = null;
       String[] bagSeq = readBagSequence(uuid);
-      deleteByDoi(bagInfo.getDoi(), mode);
+      inputDatasetDAO.create(new InputDataset(bagInfo, bagSeq, batch, bagStore));
+      ExpectedDataset expectedDataset = null;
       if (bagSeq.length <= 1) {
         expectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);
       }

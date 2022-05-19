@@ -28,6 +28,7 @@ import nl.knaw.dans.migration.core.Mode;
 import nl.knaw.dans.migration.core.VaultLoader;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import nl.knaw.dans.migration.db.InputDatasetDAO;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -72,9 +73,10 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
             .dest("uuid")
             .type(String.class)
             .help("UUID of a bag in the vault");
-        group.addArgument("-s", "--store")
+        subparser.addArgument("-s", "--store")
             .type(String.class)
-            .help("name of a bag store in the vault");
+            .required(true)
+            .help("name of a bag store in the vault, saved in input_datasets table");
     }
 
     @Override
@@ -85,10 +87,11 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         VaultLoader proxy = new UnitOfWorkAwareProxyFactory(verificationBundle)
             .create(
                 VaultLoader.class,
-                new Class[] { ExpectedFileDAO.class, ExpectedDatasetDAO.class , URI.class, URI.class, File.class },
+                new Class[] { ExpectedFileDAO.class, ExpectedDatasetDAO.class, InputDatasetDAO.class, URI.class, URI.class, File.class },
                 new Object[] {
                         new ExpectedFileDAO(verificationBundleSessionFactory),
                         new ExpectedDatasetDAO(verificationBundleSessionFactory),
+                        new InputDatasetDAO(verificationBundleSessionFactory),
                         configuration.getBagStoreBaseUri(),
                         configuration.getBagIndexBaseUri(),
                         new File(namespace.getString("file")).getParentFile(),
@@ -99,15 +102,12 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         String store = namespace.getString("store");
         Mode mode = Mode.from(namespace);
         if (uuid != null)
-            proxy.loadFromVault(UUID.fromString(uuid), mode);
+            proxy.loadFromVault(UUID.fromString(uuid), mode, "single-uuid-command", store);
         else if (file != null) {
             String uuids = FileUtils.readFileToString(new File(file), Charset.defaultCharset());
             for (String s : uuids.split(System.lineSeparator())) {
-                proxy.loadFromVault(UUID.fromString(s.trim()), mode);
+                proxy.loadFromVault(UUID.fromString(s.trim()), mode, file, store);
             }
-        }
-        else {
-            log.error("not yet implemented:loading from store {}", store);
         }
     }
 }

@@ -66,7 +66,7 @@ public class EasyFileLoader extends ExpectedLoader {
     for (CSVRecord r : csvRecords) {
       FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
       if (fedoraToBagCsv.getComment().contains("OK")) {
-        deleteByDoi(fedoraToBagCsv.getDoi(), mode);
+        deleteByDoi(fedoraToBagCsv.getDoi(), mode, "fedora");
       }
     }
   }

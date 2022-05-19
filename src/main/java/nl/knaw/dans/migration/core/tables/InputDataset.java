@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.migration.core.tables;
 
+import nl.knaw.dans.migration.core.BagInfo;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
 
 import javax.persistence.Column;
@@ -24,6 +25,7 @@ import javax.persistence.IdClass;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Entity
@@ -39,6 +41,17 @@ public class InputDataset {
 
     // most lengths from easy-dtap/provisioning/roles/easy-fs-rdb/templates/create-easy-db-tables.sql
     // doi length as in dd-dtap/shared-code/dataverse/scripts/database/create/create_v*.sql
+
+    public InputDataset() {}
+
+    public InputDataset(BagInfo bagInfo, String[] bagSeq, String batch, String bagStore) {
+        setDoi(bagInfo.getDoi());
+        setUuidV1(bagInfo.getBaseId());
+        setUuidV2(Arrays.toString(bagSeq));
+        setBatch(batch);
+        setStatus("OK");
+        setSource(bagStore);
+    }
 
     public InputDataset (FedoraToBagCsv csv, File batch) {
         doi = csv.getDoi();
