@@ -19,6 +19,7 @@ import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import nl.knaw.dans.migration.db.InputDatasetDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,12 +31,14 @@ public class ExpectedLoader {
 
   private final ExpectedFileDAO expectedFileDAO;
   private final ExpectedDatasetDAO expectedDatasetDAO;
+  final InputDatasetDAO inputDatasetDAO;
   private final Map<String, String> userToEmail;
   private final Map<String, String> licensesUrlToName;
 
-  public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, File configDir) {
+  public ExpectedLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, InputDatasetDAO inputDatasetDAO, File configDir) {
     this.expectedFileDAO = expectedFileDAO;
     this.expectedDatasetDAO = expectedDatasetDAO;
+    this.inputDatasetDAO = inputDatasetDAO;
     this.userToEmail = Mapping.load(new File(configDir + "/easy-users.csv"), "UID", "email");
     this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"),"url","name");
   }
@@ -73,10 +76,8 @@ public class ExpectedLoader {
     String depositor = expected.getDepositor();
     expected.setDepositor(userToEmail.getOrDefault(depositor, depositor));
 
-    if (null != expected.getLicenseUrl()) {
+    if (null != expected.getLicenseUrl())
       expected.setLicenseName(licensesUrlToName.getOrDefault(expected.getLicenseUrl(), null));
-    }
-    log.trace(expected.toString());
     expectedDatasetDAO.create(expected);
   }
 }

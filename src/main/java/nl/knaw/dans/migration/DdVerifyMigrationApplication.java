@@ -31,6 +31,7 @@ import nl.knaw.dans.migration.core.tables.ActualFile;
 import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
+import nl.knaw.dans.migration.core.tables.InputDataset;
 
 public class DdVerifyMigrationApplication extends Application<DdVerifyMigrationConfiguration> {
 
@@ -50,7 +51,7 @@ public class DdVerifyMigrationApplication extends Application<DdVerifyMigrationC
     };
 
     private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle =
-            new HibernateBundle<DdVerifyMigrationConfiguration>(ExpectedFile.class, ActualFile.class, ExpectedDataset.class, ActualDataset.class) {
+            new HibernateBundle<DdVerifyMigrationConfiguration>(ExpectedFile.class, ActualFile.class, ExpectedDataset.class, InputDataset.class, ActualDataset.class) {
 
         @Override
         public DataSourceFactory getDataSourceFactory(DdVerifyMigrationConfiguration configuration) {

@@ -19,9 +19,11 @@ import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
+import nl.knaw.dans.migration.core.tables.InputDataset;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
+import nl.knaw.dans.migration.db.InputDatasetDAO;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -51,15 +53,16 @@ public class EasyFileLoader extends ExpectedLoader {
   /** note: easy-convert-bag-to-deposit does not add emd.xml to bags from the vault */
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
 
-  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI solrBaseUri, URI fedoraBaseUri, File configDir) {
-    super(expectedFileDAO, expectedDatasetDAO, configDir);
+  public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, InputDatasetDAO inputDatasetDAO, URI solrBaseUri, URI fedoraBaseUri, File configDir) {
+    super(expectedFileDAO, expectedDatasetDAO, inputDatasetDAO, configDir);
     this.easyFileDAO = easyFileDAO;
     this.solrUri = solrBaseUri.resolve("datasets/select");
     this.fedoraUri = fedoraBaseUri.resolve("objects/");
   }
 
   @UnitOfWork("hibernate")
-  public void deleteCsvDOIs(CSVParser csvRecords, Mode mode) throws IOException {
+  public void deleteBatch(CSVParser csvRecords, Mode mode, String batch) throws IOException {
+    inputDatasetDAO.deleteBatch(batch,"fedora");
     for (CSVRecord r : csvRecords) {
       FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
       if (fedoraToBagCsv.getComment().contains("OK")) {
@@ -69,11 +72,17 @@ public class EasyFileLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void loadFromCsv(FedoraToBagCsv csv, Mode mode) {
+  public void loadFromCsv(FedoraToBagCsv csv, Mode mode, File csvFile) {
+    inputDatasetDAO.create(new InputDataset(csv,csvFile));
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {
-      SolrFields solrFields = new SolrFields(solrInfo(csv.getDatasetId()));
+      String line = solrInfo(csv.getDatasetId());
+      if(line.trim().isEmpty()) {
+        log.warn("skipped (not found in solr) {}", csv);
+        return;
+      }
+      SolrFields solrFields = new SolrFields(line);
       DatasetRights datasetRights = solrFields.datasetRights();
       if (mode.doDatasets()) {
         ExpectedDataset expected = datasetRights.expectedDataset();
