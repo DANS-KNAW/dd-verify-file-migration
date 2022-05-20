@@ -78,10 +78,6 @@ public class DatasetRightsHandler extends DefaultHandler {
     return saxParserFactory;
   }
 
-  /**
-   * @return key: filepath attribute of file elements
-   * value: content of the elements: accessibleToRights and visibleToRights
-   */
   static public DatasetRights parseRights(InputStream xml) {
     DatasetRightsHandler handler = new DatasetRightsHandler();
     try {

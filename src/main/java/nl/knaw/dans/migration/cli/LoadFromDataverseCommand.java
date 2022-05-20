@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -75,7 +76,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         MutuallyExclusiveGroup g = subparser.addMutuallyExclusiveGroup();
         g.addArgument("-d", "--" + destDoi)
             .dest(destDoi)
-            .help("The DOI for which to load the files, for example: 'doi:10.17026/dans-xtz-qa6j'");
+            .help("The DOI for which to load the files, for example: 'doi:10.17026/dans-xtz-qa6j'. Use csv with csv and comment column to load multiple DOIs.");
 
         g.addArgument("--" + destCsv)
             .dest(destCsv)
@@ -109,7 +110,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
                 }
             );
         String singleDoi = namespace.getString(destDoi);
-        String file = namespace.getString(destCsv);
+        String csvFile = namespace.getString(destCsv);
         String uuidsFile = namespace.getString(destUuids);
         Mode mode = Mode.from(namespace);
         if (singleDoi != null) {
@@ -117,7 +118,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
             proxy.loadFromDataset(singleDoi, mode);
         }
         else if (uuidsFile != null) {
-            log.info("Loading UUIDs found in {}", uuidsFile);
+            log.info("Loading UUIDs found in {}, delete/insert one by one from/into actual tables ({})", uuidsFile, mode);
             FileUtils.readLines(new File(uuidsFile), UTF_8).forEach(line ->
                 doFirst(
                     datasetIterator(client, "dansBagId:urn:uuid:" + line),
@@ -129,9 +130,10 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
                 )
             );
         }
-        else if (file == null) {
-            log.info("No DOI(s)/UUIDs provided, loading all datasets");
+        else if (csvFile == null) {
+            log.info("Deleting all from actual tables ({})", mode);
             proxy.deleteAll(mode);
+            log.info("No DOI(s)/UUIDs provided, loading all datasets into actual tables ({})", mode);
             Iterator<ResultItem> iterator = datasetIterator(client, "*");
             String last = "";
             while(iterator.hasNext()) {
@@ -143,10 +145,10 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
             }
         }
         else {
-            File csvFile = new File(file);
-            proxy.deleteCsvDOIs(FedoraToBagCsv.parse(csvFile), mode);
-            log.info("Loading DOIs found in {}", file);
-            for(CSVRecord r: FedoraToBagCsv.parse(csvFile)) {
+            log.info("Deleting DOIs found in {} from actual tables ({})", csvFile, mode);
+            proxy.deleteCsvDOIs(FedoraToBagCsv.parse(new File(csvFile)), mode);
+            log.info("Loading DOIs found in {} into actual tables ({})", csvFile, mode);
+            for(CSVRecord r: FedoraToBagCsv.parse(new File(csvFile))) {
                 FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
                 if (fedoraToBagCsv.getComment().contains("OK"))
                     proxy.loadFromDataset("doi:" + fedoraToBagCsv.getDoi(), mode);
