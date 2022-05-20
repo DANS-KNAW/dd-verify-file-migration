@@ -29,7 +29,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +61,11 @@ public class EasyFileLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void deleteCsvDOIs(CSVParser csvRecords, Mode mode) throws IOException {
+  public void deleteCsvDOIs(CSVParser csvRecords, Mode mode, String batch) throws IOException {
     for (CSVRecord r : csvRecords) {
       FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
       if (fedoraToBagCsv.getComment().contains("OK")) {
-        deleteByDoi(fedoraToBagCsv.getDoi(), mode, "fedora");
+        deleteByDoi(fedoraToBagCsv.getDoi(), mode, batch, "fedora");
       }
     }
   }
@@ -77,7 +76,12 @@ public class EasyFileLoader extends ExpectedLoader {
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {
-      SolrFields solrFields = new SolrFields(solrInfo(csv.getDatasetId()));
+      String line = solrInfo(csv.getDatasetId());
+      if(line.trim().isEmpty()) {
+        log.warn("skipped (not found in solr) {}", csv);
+        return;
+      }
+      SolrFields solrFields = new SolrFields(line);
       DatasetRights datasetRights = solrFields.datasetRights();
       if (mode.doDatasets()) {
         ExpectedDataset expected = datasetRights.expectedDataset();

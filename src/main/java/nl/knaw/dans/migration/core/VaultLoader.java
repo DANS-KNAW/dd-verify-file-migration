@@ -83,7 +83,7 @@ public class VaultLoader extends ExpectedLoader {
   public void loadFromVault(UUID uuid, Mode mode, String batch, String bagStore) {
     final BagInfo bagInfo = bagInfoFromIndex(uuid.toString());
     log.trace("from input {}", bagInfo);
-    deleteByDoi(bagInfo.getDoi(), mode, "vault");
+    deleteByDoi(bagInfo.getDoi(), mode, batch, "vault");
     if (bagInfo.getBagId() == null)
       log.trace("skipping: not found/parsed");
     else if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))

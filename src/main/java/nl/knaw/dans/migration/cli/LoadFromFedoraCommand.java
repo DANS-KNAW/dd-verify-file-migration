@@ -113,7 +113,7 @@ public class LoadFromFedoraCommand extends DefaultConfigEnvironmentCommand<DdVer
         Mode mode = Mode.from(namespace);
         for (File csvFile : namespace.<File> getList(CSV)) {
             log.info(csvFile.toString());
-            proxy.deleteCsvDOIs(FedoraToBagCsv.parse(csvFile), mode);
+            proxy.deleteCsvDOIs(FedoraToBagCsv.parse(csvFile), mode, csvFile.toString());
             for (CSVRecord r : FedoraToBagCsv.parse(csvFile)) {
                 proxy.loadFromCsv(new FedoraToBagCsv(r), mode, csvFile);
             }
