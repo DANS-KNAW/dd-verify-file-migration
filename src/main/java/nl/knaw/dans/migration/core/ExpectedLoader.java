@@ -43,12 +43,11 @@ public class ExpectedLoader {
     this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"),"url","name");
   }
 
-  public void deleteByDoi(String doi, Mode mode, String batch, String source) {
+  public void deleteByDoi(String doi, Mode mode) {
     if (mode.doFiles())
       expectedFileDAO.deleteByDoi(doi);
     if (mode.doDatasets())
       expectedDatasetDAO.deleteByDoi(doi);
-    inputDatasetDAO.deleteByDoi(doi, batch, source);
   }
 
   public void expectedMigrationFiles(String doi, String[] migrationFiles, String easyFileId) {
@@ -77,10 +76,8 @@ public class ExpectedLoader {
     String depositor = expected.getDepositor();
     expected.setDepositor(userToEmail.getOrDefault(depositor, depositor));
 
-    if (null != expected.getLicenseUrl()) {
+    if (null != expected.getLicenseUrl())
       expected.setLicenseName(licensesUrlToName.getOrDefault(expected.getLicenseUrl(), null));
-    }
-    log.trace(expected.toString());
     expectedDatasetDAO.create(expected);
   }
 }

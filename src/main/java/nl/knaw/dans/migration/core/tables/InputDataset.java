@@ -44,13 +44,13 @@ public class InputDataset {
 
     public InputDataset() {}
 
-    public InputDataset(BagInfo bagInfo, String[] bagSeq, String batch, String bagStore) {
+    public InputDataset(BagInfo bagInfo, String[] bagSeq, String batch, String source) {
         setDoi(bagInfo.getDoi());
         setUuidV1(bagInfo.getBaseId());
         setUuidV2(Arrays.toString(bagSeq));
         setBatch(batch);
         setStatus("OK");
-        setSource(bagStore);
+        setSource(source);
     }
 
     public InputDataset (FedoraToBagCsv csv, File batch) {

@@ -80,10 +80,15 @@ public class VaultLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
+  public void deleteBatch(String batch, String bagStore) {
+    inputDatasetDAO.deleteBatch(batch,bagStore);
+  }
+
+  @UnitOfWork("hibernate")
   public void loadFromVault(UUID uuid, Mode mode, String batch, String bagStore) {
     final BagInfo bagInfo = bagInfoFromIndex(uuid.toString());
     log.trace("from input {}", bagInfo);
-    deleteByDoi(bagInfo.getDoi(), mode, batch, "vault");
+    deleteByDoi(bagInfo.getDoi(), mode);
     if (bagInfo.getBagId() == null)
       log.trace("skipping: not found/parsed");
     else if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))

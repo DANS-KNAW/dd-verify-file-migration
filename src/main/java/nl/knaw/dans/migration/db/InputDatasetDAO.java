@@ -16,6 +16,7 @@
 package nl.knaw.dans.migration.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.InputDataset;
@@ -37,14 +38,13 @@ public class InputDatasetDAO extends AbstractDAO<EasyFile> {
     currentSession().save(input);
   }
 
-  public void deleteByDoi(String doi, String batch, String source) {
-    log.trace("deleting InputDataset {} {} {}", doi, batch, source);
+  @UnitOfWork("hibernate")
+  public void deleteBatch(String batch, String source) {
+    log.trace("deleting InputDataset {} {}", batch, source);
     int r = currentSession()
-        .createQuery("DELETE FROM InputDataset WHERE doi = :doi AND batch = :batch AND source = :source")
-        .setParameter("doi", doi)
+        .createQuery("DELETE FROM InputDataset WHERE batch = :batch AND source = :source")
         .setParameter("batch", batch)
         .setParameter("source", source)
         .executeUpdate();
     log.trace("deleted {} {} from InputDataset", r, source);
-  }
-}
+  }}

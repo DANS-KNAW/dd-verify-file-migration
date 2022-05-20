@@ -61,11 +61,12 @@ public class EasyFileLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void deleteCsvDOIs(CSVParser csvRecords, Mode mode, String batch) throws IOException {
+  public void deleteBatch(CSVParser csvRecords, Mode mode, String batch) throws IOException {
+    inputDatasetDAO.deleteBatch(batch,"fedora");
     for (CSVRecord r : csvRecords) {
       FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
       if (fedoraToBagCsv.getComment().contains("OK")) {
-        deleteByDoi(fedoraToBagCsv.getDoi(), mode, batch, "fedora");
+        deleteByDoi(fedoraToBagCsv.getDoi(), mode);
       }
     }
   }

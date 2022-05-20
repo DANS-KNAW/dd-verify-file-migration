@@ -64,15 +64,11 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         Mode.configure(
             subparser.addArgument("--mode")
         );
-        MutuallyExclusiveGroup group = subparser.addMutuallyExclusiveGroup().required(true);
-        group.addArgument("-u", "--uuids")
+        subparser.addArgument("-u", "--uuids")
             .dest("uuids")
+            .required(true)
             .type(File.class)
             .help("file with UUIDs of a bag in the vault");
-        group.addArgument("-U", "--UUID")
-            .dest("uuid")
-            .type(String.class)
-            .help("UUID of a bag in the vault");
         subparser.addArgument("-s", "--store")
             .type(String.class)
             .required(true)
@@ -97,13 +93,11 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
                         new File(namespace.getString("file")).getParentFile(),
                 }
             );
-        String uuid = namespace.getString("uuid");
         String file = namespace.getString("uuids");
         String store = namespace.getString("store");
         Mode mode = Mode.from(namespace);
-        if (uuid != null)
-            proxy.loadFromVault(UUID.fromString(uuid), mode, "single-uuid-command", store);
-        else if (file != null) {
+        if (file != null) {
+            proxy.deleteBatch(file, store);
             String uuids = FileUtils.readFileToString(new File(file), Charset.defaultCharset());
             for (String s : uuids.split(System.lineSeparator())) {
                 proxy.loadFromVault(UUID.fromString(s.trim()), mode, file, store);
