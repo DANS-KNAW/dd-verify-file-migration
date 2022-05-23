@@ -86,13 +86,19 @@ public class VaultLoader extends ExpectedLoader {
 
   @UnitOfWork("hibernate")
   public void loadFromVault(UUID uuid, Mode mode, String batch, String bagStore) {
-    final BagInfo bagInfo = bagInfoFromIndex(uuid.toString());
+    BagInfo bagInfo;
+    try {
+      bagInfo = bagInfoFromIndex(uuid.toString());
+    } catch ( Exception e) {
+      inputDatasetDAO.create(new InputDataset(uuid, "SKIPPED " + e, batch, bagStore));
+      return;
+    }
     log.trace("from input {}", bagInfo);
-    deleteByDoi(bagInfo.getDoi(), mode);
+    deleteByDoi(bagInfo.getDoi(), mode); // TODO delete by uuidV1?
     if (bagInfo.getBagId() == null)
-      log.trace("skipping: not found/parsed");
+      inputDatasetDAO.create(new InputDataset(bagInfo, "SKIPPED not found/parsed " + bagInfo.getBaseId(), batch, bagStore));
     else if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
-      log.info("Skipping {}, it is another version of {}", uuid, bagInfo.getBaseId());
+      inputDatasetDAO.create(new InputDataset(bagInfo, "SKIPPED another version of " + bagInfo.getBaseId(), batch, bagStore));
     else {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);

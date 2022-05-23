@@ -28,6 +28,7 @@ import javax.persistence.Table;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @IdClass(InputDatasetKey.class)
@@ -52,6 +53,26 @@ public class InputDataset {
         setUuidV2(Arrays.toString(bagSeq));
         setBatch(batch);
         setStatus("OK");
+        setSource(source);
+    }
+
+    public InputDataset(BagInfo bagInfo, String status, String batch, String source) {
+        setDoi(bagInfo.getDoi());
+        setEasyDatasetId("");
+        setUuidV1(bagInfo.getBaseId());
+        setUuidV2("");
+        setBatch(batch);
+        setStatus(status);
+        setSource(source);
+    }
+
+    public InputDataset(UUID uuid, String status, String batch, String source) {
+        setDoi("");
+        setEasyDatasetId("");
+        setUuidV1(uuid.toString());
+        setUuidV2("");
+        setBatch(batch);
+        setStatus(status);
         setSource(source);
     }
 
