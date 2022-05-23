@@ -23,6 +23,7 @@ public class InputDatasetKey implements Serializable {
   private String doi;
   private String batch;
   private String source;
+  private String easyDatasetId;
 
   @Override
   public boolean equals(Object o) {
