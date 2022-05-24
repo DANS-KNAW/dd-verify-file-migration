@@ -94,9 +94,9 @@ public class VaultLoader extends ExpectedLoader {
       return;
     }
     log.trace("from input {}", bagInfo);
-    deleteByDoi(bagInfo.getDoi(), mode); // TODO delete by uuidV1?
+    deleteByDoi(bagInfo.getDoi(), mode);
     if (bagInfo.getBagId() == null)
-      inputDatasetDAO.create(new InputDataset(bagInfo, "SKIPPED not found/parsed " + bagInfo.getBaseId(), batch, bagStore));
+      inputDatasetDAO.create(new InputDataset(uuid, "SKIPPED not found/parsed", batch, bagStore));
     else if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
       inputDatasetDAO.create(new InputDataset(bagInfo, "SKIPPED another version of " + bagInfo.getBaseId(), batch, bagStore));
     else {
