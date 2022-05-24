@@ -94,13 +94,13 @@ public class VaultLoader extends ExpectedLoader {
       return;
     }
     log.trace("from input {}", bagInfo);
-    deleteByDoi(bagInfo.getDoi(), mode);
     if (bagInfo.getBagId() == null)
       inputDatasetDAO.create(new InputDataset(uuid, "SKIPPED not found/parsed", batch, bagStore));
     else if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
       inputDatasetDAO.create(new InputDataset(bagInfo, "SKIPPED another version of " + bagInfo.getBaseId(), batch, bagStore));
     else {
       log.trace("Processing {}", bagInfo);
+      deleteByDoi(bagInfo.getDoi(), mode);
       String[] bagSeq = readBagSequence(uuid);
       inputDatasetDAO.create(new InputDataset(bagInfo, bagSeq, batch, bagStore));
       ExpectedDataset expectedDataset = null;
