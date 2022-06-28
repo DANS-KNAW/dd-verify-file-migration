@@ -19,6 +19,7 @@ import io.dropwizard.Application;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Environment;
+import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import nl.knaw.dans.lib.util.DefaultConfigEnvironmentCommand;
@@ -86,6 +87,7 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
                 new Object[] {
                         new ExpectedFileDAO(verificationBundleSessionFactory),
                         new ExpectedDatasetDAO(verificationBundleSessionFactory),
+                        new InputDatasetDAO(verificationBundleSessionFactory),
                         configuration.getBagStoreBaseUri(),
                         configuration.getBagIndexBaseUri(),
                         new File(namespace.getString("file")).getParentFile(),
@@ -95,6 +97,7 @@ public class LoadFromVaultCommand extends DefaultConfigEnvironmentCommand<DdVeri
         String store = namespace.getString("store");
         Mode mode = Mode.from(namespace);
         if (file != null) {
+            proxy.deleteBatch(file, store);
             String uuids = FileUtils.readFileToString(new File(file), Charset.defaultCharset());
             for (String s : uuids.split(System.lineSeparator())) {
                 proxy.loadFromVault(UUID.fromString(s.trim()), mode, file, store);

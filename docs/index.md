@@ -35,7 +35,7 @@ ARGUMENTS
                                      for example: 'doi:10.17026/dans-xtz-qa6j'
                                      Use csv with csv and comment column to load multiple DOIs.
         --csv CSV                    CSV file produced by easy-fedora-to-bag
-        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: ALL)
+        --mode {BOTH,FILES,DATASETS,INPUT}  files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
         --UUIDs UUIDS                .txt file with bag ids
         -h, --help                   show this help message and exit
 
@@ -47,7 +47,7 @@ ARGUMENTS
         file                         application configuration file (default: etc/config.yml)
 
       named arguments:     
-        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: DATASETS)
+        --mode {BOTH,FILES,DATASETS,INPUT}  files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
         -u UUIDS, --uuids UUIDS      file with UUIDs of a bag in the vault
         -U UUID, --UUID UUID         UUID of a bag in the vault
         -s STORE, --store STORE      name of a bag store in the vault
@@ -62,7 +62,7 @@ ARGUMENTS
 
       named arguments:
         -c [FILE], --config [FILE]   application configuration file (default: etc/config.yml)
-        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: DATASETS)
+        --mode {BOTH,FILES,DATASETS,INPUT}  files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
         -h, --help                   show this help message and exit
 
 EXAMPLES
