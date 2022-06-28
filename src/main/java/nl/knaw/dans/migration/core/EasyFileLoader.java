@@ -19,7 +19,6 @@ import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.migration.core.tables.EasyFile;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
-import nl.knaw.dans.migration.core.tables.InputDataset;
 import nl.knaw.dans.migration.db.EasyFileDAO;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
@@ -54,7 +53,7 @@ public class EasyFileLoader extends ExpectedLoader {
   private static final String[] migrationFiles = { "provenance.xml", "dataset.xml", "files.xml", "emd.xml" };
 
   public EasyFileLoader(EasyFileDAO easyFileDAO, ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, InputDatasetDAO inputDatasetDAO, URI solrBaseUri, URI fedoraBaseUri, File configDir) {
-    super(expectedFileDAO, expectedDatasetDAO, inputDatasetDAO, configDir);
+    super(expectedFileDAO, expectedDatasetDAO, configDir);
     this.easyFileDAO = easyFileDAO;
     this.solrUri = solrBaseUri.resolve("datasets/select");
     this.fedoraUri = fedoraBaseUri.resolve("objects/");
@@ -62,7 +61,6 @@ public class EasyFileLoader extends ExpectedLoader {
 
   @UnitOfWork("hibernate")
   public void deleteBatch(CSVParser csvRecords, Mode mode, String batch) throws IOException {
-    inputDatasetDAO.deleteBatch(batch,"fedora");
     log.info("start deleting DOIs from {} expected table(s)", mode);
     for (CSVRecord r : csvRecords) {
       FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
@@ -75,7 +73,6 @@ public class EasyFileLoader extends ExpectedLoader {
 
   @UnitOfWork("hibernate")
   public void loadFromCsv(FedoraToBagCsv csv, Mode mode, File csvFile) {
-    inputDatasetDAO.create(new InputDataset(csv,csvFile));
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {

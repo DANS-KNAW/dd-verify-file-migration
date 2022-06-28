@@ -120,9 +120,9 @@ public class EasyFileLoaderTest {
   }
 
   private void replayLoadVerify(FedoraToBagCsv csv, Mode mode, Loader loader) {
-    replay(loader.easyFileDAO, loader.expectedFileDAO, loader.expectedDatasetDAO, loader.inputDatasetDAO);
+    replay(loader.easyFileDAO, loader.expectedFileDAO, loader.expectedDatasetDAO);
     loader.loadFromCsv(csv, mode, csvFile);
-    verify(loader.easyFileDAO, loader.expectedFileDAO, loader.expectedDatasetDAO, loader.inputDatasetDAO);
+    verify(loader.easyFileDAO, loader.expectedFileDAO, loader.expectedDatasetDAO);
   }
 
   @Test
@@ -130,7 +130,6 @@ public class EasyFileLoaderTest {
 
     FedoraToBagCsv csv = parseFedoraCsv("easy-dataset:123,uuid1,," + doi + ",user001,simple,Failed for some reason");
     Loader loader = Loader.create();
-    expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
 
     replayLoadVerify(csv, Mode.ALL, loader);
   }
@@ -164,7 +163,6 @@ public class EasyFileLoaderTest {
     expectSuccess(loader.expectedDatasetDAO, expectedDataset);
 
     FedoraToBagCsv csv = parseFedoraCsv("easy-dataset:123,uuid1,,"+doi+",user001,simple,OK");
-    expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(loader.expectedFileDAO, ef);
 
@@ -189,7 +187,6 @@ public class EasyFileLoaderTest {
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(loader.expectedFileDAO, ef);
     expectSuccess(loader.expectedDatasetDAO, ed);
-    expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
 
     replayLoadVerify(csv, Mode.ALL, loader);
   }
@@ -217,7 +214,6 @@ public class EasyFileLoaderTest {
       ed.setExpectedVersions(count);
 
       Loader loader = Loader.create("2009-06-04,GROUP_ACCESS,somebody,PUBLISHED,2022-03-25");
-      expectSuccess(loader.inputDatasetDAO, new InputDataset(csv, csvFile));
       expectSuccess(loader.expectedDatasetDAO, ed);
       expect(loader.easyFileDAO.findByDatasetId(datasetId)).andReturn(Collections.emptyList());
       for (ExpectedFile ef : expectedMigrationFiles())
@@ -276,7 +272,6 @@ public class EasyFileLoaderTest {
     expectSuccess(loader.expectedFileDAO, new ExpectedFile(doi,"some_thumbnails/image_small.png", false,"123","easy-file:1","some_thumbnails/image_small.png",false,true,false, "ANONYMOUS", "ANONYMOUS"));
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(loader.expectedFileDAO, ef);
-    expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
 
     replayLoadVerify(csv, Mode.FILES, loader);
   }

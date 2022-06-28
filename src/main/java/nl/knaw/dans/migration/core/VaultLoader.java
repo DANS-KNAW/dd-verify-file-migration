@@ -28,10 +28,8 @@ import nl.knaw.dans.lib.dataverse.model.search.ResultItem;
 import nl.knaw.dans.migration.core.MetadataHandler.DatasetMetadata;
 import nl.knaw.dans.migration.core.tables.ExpectedDataset;
 import nl.knaw.dans.migration.core.tables.ExpectedFile;
-import nl.knaw.dans.migration.core.tables.InputDataset;
 import nl.knaw.dans.migration.db.ExpectedDatasetDAO;
 import nl.knaw.dans.migration.db.ExpectedFileDAO;
-import nl.knaw.dans.migration.db.InputDatasetDAO;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -64,8 +62,8 @@ public class VaultLoader extends ExpectedLoader {
   private final URI bagIndexSeqUri;
   private final ObjectMapper mapper;
 
-  public VaultLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, InputDatasetDAO inputDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
-    super(expectedFileDAO, expectedDatasetDAO, inputDatasetDAO, configDir);
+  public VaultLoader(ExpectedFileDAO expectedFileDAO, ExpectedDatasetDAO expectedDatasetDAO, URI bagStoreBaseUri, URI bagIndexBaseUri, File configDir) {
+    super(expectedFileDAO, expectedDatasetDAO, configDir);
     bagIndexSeqUri = bagIndexBaseUri.resolve("bag-sequence");
     bagIndexBagsUri = bagIndexBaseUri.resolve("bags/");
     bagStoreBagsUri = bagStoreBaseUri.resolve("bags/");
@@ -80,29 +78,18 @@ public class VaultLoader extends ExpectedLoader {
   }
 
   @UnitOfWork("hibernate")
-  public void deleteBatch(String batch, String bagStore) {
-    inputDatasetDAO.deleteBatch(batch,bagStore);
-  }
-
-  @UnitOfWork("hibernate")
   public void loadFromVault(UUID uuid, Mode mode, String batch, String bagStore) {
     BagInfo bagInfo;
     try {
       bagInfo = bagInfoFromIndex(uuid.toString());
     } catch ( Exception e) {
-      inputDatasetDAO.create(new InputDataset(uuid, "SKIPPED " + e, batch, bagStore));
       return;
     }
     log.trace("from input {}", bagInfo);
-    if (bagInfo.getBagId() == null)
-      inputDatasetDAO.create(new InputDataset(uuid, "SKIPPED not found/parsed", batch, bagStore));
-    else if (!bagInfo.getBagId().equals(bagInfo.getBaseId()))
-      inputDatasetDAO.create(new InputDataset(bagInfo, "SKIPPED another version of " + bagInfo.getBaseId(), batch, bagStore));
-    else {
+    if (bagInfo.getBagId() != null && bagInfo.getBagId().equals(bagInfo.getBaseId())) {
       log.trace("Processing {}", bagInfo);
       deleteByDoi(bagInfo.getDoi(), mode);
       String[] bagSeq = readBagSequence(uuid);
-      inputDatasetDAO.create(new InputDataset(bagInfo, bagSeq, batch, bagStore));
       ExpectedDataset expectedDataset = null;
       if (bagSeq.length <= 1) {
         expectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);

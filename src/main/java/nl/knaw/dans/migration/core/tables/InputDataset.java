@@ -18,7 +18,6 @@ package nl.knaw.dans.migration.core.tables;
 import nl.knaw.dans.migration.core.BagInfo;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
 
-import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
