@@ -22,6 +22,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class Mapping {
             .withIgnoreSurroundingSpaces()
             .withRecordSeparator(System.lineSeparator());
 
-    static public Map<String, String> load(File csvFile, String... header) {
+    static public Map<String, String> load(File csvFile, boolean toLower, String... header) {
         if (!csvFile.exists() || 0 == csvFile.length()) {
             throw new IllegalStateException("No (content in) " + csvFile);
         }
@@ -47,8 +48,11 @@ public class Mapping {
             throw new IllegalStateException("Can't read " + csvFile, e);
         }
         HashMap<String, String> mapping = new HashMap<>();
-        records.forEach(csvRecord -> mapping.put(
-                csvRecord.get(header[0]), csvRecord.get(header[1]))
+        records.forEach(csvRecord -> {
+            if (toLower) Arrays.stream(header).map(String::toLowerCase);
+            mapping.put(
+                    csvRecord.get(header[0]), csvRecord.get(header[1]));
+            }
         );
         return mapping;
     }

@@ -39,8 +39,8 @@ public class ExpectedLoader {
     this.expectedFileDAO = expectedFileDAO;
     this.expectedDatasetDAO = expectedDatasetDAO;
     this.inputDatasetDAO = inputDatasetDAO;
-    this.userToEmail = Mapping.load(new File(configDir + "/easy-users.csv"), "UID", "email");
-    this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"),"url","name");
+    this.userToEmail = Mapping.load(new File(configDir + "/easy-users.csv"), true, "UID", "email");
+    this.licensesUrlToName = Mapping.load(new File(configDir + "/licenses.csv"), false, "url","name");
   }
 
   public void deleteByDoi(String doi, Mode mode) {
@@ -74,7 +74,7 @@ public class ExpectedLoader {
 
   public void saveExpectedDataset(ExpectedDataset expected) {
     String depositor = expected.getDepositor();
-    expected.setDepositor(userToEmail.getOrDefault(depositor, depositor));
+    expected.setDepositor(userToEmail.getOrDefault(depositor.toLowerCase(), depositor));
 
     if (null != expected.getLicenseUrl())
       expected.setLicenseName(licensesUrlToName.getOrDefault(expected.getLicenseUrl(), null));

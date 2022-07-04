@@ -151,7 +151,7 @@ public class EasyFileLoaderTest {
   @Test
   public void dd874() throws IOException {
     ExpectedDataset expectedDataset = new ExpectedDataset();
-    expectedDataset.setDepositor("somebody");
+    expectedDataset.setDepositor("does.not.exist@dans.knaw.nl");
     expectedDataset.setDoi(doi);
     expectedDataset.setAccessCategory(AccessCategory.OPEN_ACCESS);
     expectedDataset.setCitationYear("2022");
@@ -159,7 +159,7 @@ public class EasyFileLoaderTest {
     expectedDataset.setLicenseName("CC0-1.0");
     expectedDataset.setExpectedVersions(1);
 
-    Loader loader = Loader.create("\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\",somebody,PUBLISHED,2022-03-25");
+    Loader loader = Loader.create("\"\",\"OPEN_ACCESS,accept,http://creativecommons.org/licenses/by/4.0,Econsultancy\",USER001,PUBLISHED,2022-03-25");
     expect(loader.easyFileDAO.findByDatasetId("easy-dataset:123")).andReturn(Collections.emptyList()).once();
     expectSuccess(loader.expectedDatasetDAO, expectedDataset);
 
