@@ -18,13 +18,14 @@ package nl.knaw.dans.migration.core;
 import net.sourceforge.argparse4j.inf.Argument;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-public enum Mode {ALL, FILES, DATASETS;
+public enum Mode {
+    BOTH, FILES, DATASETS, INPUT;
 
     public boolean doDatasets() {
-        return !Mode.FILES.equals(this);
+        return Mode.DATASETS.equals(this) || Mode.BOTH.equals(this);
     }
     public boolean doFiles() {
-        return !Mode.DATASETS.equals(this);
+        return Mode.FILES.equals(this) || Mode.BOTH.equals(this);
     }
 
     public static Argument configure(Argument argument) {
@@ -32,7 +33,7 @@ public enum Mode {ALL, FILES, DATASETS;
             .dest("mode")
             .setDefault(Mode.DATASETS)
             .type(Mode.class)
-            .help("files require more writing, datasets require more reading");
+            .help("files require more writing, datasets require more reading, BOTH=FILES+DATASETS");
     }
 
     public static Mode from(Namespace namespace) {

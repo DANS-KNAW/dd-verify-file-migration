@@ -25,7 +25,7 @@ ARGUMENTS
 
     load-from-dataverse [-h] [-d DOI | --csv CSV] [file]
       
-      Load actual tables with file info from dataverse
+      Load actual table(s) with file and/or dataset info from dataverse.
       
       positional arguments:
         file                         application configuration file (default: etc/config.yml)
@@ -35,19 +35,20 @@ ARGUMENTS
                                      for example: 'doi:10.17026/dans-xtz-qa6j'
                                      Use csv with csv and comment column to load multiple DOIs.
         --csv CSV                    CSV file produced by easy-fedora-to-bag
-        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: ALL)
+        --mode {BOTH,FILES,DATASETS} files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
         --UUIDs UUIDS                .txt file with bag ids
         -h, --help                   show this help message and exit
 
     load-from-vault [-h] (-u UUIDS | -U UUID | -s STORE) [file]
          
-      Load expected table with info from manifest-sha1.txt of bags in the vault
+      Load expected table(s) with info from manifest-sha1.txt of bags in the vault and/or from metadata/dataset.xml.
+      When mode=INPUT the InputDatasets are loaded instead.
 
       positional arguments:
         file                         application configuration file (default: etc/config.yml)
 
       named arguments:     
-        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: DATASETS)
+        --mode {BOTH,FILES,DATASETS,INPUT}  files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
         -u UUIDS, --uuids UUIDS      file with UUIDs of a bag in the vault
         -U UUID, --UUID UUID         UUID of a bag in the vault
         -s STORE, --store STORE      name of a bag store in the vault
@@ -55,14 +56,15 @@ ARGUMENTS
 
     load-from-fedora [-c [FILE]] [-h] csv [csv ...]
 
-      Load expected tables with info from easy_files in fs-rdb and transformation rules
+      Load expected table(s) with info from easy_files in fs-rdb and transformation rules.
+      When mode=INPUT the InputDatasets are loaded instead.
 
       positional arguments:
         csv                          CSV file produced by easy-fedora-to-bag
 
       named arguments:
         -c [FILE], --config [FILE]   application configuration file (default: etc/config.yml)
-        --mode {ALL,FILES,DATASETS}  files require more writing, dataset require more reading (default: DATASETS)
+        --mode {BOTH,FILES,DATASETS,INPUT}  files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
         -h, --help                   show this help message and exit
 
 EXAMPLES
