@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -83,7 +82,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
             .type(File.class)
             .help("CSV file produced by easy-fedora-to-bag");
 
-        nl.knaw.dans.migration.core.Mode.configure(
+        Mode.configure(
             subparser.addArgument("--mode")
         );
 
@@ -113,6 +112,7 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         String csvFile = namespace.getString(destCsv);
         String uuidsFile = namespace.getString(destUuids);
         Mode mode = Mode.from(namespace);
+        if (Mode.INPUT.equals(mode) ) throw new IllegalArgumentException("mode INPUT not implemented, please use load-from-fedora or load-from-vault");
         if (singleDoi != null) {
             proxy.deleteSingleDoi(singleDoi, mode);
             proxy.loadFromDataset(singleDoi, mode);

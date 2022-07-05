@@ -62,20 +62,26 @@ public class EasyFileLoader extends ExpectedLoader {
 
   @UnitOfWork("hibernate")
   public void deleteBatch(CSVParser csvRecords, Mode mode, String batch) throws IOException {
-    inputDatasetDAO.deleteBatch(batch,"fedora");
-    log.info("start deleting DOIs from {} expected table(s)", mode);
-    for (CSVRecord r : csvRecords) {
-      FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
-      if (fedoraToBagCsv.getComment().contains("OK")) {
-        deleteByDoi(fedoraToBagCsv.getDoi(), mode);
+    if (mode == Mode.INPUT) {
+      inputDatasetDAO.deleteBatch(batch, "fedora");
+    } else {
+      log.info("start deleting DOIs from {} expected table(s)", mode);
+      for (CSVRecord r : csvRecords) {
+        FedoraToBagCsv fedoraToBagCsv = new FedoraToBagCsv(r);
+        if (fedoraToBagCsv.getComment().contains("OK")) {
+          deleteByDoi(fedoraToBagCsv.getDoi(), mode);
+        }
       }
+      log.info("end deleting DOIs from {} expected table(s)", mode);
     }
-    log.info("end deleting DOIs from {} expected table(s)", mode);
   }
 
   @UnitOfWork("hibernate")
   public void loadFromCsv(FedoraToBagCsv csv, Mode mode, File csvFile) {
-    inputDatasetDAO.create(new InputDataset(csv,csvFile));
+    if (mode == Mode.INPUT) {
+      inputDatasetDAO.create(new InputDataset(csv, csvFile));
+      return;
+    }
     if (!csv.getComment().contains("OK"))
       log.warn("skipped {}", csv);
     else try {

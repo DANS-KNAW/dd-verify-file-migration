@@ -114,9 +114,8 @@ public class EasyFileLoaderTest {
     expectedDataset.setCitationYear("2022");
     expectedDataset.setExpectedVersions(1);
     expectSuccess(loader.expectedDatasetDAO,expectedDataset);
-    expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
 
-    replayLoadVerify(csv, Mode.ALL, loader);
+    replayLoadVerify(csv, Mode.BOTH, loader);
   }
 
   private void replayLoadVerify(FedoraToBagCsv csv, Mode mode, Loader loader) {
@@ -130,9 +129,18 @@ public class EasyFileLoaderTest {
 
     FedoraToBagCsv csv = parseFedoraCsv("easy-dataset:123,uuid1,," + doi + ",user001,simple,Failed for some reason");
     Loader loader = Loader.create();
+
+    replayLoadVerify(csv, Mode.BOTH, loader);
+  }
+
+  @Test
+  public void skipFailedInput() throws IOException {
+
+    FedoraToBagCsv csv = parseFedoraCsv("easy-dataset:123,uuid1,," + doi + ",user001,simple,Failed for some reason");
+    Loader loader = Loader.create();
     expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
 
-    replayLoadVerify(csv, Mode.ALL, loader);
+    replayLoadVerify(csv, Mode.INPUT, loader);
   }
 
   @Test
@@ -143,7 +151,6 @@ public class EasyFileLoaderTest {
     expect(loader.easyFileDAO.findByDatasetId("easy-dataset:123")).andReturn(Collections.emptyList()).once();
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(loader.expectedFileDAO, ef);
-    expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
 
     replayLoadVerify(csv, Mode.FILES, loader);
   }
@@ -164,11 +171,10 @@ public class EasyFileLoaderTest {
     expectSuccess(loader.expectedDatasetDAO, expectedDataset);
 
     FedoraToBagCsv csv = parseFedoraCsv("easy-dataset:123,uuid1,,"+doi+",user001,simple,OK");
-    expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(loader.expectedFileDAO, ef);
 
-    replayLoadVerify(csv, Mode.ALL, loader);
+    replayLoadVerify(csv, Mode.BOTH, loader);
   }
 
   @Test
@@ -189,9 +195,27 @@ public class EasyFileLoaderTest {
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(loader.expectedFileDAO, ef);
     expectSuccess(loader.expectedDatasetDAO, ed);
+
+    replayLoadVerify(csv, Mode.BOTH, loader);
+  }
+
+  @Test
+  public void dd875Input() throws IOException {
+    ExpectedDataset ed = new ExpectedDataset();
+    ed.setDoi(doi);
+    ed.setAccessCategory(AccessCategory.GROUP_ACCESS);
+    ed.setDeleted(false);
+    ed.setDepositor("somebody");
+    ed.setCitationYear("2022");
+    ed.setLicenseName("CC0-1.0");
+    ed.setLicenseUrl("http://creativecommons.org/publicdomain/zero/1.0");
+    ed.setExpectedVersions(1);
+
+    FedoraToBagCsv csv = parseFedoraCsv("easy-dataset:123,uuid1,,"+doi+",user001,simple,OK");
+    Loader loader = Loader.create("2009-06-04,\"RAAP Archeologisch Adviesbureau,GROUP_ACCESS\",somebody,PUBLISHED,2022-03-25");
     expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
 
-    replayLoadVerify(csv, Mode.ALL, loader);
+    replayLoadVerify(csv, Mode.INPUT, loader);
   }
 
   @Test
@@ -217,13 +241,30 @@ public class EasyFileLoaderTest {
       ed.setExpectedVersions(count);
 
       Loader loader = Loader.create("2009-06-04,GROUP_ACCESS,somebody,PUBLISHED,2022-03-25");
-      expectSuccess(loader.inputDatasetDAO, new InputDataset(csv, csvFile));
       expectSuccess(loader.expectedDatasetDAO, ed);
       expect(loader.easyFileDAO.findByDatasetId(datasetId)).andReturn(Collections.emptyList());
       for (ExpectedFile ef : expectedMigrationFiles())
         expectSuccess(loader.expectedFileDAO, ef);
 
-      replayLoadVerify(csv, Mode.ALL, loader);
+      replayLoadVerify(csv, Mode.BOTH, loader);
+    }
+  }
+
+  @Test
+  public void withoutFilesInput() throws IOException {
+    HashMap<String, Integer> uuidToVersions = new HashMap<>();
+    uuidToVersions.put("",1);
+    uuidToVersions.put(" ",1);
+    uuidToVersions.put("00fab9df-0417-460b-bbb0-312aba55ed27",2);
+    uuidToVersions.put("  00fab9df-0417-460b-bbb0-312aba55ed27  ",2);
+    for (Map.Entry<String, Integer> entry : uuidToVersions.entrySet()) {
+      String uuid = entry.getKey();
+      FedoraToBagCsv csv = parseFedoraCsv("easy-dataset:123,blabla," + uuid + "," + doi + ",user001,simple,OK");
+
+      Loader loader = Loader.create("2009-06-04,GROUP_ACCESS,somebody,PUBLISHED,2022-03-25");
+      expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
+
+      replayLoadVerify(csv, Mode.INPUT, loader);
     }
   }
 
@@ -243,7 +284,7 @@ public class EasyFileLoaderTest {
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(loader.expectedFileDAO, ef);
 
-    replayLoadVerify(csv, Mode.ALL, loader);
+    replayLoadVerify(csv, Mode.BOTH, loader);
   }
 
   //TODO ignore for now @Test
@@ -261,9 +302,8 @@ public class EasyFileLoaderTest {
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(loader.expectedFileDAO, ef);
 
-    replayLoadVerify(csv, Mode.ALL, loader);
+    replayLoadVerify(csv, Mode.BOTH, loader);
   }
-
 
   @Test
   public void dropThumbnail() throws IOException {
@@ -276,9 +316,18 @@ public class EasyFileLoaderTest {
     expectSuccess(loader.expectedFileDAO, new ExpectedFile(doi,"some_thumbnails/image_small.png", false,"123","easy-file:1","some_thumbnails/image_small.png",false,true,false, "ANONYMOUS", "ANONYMOUS"));
     for (ExpectedFile ef: expectedMigrationFiles())
       expectSuccess(loader.expectedFileDAO, ef);
-    expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
 
     replayLoadVerify(csv, Mode.FILES, loader);
+  }
+
+  @Test
+  public void dropThumbnailInput() throws IOException {
+
+    FedoraToBagCsv csv = parseFedoraCsv("easy-dataset:123,uuid1,,"+doi+",user001,simple,OK");
+    Loader loader = Loader.create();
+    expectSuccess(loader.inputDatasetDAO,new InputDataset(csv,csvFile));
+
+    replayLoadVerify(csv, Mode.INPUT, loader);
   }
 
   private FedoraToBagCsv parseFedoraCsv(String s) throws IOException {

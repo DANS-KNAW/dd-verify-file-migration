@@ -18,7 +18,6 @@ package nl.knaw.dans.migration.core.tables;
 import nl.knaw.dans.migration.core.BagInfo;
 import nl.knaw.dans.migration.core.FedoraToBagCsv;
 
-import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -28,6 +27,7 @@ import javax.persistence.Table;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @IdClass(InputDatasetKey.class)
@@ -52,6 +52,26 @@ public class InputDataset {
         setUuidV2(Arrays.toString(bagSeq));
         setBatch(batch);
         setStatus("OK");
+        setSource(source);
+    }
+
+    public InputDataset(BagInfo bagInfo, String status, String batch, String source) {
+        setDoi(bagInfo.getDoi());
+        setEasyDatasetId("");
+        setUuidV1(bagInfo.getBaseId());
+        setUuidV2("");
+        setBatch(batch);
+        setStatus(status);
+        setSource(source);
+    }
+
+    public InputDataset(UUID uuid, String status, String batch, String source) {
+        setDoi("");
+        setEasyDatasetId("");
+        setUuidV1(uuid.toString());
+        setUuidV2("");
+        setBatch(batch);
+        setStatus(status);
         setSource(source);
     }
 
