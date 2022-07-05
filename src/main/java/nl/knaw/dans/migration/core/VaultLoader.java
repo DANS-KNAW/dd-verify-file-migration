@@ -97,21 +97,28 @@ public class VaultLoader extends ExpectedLoader {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
       inputDatasetDAO.create(new InputDataset(bagInfo, bagSeq, batch, bagStore));
-      ExpectedDataset expectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);
-      if (expectedDataset != null && mode.doDatasets()) {
-        expectedDataset.setDepositor(readDepositor(uuid.toString()));
-        expectedDataset.setDoi(bagInfo.getDoi());
-        expectedDataset.setExpectedVersions(bagSeq.length);
-        saveExpectedDataset(expectedDataset);
-      }
       List<BagInfo> bagInfos= StreamSupport
           .stream(Arrays.stream(bagSeq).spliterator(), false)
           .map(this::bagInfoFromIndex)
           .sorted(new BagInfoComparator()).collect(Collectors.toList());
+      ExpectedDataset firstExpectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);
+      ExpectedDataset expectedDataset = null;
       for (int bagSeNr = 1; bagSeNr < bagInfos.size(); bagSeNr++) {
         BagInfo info = bagInfos.get(bagSeNr);
         log.trace("{} from sequence {}", bagSeNr, info);
-        processBag(info.getBagId(), bagSeNr, bagInfos.get(0).getDoi(), mode);
+        expectedDataset = processBag(info.getBagId(), bagSeNr, bagInfos.get(0).getDoi(), mode);
+      }
+
+      // save (a mix of) the first and/or last dataset
+      if (expectedDataset == null)
+        expectedDataset = firstExpectedDataset;
+      else
+        expectedDataset.setCitationYear(firstExpectedDataset.getCitationYear());
+      if (mode.doDatasets()) {
+        expectedDataset.setDepositor(readDepositor(uuid.toString()));
+        expectedDataset.setDoi(bagInfo.getDoi());
+        expectedDataset.setExpectedVersions(bagSeq.length);
+        saveExpectedDataset(expectedDataset);
       }
     }
   }
