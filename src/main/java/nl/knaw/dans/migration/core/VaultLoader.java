@@ -101,22 +101,27 @@ public class VaultLoader extends ExpectedLoader {
       log.trace("Processing {}", bagInfo);
       deleteByDoi(bagInfo.getDoi(), mode);
       String[] bagSeq = readBagSequence(uuid);
+      List<BagInfo> bagInfos= StreamSupport
+          .stream(Arrays.stream(bagSeq).spliterator(), false)
+          .map(this::bagInfoFromIndex)
+          .sorted(new BagInfoComparator()).collect(Collectors.toList());
+
+      ExpectedDataset firstExpectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);
+
+      // rest of the bags from a sequence
       ExpectedDataset expectedDataset = null;
-      if (bagSeq.length <= 1) {
-        expectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);
+      for (int bagSeNr = 1; bagSeNr < bagInfos.size(); bagSeNr++) {
+        BagInfo info = bagInfos.get(bagSeNr);
+        log.trace("{} from sequence {}", bagSeNr, info);
+        expectedDataset = processBag(info.getBagId(), bagSeNr, bagInfos.get(0).getDoi(), mode);
       }
-      else {
-        List<BagInfo> bagInfos= StreamSupport
-            .stream(Arrays.stream(bagSeq).spliterator(), false)
-            .map(this::bagInfoFromIndex)
-            .sorted(new BagInfoComparator()).collect(Collectors.toList());
-        for (int i = 0; i < bagInfos.size(); i++) {
-          BagInfo info = bagInfos.get(i);
-          log.trace("{} from sequence {}", i, info);
-          expectedDataset = processBag(info.getBagId(), i, bagInfos.get(0).getDoi(), mode);
-        }
-      }
-      if (expectedDataset != null && mode.doDatasets()) {
+
+      // save (a mix of) the first and/or last dataset
+      if (expectedDataset == null)
+        expectedDataset = firstExpectedDataset;
+      else
+        expectedDataset.setCitationYear(firstExpectedDataset.getCitationYear());
+      if (mode.doDatasets()) {
         expectedDataset.setDepositor(readDepositor(uuid.toString()));
         expectedDataset.setDoi(bagInfo.getDoi());
         expectedDataset.setExpectedVersions(bagSeq.length);
