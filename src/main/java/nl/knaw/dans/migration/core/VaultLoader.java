@@ -108,10 +108,10 @@ public class VaultLoader extends ExpectedLoader {
           .stream(Arrays.stream(bagSeq).spliterator(), false)
           .map(this::bagInfoFromIndex)
           .sorted(new BagInfoComparator()).collect(Collectors.toList());
-      for (int i = 1; i < bagInfos.size(); i++) {
-        BagInfo info = bagInfos.get(i);
-        log.trace("{} from sequence {}", i, info);
-        processBag(info.getBagId(), i, bagInfos.get(0).getDoi(), mode);
+      for (int bagSeNr = 1; bagSeNr < bagInfos.size(); bagSeNr++) {
+        BagInfo info = bagInfos.get(bagSeNr);
+        log.trace("{} from sequence {}", bagSeNr, info);
+        processBag(info.getBagId(), bagSeNr, bagInfos.get(0).getDoi(), mode);
       }
     }
   }
