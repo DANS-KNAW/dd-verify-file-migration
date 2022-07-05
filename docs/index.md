@@ -42,7 +42,7 @@ ARGUMENTS
     load-from-vault [-h] (-u UUIDS | -U UUID | -s STORE) [file]
          
       Load expected table(s) with info from manifest-sha1.txt of bags in the vault and/or from metadata/dataset.xml.
-      Unless mode=INPUT, then InputDatasets is loaded.
+      When mode=INPUT the InputDatasets are loaded instead.
 
       positional arguments:
         file                         application configuration file (default: etc/config.yml)
@@ -56,7 +56,8 @@ ARGUMENTS
 
     load-from-fedora [-c [FILE]] [-h] csv [csv ...]
 
-      Load expected table(s) with info from easy_files in fs-rdb and transformation rules
+      Load expected table(s) with info from easy_files in fs-rdb and transformation rules.
+      When mode=INPUT the InputDatasets are loaded instead.
 
       positional arguments:
         csv                          CSV file produced by easy-fedora-to-bag
