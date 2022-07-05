@@ -105,7 +105,10 @@ public class VaultLoader extends ExpectedLoader {
           .stream(Arrays.stream(bagSeq).spliterator(), false)
           .map(this::bagInfoFromIndex)
           .sorted(new BagInfoComparator()).collect(Collectors.toList());
+
       ExpectedDataset firstExpectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);
+
+      // rest of the bags from a sequence
       ExpectedDataset expectedDataset = null;
       for (int bagSeNr = 1; bagSeNr < bagInfos.size(); bagSeNr++) {
         BagInfo info = bagInfos.get(bagSeNr);
