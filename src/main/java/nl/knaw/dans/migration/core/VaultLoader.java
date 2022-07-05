@@ -97,26 +97,21 @@ public class VaultLoader extends ExpectedLoader {
       log.trace("Processing {}", bagInfo);
       String[] bagSeq = readBagSequence(uuid);
       inputDatasetDAO.create(new InputDataset(bagInfo, bagSeq, batch, bagStore));
-      ExpectedDataset expectedDataset = null;
-      if (bagSeq.length <= 1) {
-        expectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);
-      }
-      else {
-        List<BagInfo> bagInfos= StreamSupport
-            .stream(Arrays.stream(bagSeq).spliterator(), false)
-            .map(this::bagInfoFromIndex)
-            .sorted(new BagInfoComparator()).collect(Collectors.toList());
-        for (int i = 0; i < bagInfos.size(); i++) {
-          BagInfo info = bagInfos.get(i);
-          log.trace("{} from sequence {}", i, info);
-          expectedDataset = processBag(info.getBagId(), i, bagInfos.get(0).getDoi(), mode);
-        }
-      }
+      ExpectedDataset expectedDataset = processBag(uuid.toString(), 0, bagInfo.getDoi(), mode);
       if (expectedDataset != null && mode.doDatasets()) {
         expectedDataset.setDepositor(readDepositor(uuid.toString()));
         expectedDataset.setDoi(bagInfo.getDoi());
         expectedDataset.setExpectedVersions(bagSeq.length);
         saveExpectedDataset(expectedDataset);
+      }
+      List<BagInfo> bagInfos= StreamSupport
+          .stream(Arrays.stream(bagSeq).spliterator(), false)
+          .map(this::bagInfoFromIndex)
+          .sorted(new BagInfoComparator()).collect(Collectors.toList());
+      for (int i = 1; i < bagInfos.size(); i++) {
+        BagInfo info = bagInfos.get(i);
+        log.trace("{} from sequence {}", i, info);
+        processBag(info.getBagId(), i, bagInfos.get(0).getDoi(), mode);
       }
     }
   }
