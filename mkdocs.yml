@@ -16,8 +16,7 @@
 
 site_name: dd-verify-migration
 theme:
-  name: dans
-  disclaimer: false
+  name: readthedocs
 
 repo_name: DANS-KNAW/dd-verify-migration
 repo_url: https://github.com/DANS-KNAW/dd-verify-migration
