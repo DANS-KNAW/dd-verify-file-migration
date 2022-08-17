@@ -15,13 +15,13 @@ Database for comparing expected and actual files and datasets after migration to
 ARGUMENTS
 ---------
 
-      positional arguments:
-         {server,check,load-from-fedora,load-from-dataverse,load-from-vault} ...
-                                     available commands
+    positional arguments:
+      {server,check,load-from-fedora,load-from-dataverse,load-from-vault} ...
+                                  available commands
 
-      named arguments:      
-        -h, --help                   show this help message and exit
-        -v, --version                show the application version and exit
+    named arguments:      
+     -h, --help                   show this help message and exit
+     -v, --version                show the application version and exit
 
     load-from-dataverse [-h] [-d DOI | --csv CSV] [file]
       
@@ -66,6 +66,8 @@ ARGUMENTS
         -c [FILE], --config [FILE]   application configuration file (default: etc/config.yml)
         --mode {BOTH,FILES,DATASETS,INPUT}  files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
         -h, --help                   show this help message and exit
+
+
 
 EXAMPLES
 --------
