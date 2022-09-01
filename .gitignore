@@ -22,3 +22,4 @@
 /.dans.knaw.nl-yum-repo
 /jdbc:postgresql:/
 /venv/
+/.venv-mkdocs
