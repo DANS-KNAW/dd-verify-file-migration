@@ -39,7 +39,7 @@
     </properties>
 
     <scm>
-        <developerConnection>scm:git:https://github.com/DANS-KNAW/dd-verify-migration</developerConnection>
+        <developerConnection>scm:git:ssh://github.com/DANS-KNAW/dd-verify-migration</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
