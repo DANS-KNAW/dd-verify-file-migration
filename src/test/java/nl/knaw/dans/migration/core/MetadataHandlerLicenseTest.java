@@ -63,7 +63,7 @@ public class MetadataHandlerLicenseTest {
 
     @Test
     public void alsoForDdm() {
-        String start = "<ddm:DDM xmlns:ddm=\"http://easy.dans.knaw.nl/schemas/md/ddm/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">";
+        String start = "<ddm:DDM xmlns:ddm=\"http://schemas.dans.knaw.nl/dataset/ddm-v2/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">";
         String ddm = start + "<ddm:dcmiMetadata><dcterms:license xsi:type=\"dcterms:URI\">http://opensource.org/licenses/MIT</dcterms:license></ddm:dcmiMetadata></ddm:DDM>";
         ByteArrayInputStream inputStream = new ByteArrayInputStream(ddm.getBytes(StandardCharsets.UTF_8));
         String license = getLicense(inputStream, AccessCategory.NO_ACCESS);
