@@ -110,7 +110,7 @@ public class DataverseLoader {
                         if (latestVersion.getPublicationDate() != null) // probably DRAFT
                             actualDataset.setCitationYear(latestVersion.getPublicationDate().substring(0, 4));
                         if (latestVersion.getLatestVersion() != null) // probably DEACCESSIONED
-                            actualDataset.setFileAccessRequest(latestVersion.getLatestVersion().isFileAccessRequest());
+                            actualDataset.setFileAccessRequest(latestVersion.getLatestVersion().getFileAccessRequest());
                     });
                     load(doi, rolesLoader, RoleAssignmentReadOnly.class, doi).ifPresent(roles -> {
                         String depositor = roles.stream()
@@ -173,7 +173,7 @@ public class DataverseLoader {
         actualFile.setMinorVersionNr(v.getVersionMinorNumber());
         actualFile.setSha1Checksum(f.getChecksum().getValue());
         actualFile.setStorageId(v.getStorageIdentifier());
-        actualFile.setAccessibleTo(fileMeta.getRestricted(), v.isFileAccessRequest());
+        actualFile.setAccessibleTo(fileMeta.getRestricted(), v.getFileAccessRequest());
         Embargo embargo = f.getEmbargo();
         if (embargo != null)
             actualFile.setEmbargoDate(embargo.getDateAvailable());
