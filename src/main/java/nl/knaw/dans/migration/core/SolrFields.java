@@ -25,13 +25,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 
 public class SolrFields {
 
     private static final Logger log = LoggerFactory.getLogger(EasyFileLoader.class);
 
-    public static String requestedFields = "emd_date_available_formatted,dc_rights,amd_depositor_id,ds_state,emd_date_created_formatted";
+    public static String requestedFields = "emd_date_available_formatted,dc_rights,amd_depositor_id,ds_state,emd_date_created_formatted,emd_date_created";
     private static final CSVFormat solrFormat = CSVFormat.RFC4180.withDelimiter(',');
     final String available;
     final String creator;
@@ -45,7 +46,9 @@ public class SolrFields {
         available = record.get(0).trim();
         creator = record.get(2).trim();
         state = record.get(3).trim();
-        date = record.get(4).trim().substring(0,4);
+        String trimmed = record.get(4).trim();
+        String dateFormatted = trimmed.length() >=4 ? trimmed.substring(0,4) : record.get(5).trim() ;
+        date = dateFormatted;
         String[] dcRights = record.get(1).trim()
                 .replaceAll("^\"", "") // strip leading quote
                 .replaceAll("\"$", "") // strip trailing quote
