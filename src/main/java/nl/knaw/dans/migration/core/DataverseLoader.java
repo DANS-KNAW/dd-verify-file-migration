@@ -93,7 +93,7 @@ public class DataverseLoader {
         CacheLoader<String, DataverseResponse<AuthenticatedUser>> userLoader = id -> client.admin().listSingleUser(id);
         CacheLoader<String, DataverseResponse<List<DatasetVersion>>> versionsLoader = id -> client.dataset(id).getAllVersions();
         CacheLoader<String, DataverseResponse<List<RoleAssignmentReadOnly>>> rolesLoader = id -> client.dataset(id).listRoleAssignments();
-        CacheLoader<String, DataverseResponse<DatasetLatestVersion>> lastestVersionLoader = id -> client.dataset(id).getLatestVersion();
+        CacheLoader<String, DataverseResponse<DatasetLatestVersion>> lastestVersionLoader = id -> client.dataset(id).viewLatestVersion();
 
         String shortDoi = doi.replace("doi:", "");
         load(doi, versionsLoader, DatasetVersion.class, doi).ifPresent(versions ->
@@ -110,7 +110,7 @@ public class DataverseLoader {
                         if (latestVersion.getPublicationDate() != null) // probably DRAFT
                             actualDataset.setCitationYear(latestVersion.getPublicationDate().substring(0, 4));
                         if (latestVersion.getLatestVersion() != null) // probably DEACCESSIONED
-                            actualDataset.setFileAccessRequest(latestVersion.getLatestVersion().getFileAccessRequest());
+                            actualDataset.setFileAccessRequest(latestVersion.getLatestVersion().isFileAccessRequest());
                     });
                     load(doi, rolesLoader, RoleAssignmentReadOnly.class, doi).ifPresent(roles -> {
                         String depositor = roles.stream()
@@ -173,7 +173,7 @@ public class DataverseLoader {
         actualFile.setMinorVersionNr(v.getVersionMinorNumber());
         actualFile.setSha1Checksum(f.getChecksum().getValue());
         actualFile.setStorageId(v.getStorageIdentifier());
-        actualFile.setAccessibleTo(fileMeta.getRestricted(), v.getFileAccessRequest());
+        actualFile.setAccessibleTo(fileMeta.getRestricted(), v.isFileAccessRequest());
         Embargo embargo = f.getEmbargo();
         if (embargo != null)
             actualFile.setEmbargoDate(embargo.getDateAvailable());
