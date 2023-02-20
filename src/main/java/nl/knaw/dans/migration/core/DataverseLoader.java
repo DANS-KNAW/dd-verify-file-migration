@@ -34,7 +34,7 @@ import nl.knaw.dans.migration.db.ActualDatasetDAO;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.hsqldb.lib.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +86,7 @@ public class DataverseLoader {
 
     @UnitOfWork("hibernate")
     public void loadFromDataset(String doi, Mode mode) {
-        if (StringUtil.isEmpty(doi))
+        if (StringUtils.isEmpty(doi))
             return; // workaround
         log.info("Reading {} from dataverse", doi);
 

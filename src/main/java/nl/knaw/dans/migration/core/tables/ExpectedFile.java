@@ -17,8 +17,8 @@ package nl.knaw.dans.migration.core.tables;
 
 import nl.knaw.dans.migration.core.FileRights;
 import nl.knaw.dans.migration.core.ManifestCsv;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.hsqldb.lib.StringUtil;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -263,7 +263,7 @@ public class ExpectedFile {
 
     public void setAccessibleTo(String accessibleTo) {
         // do not override the effect of setDefaultRights with nothing
-        if (!StringUtil.isEmpty(accessibleTo))
+        if (!StringUtils.isEmpty(accessibleTo))
             this.accessibleTo = accessibleTo;
     }
 
@@ -273,7 +273,7 @@ public class ExpectedFile {
 
     public void setVisibleTo(String visibleTo) {
         // do not override the effect of setDefaultRights with nothing
-        if (!StringUtil.isEmpty(visibleTo))
+        if (!StringUtils.isEmpty(visibleTo))
             this.visibleTo = visibleTo;
     }
 
