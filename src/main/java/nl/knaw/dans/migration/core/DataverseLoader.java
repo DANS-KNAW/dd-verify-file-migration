@@ -93,11 +93,13 @@ public class DataverseLoader {
         CacheLoader<String, DataverseResponse<AuthenticatedUser>> userLoader = id -> client.admin().listSingleUser(id);
         CacheLoader<String, DataverseResponse<List<DatasetVersion>>> versionsLoader = id -> client.dataset(id).getAllVersions();
         CacheLoader<String, DataverseResponse<List<RoleAssignmentReadOnly>>> rolesLoader = id -> client.dataset(id).listRoleAssignments();
-        CacheLoader<String, DataverseResponse<DatasetLatestVersion>> lastestVersionLoader = id -> client.dataset(id).viewLatestVersion();
+        CacheLoader<String, DataverseResponse<DatasetLatestVersion>> latestVersionLoader = id -> client.dataset(id).viewLatestVersion();
 
         String shortDoi = doi.replace("doi:", "");
         load(doi, versionsLoader, DatasetVersion.class, doi).ifPresent(versions ->
             versions.forEach(v -> {
+                if (v == null)
+                    return;
                 if (mode.doDatasets()) {
                     ActualDataset actualDataset = new ActualDataset();
                     actualDataset.setMajorVersionNr(v.getVersionNumber());
@@ -106,7 +108,7 @@ public class DataverseLoader {
                     actualDataset.setLicenseName(v.getLicense().getName());
                     actualDataset.setLicenseUri(v.getLicense().getUri().toString());
                     actualDataset.setDoi(shortDoi);
-                    load(doi, lastestVersionLoader, DatasetLatestVersion.class, doi).ifPresent(latestVersion -> {
+                    load(doi, latestVersionLoader, DatasetLatestVersion.class, doi).ifPresent(latestVersion -> {
                         if (latestVersion.getPublicationDate() != null) // probably DRAFT
                             actualDataset.setCitationYear(latestVersion.getPublicationDate().substring(0, 4));
                         if (latestVersion.getLatestVersion() != null) // probably DEACCESSIONED
@@ -163,7 +165,7 @@ public class DataverseLoader {
     }
 
     private ActualFile toActual(FileMeta fileMeta, String doi, DatasetVersion v) {
-        DataFile f = fileMeta.getDataFile();
+        DataFile dataFile = fileMeta.getDataFile();
         String dl = fileMeta.getDirectoryLabel();
         String actualPath = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
         ActualFile actualFile = new ActualFile();
@@ -171,10 +173,10 @@ public class DataverseLoader {
         actualFile.setActualPath(actualPath);
         actualFile.setMajorVersionNr(v.getVersionNumber());
         actualFile.setMinorVersionNr(v.getVersionMinorNumber());
-        actualFile.setSha1Checksum(f.getChecksum().getValue());
-        actualFile.setStorageId(v.getStorageIdentifier());
+        actualFile.setSha1Checksum(dataFile.getChecksum().getValue());
+        actualFile.setStorageId(dataFile.getStorageIdentifier());
         actualFile.setAccessibleTo(fileMeta.getRestricted(), v.isFileAccessRequest());
-        Embargo embargo = f.getEmbargo();
+        Embargo embargo = dataFile.getEmbargo();
         if (embargo != null)
             actualFile.setEmbargoDate(embargo.getDateAvailable());
         return actualFile;
