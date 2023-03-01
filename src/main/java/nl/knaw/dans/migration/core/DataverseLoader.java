@@ -34,7 +34,7 @@ import nl.knaw.dans.migration.db.ActualDatasetDAO;
 import nl.knaw.dans.migration.db.ActualFileDAO;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.hsqldb.lib.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,18 +86,20 @@ public class DataverseLoader {
 
     @UnitOfWork("hibernate")
     public void loadFromDataset(String doi, Mode mode) {
-        if (StringUtil.isEmpty(doi))
+        if (StringUtils.isEmpty(doi))
             return; // workaround
         log.info("Reading {} from dataverse", doi);
 
         CacheLoader<String, DataverseResponse<AuthenticatedUser>> userLoader = id -> client.admin().listSingleUser(id);
         CacheLoader<String, DataverseResponse<List<DatasetVersion>>> versionsLoader = id -> client.dataset(id).getAllVersions();
         CacheLoader<String, DataverseResponse<List<RoleAssignmentReadOnly>>> rolesLoader = id -> client.dataset(id).listRoleAssignments();
-        CacheLoader<String, DataverseResponse<DatasetLatestVersion>> lastestVersionLoader = id -> client.dataset(id).getLatestVersion();
+        CacheLoader<String, DataverseResponse<DatasetLatestVersion>> latestVersionLoader = id -> client.dataset(id).viewLatestVersion();
 
         String shortDoi = doi.replace("doi:", "");
         load(doi, versionsLoader, DatasetVersion.class, doi).ifPresent(versions ->
             versions.forEach(v -> {
+                if (v == null)
+                    return;
                 if (mode.doDatasets()) {
                     ActualDataset actualDataset = new ActualDataset();
                     actualDataset.setMajorVersionNr(v.getVersionNumber());
@@ -106,11 +108,11 @@ public class DataverseLoader {
                     actualDataset.setLicenseName(v.getLicense().getName());
                     actualDataset.setLicenseUri(v.getLicense().getUri().toString());
                     actualDataset.setDoi(shortDoi);
-                    load(doi, lastestVersionLoader, DatasetLatestVersion.class, doi).ifPresent(latestVersion -> {
+                    load(doi, latestVersionLoader, DatasetLatestVersion.class, doi).ifPresent(latestVersion -> {
                         if (latestVersion.getPublicationDate() != null) // probably DRAFT
                             actualDataset.setCitationYear(latestVersion.getPublicationDate().substring(0, 4));
                         if (latestVersion.getLatestVersion() != null) // probably DEACCESSIONED
-                            actualDataset.setFileAccessRequest(latestVersion.getLatestVersion().getFileAccessRequest());
+                            actualDataset.setFileAccessRequest(latestVersion.getLatestVersion().isFileAccessRequest());
                     });
                     load(doi, rolesLoader, RoleAssignmentReadOnly.class, doi).ifPresent(roles -> {
                         String depositor = roles.stream()
@@ -163,7 +165,7 @@ public class DataverseLoader {
     }
 
     private ActualFile toActual(FileMeta fileMeta, String doi, DatasetVersion v) {
-        DataFile f = fileMeta.getDataFile();
+        DataFile dataFile = fileMeta.getDataFile();
         String dl = fileMeta.getDirectoryLabel();
         String actualPath = (dl == null ? "" : dl + "/") + fileMeta.getLabel();
         ActualFile actualFile = new ActualFile();
@@ -171,10 +173,10 @@ public class DataverseLoader {
         actualFile.setActualPath(actualPath);
         actualFile.setMajorVersionNr(v.getVersionNumber());
         actualFile.setMinorVersionNr(v.getVersionMinorNumber());
-        actualFile.setSha1Checksum(f.getChecksum().getValue());
-        actualFile.setStorageId(v.getStorageIdentifier());
-        actualFile.setAccessibleTo(fileMeta.getRestricted(), v.getFileAccessRequest());
-        Embargo embargo = f.getEmbargo();
+        actualFile.setSha1Checksum(dataFile.getChecksum().getValue());
+        actualFile.setStorageId(dataFile.getStorageIdentifier());
+        actualFile.setAccessibleTo(fileMeta.getRestricted(), v.isFileAccessRequest());
+        Embargo embargo = dataFile.getEmbargo();
         if (embargo != null)
             actualFile.setEmbargoDate(embargo.getDateAvailable());
         return actualFile;

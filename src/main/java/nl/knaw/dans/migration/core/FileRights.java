@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.migration.core;
 
-import org.hsqldb.lib.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
@@ -35,7 +35,7 @@ public class FileRights implements Serializable {
   public void setEmbargoDate(@Nullable String dateAvailable) {
     if (null != dateAvailable) {
       String s = dateAvailable.trim().replaceAll("\"", "");
-      if (!StringUtil.isEmpty(s) && DateTime.now().compareTo(DateTime.parse(s)) < 0) {
+      if (!StringUtils.isEmpty(s) && DateTime.now().compareTo(DateTime.parse(s)) < 0) {
         this.embargoDate = dateAvailable.trim();
       }
     }
@@ -66,9 +66,9 @@ public class FileRights implements Serializable {
   }
 
   public FileRights applyDefaults(FileRights defaultRights){
-    if(StringUtil.isEmpty(getAccessibleTo()))
+    if(StringUtils.isEmpty(getAccessibleTo()))
       setAccessibleTo(defaultRights.getAccessibleTo());
-    if(StringUtil.isEmpty(getVisibleTo()))
+    if(StringUtils.isEmpty(getVisibleTo()))
       setVisibleTo(defaultRights.getVisibleTo());
     setEmbargoDate(defaultRights.getEmbargoDate());
     return this;

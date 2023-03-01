@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>dd-verify-migration</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.7.2-SNAPSHOT</version>
 
     <name>DD Verify Migration</name>
     <url>https://github.com/DANS-KNAW/${project.artifactId}</url>
@@ -67,6 +67,7 @@
         <dependency>
             <groupId>nl.knaw.dans</groupId>
             <artifactId>dans-dataverse-client-lib</artifactId>
+            <version>0.0.15</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

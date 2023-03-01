@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.migration.core.tables;
 
-import org.hsqldb.lib.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
@@ -131,7 +131,7 @@ public class ActualFile {
   }
 
   public void setEmbargoDate(@Nullable String dateAvailable) {
-    if (!StringUtil.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
+    if (!StringUtils.isEmpty(dateAvailable) && DateTime.now().compareTo(DateTime.parse(dateAvailable)) < 0)
       this.embargoDate = dateAvailable;
   }
 
