@@ -24,8 +24,6 @@ import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import nl.knaw.dans.migration.cli.LoadFromDataverseCommand;
-import nl.knaw.dans.migration.cli.LoadFromFedoraCommand;
-import nl.knaw.dans.migration.cli.LoadFromVaultCommand;
 import nl.knaw.dans.migration.core.tables.ActualDataset;
 import nl.knaw.dans.migration.core.tables.ActualFile;
 import nl.knaw.dans.migration.core.tables.EasyFile;
@@ -73,9 +71,7 @@ public class DdVerifyMigrationApplication extends Application<DdVerifyMigrationC
         bootstrap.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
         bootstrap.getObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         bootstrap.addBundle(verificationBundle);// easyBundle is added by LoadFromFedoraCommand
-        bootstrap.addCommand(new LoadFromFedoraCommand(this, easyBundle, verificationBundle));
         bootstrap.addCommand(new LoadFromDataverseCommand(this, verificationBundle));
-        bootstrap.addCommand(new LoadFromVaultCommand(this, verificationBundle));
     }
 
     @Override
