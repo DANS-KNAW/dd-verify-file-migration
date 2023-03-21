@@ -28,28 +28,10 @@ logging:
       archive: false
       currentLogFilename: data/dd-verify-migration.log
 
-# with tunnel ssh -L 18080:localhost:20110 USER@XXX.dans.knaw.nl
-bagStoreBaseUri: 'http://deasy.dans.knaw.nl:20110/'
-
-# with tunnel ssh -L 28080:localhost:20120 USER@XXX.dans.knaw.nl
-bagIndexBaseUri: 'http://deasy.dans.knaw.nl:20120/'
-
 dataverse:
   baseUrl: 'http://dar.dans.knaw.nl:8080/'
   apiKey: changeme
 
-easyDb:
-  driverClass: org.postgresql.Driver
-  url: 'jdbc:postgresql://deasy.dans.knaw.nl:5432/easy_db'
-  logValidationErrors: true
-  user: easy_tool
-  password: changeme
-  properties:
-    hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
-    hibernate.hbm2ddl.auto: update
-
-solrBaseUri: 'http://deasy.dans.knaw.nl:8080/solr'
-  localhost
 verificationDatabase:
   driverClass: org.hsqldb.jdbcDriver
   url: 'jdbc:hsqldb:hsql://localhost:9001/verificationDatabase'
@@ -59,4 +41,7 @@ verificationDatabase:
   properties:
     hibernate.dialect: 'org.hibernate.dialect.HSQLDialect'
     hibernate.hbm2ddl.auto: update
+    hibernate.connection.initial_pool_size: 1
+    hibernate.connection.min_pool_size: 1
+    hibernate.connection.pool_size: 4
 

@@ -11,41 +11,9 @@ server:
       # Replace with port number unique for this service
       port: 20001
 
-#
-# for load-from-vault
-#
-
-bagStoreBaseUri: 'http://localhost:20110/'
-bagIndexBaseUri: 'http://localhost:20120/'
-
-#
-#for load-from-dataverse
-#
 dataverse:
   baseUrl: 'http://localhost:8080/'
   apiKey: changeme
-
-#
-# for load-from-fedora
-#
-
-solrBaseUri: 'http://localhost:8080/solr/'
-fedoraBaseUri: 'http://localhost:8080/fedora/'
-
-# null on a datastation (read system without easy_db)
-easyDb:
-  driverClass: org.postgresql.Driver
-  url: 'jdbc:postgresql://localhost:5432/easy_db'
-  logValidationErrors: true
-  user: easy_tool
-  password: changeme
-  properties:
-    hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
-    hibernate.hbm2ddl.auto: validate
-
-#
-# for all load-from commands
-#
 
 verificationDatabase:
   driverClass: org.postgresql.Driver
@@ -56,6 +24,9 @@ verificationDatabase:
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL92Dialect'
     hibernate.hbm2ddl.auto: update
+    hibernate.connection.initial_pool_size: 1
+    hibernate.connection.min_pool_size: 1
+    hibernate.connection.pool_size: 4
 
 #
 # See https://www.dropwizard.io/en/latest/manual/configuration.html#logging
