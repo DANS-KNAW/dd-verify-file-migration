@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public class DataverseLoader {
     private static final Logger log = LoggerFactory.getLogger(DataverseLoader.class);
@@ -99,12 +98,12 @@ public class DataverseLoader {
         String shortDoi = doi.replace("doi:", "");
         load(doi, versionsLoader, DatasetVersion.class, doi).ifPresent(versions ->
             versions.forEach(v -> {
-                if (v == null)
+                if (v == null || v.getVersionNumber() == null || v.getVersionMinorNumber() == null)
                     return;
                 if (mode.doDatasets()) {
                     ActualDataset actualDataset = new ActualDataset();
-                    OptionalInt.of(v.getVersionNumber()).ifPresent(actualDataset::setMajorVersionNr);
-                    OptionalInt.of(v.getVersionMinorNumber()).ifPresent(actualDataset::setMinorVersionNr);
+                    actualDataset.setMajorVersionNr(v.getVersionNumber());
+                    actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
                     actualDataset.setDeaccessioned("DEACCESSIONED".equals(v.getVersionState()));
                     actualDataset.setLicenseName(v.getLicense().getName());
                     actualDataset.setLicenseUri(v.getLicense().getUri().toString());
