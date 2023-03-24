@@ -43,17 +43,17 @@ public class ActualDataset {
 
   @Id
   @Column(name="major_version_nr")
-  private int majorVersionNr;
+  private Integer majorVersionNr;
 
   @Id
   @Column(name="minor_version_nr")
-  private int minorVersionNr;
+  private Integer minorVersionNr;
 
   @Column(name="file_access_request")
-  private boolean fileAccessRequest;
+  private Boolean fileAccessRequest;
 
   @Column(name="deaccessioned")
-  private boolean deaccessioned;
+  private Boolean deaccessioned;
 
   @Column(name="license_name")
   private String licenseName;
@@ -76,35 +76,35 @@ public class ActualDataset {
     this.doi = doi;
   }
 
-  public int getMajorVersionNr() {
+  public Integer getMajorVersionNr() {
     return majorVersionNr;
   }
 
-  public void setMajorVersionNr(int majorVersionNr) {
+  public void setMajorVersionNr(Integer majorVersionNr) {
     this.majorVersionNr = majorVersionNr;
   }
 
-  public int getMinorVersionNr() {
+  public Integer getMinorVersionNr() {
     return minorVersionNr;
   }
 
-  public void setMinorVersionNr(int minorVersionNr) {
+  public void setMinorVersionNr(Integer minorVersionNr) {
     this.minorVersionNr = minorVersionNr;
   }
 
-  public boolean isFileAccessRequest() {
+  public Boolean isFileAccessRequest() {
     return fileAccessRequest;
   }
 
-  public void setFileAccessRequest(boolean fileAccessRequest) {
+  public void setFileAccessRequest(Boolean fileAccessRequest) {
     this.fileAccessRequest = fileAccessRequest;
   }
 
-  public boolean isDeaccessioned() {
+  public Boolean isDeaccessioned() {
     return deaccessioned;
   }
 
-  public void setDeaccessioned(boolean deaccessioned) {
+  public void setDeaccessioned(Boolean deaccessioned) {
     this.deaccessioned = deaccessioned;
   }
 

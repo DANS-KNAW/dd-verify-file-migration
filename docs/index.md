@@ -19,56 +19,15 @@ ARGUMENTS
     
 ```text
 positional arguments:
-{server,check,load-from-fedora,load-from-dataverse,load-from-vault} ...
-                            available commands
-
-named arguments:      
--h, --help                   show this help message and exit
--v, --version                show the application version and exit
-
-load-from-dataverse [-h] [-d DOI | --csv CSV] [file]
-
-Load actual table(s) with file and/or dataset info from dataverse.
+{server,check,load-from-dataverse} ...
 
 positional arguments:
-  file                         application configuration file (default: etc/config.yml)
-
-named arguments:      
-  -d DOI, --doi DOI            The DOI for which to load the files,
-                               for example: 'doi:10.17026/dans-xtz-qa6j'
-                               Use csv with csv and comment column to load multiple DOIs.
-  --csv CSV                    CSV file produced by easy-fedora-to-bag
-  --mode {BOTH,FILES,DATASETS} files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
-  --UUIDs UUIDS                .txt file with bag ids
-  -h, --help                   show this help message and exit
-
-load-from-vault [-h] (-u UUIDS | -U UUID | -s STORE) [file]
-   
-Load expected table(s) with info from manifest-sha1.txt of bags in the vault and/or from metadata/dataset.xml.
-When mode=INPUT the InputDatasets are loaded instead.
-
-positional arguments:
-  file                         application configuration file (default: etc/config.yml)
-
-named arguments:     
-  --mode {BOTH,FILES,DATASETS,INPUT}  files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
-  -u UUIDS, --uuids UUIDS      file with UUIDs of a bag in the vault
-  -U UUID, --UUID UUID         UUID of a bag in the vault
-  -s STORE, --store STORE      name of a bag store in the vault
-  -h, --help                   show this help message and exit
-
-load-from-fedora [-c [FILE]] [-h] csv [csv ...]
-
-Load expected table(s) with info from easy_files in fs-rdb and transformation rules.
-When mode=INPUT the InputDatasets are loaded instead.
-
-positional arguments:
-  csv                          CSV file produced by easy-fedora-to-bag
+  {server,check,load-from-dataverse}
+                         available commands
 
 named arguments:
-  -c [FILE], --config [FILE]   application configuration file (default: etc/config.yml)
-  --mode {BOTH,FILES,DATASETS,INPUT}  files require more writing, dataset require more reading, BOTH=FILES+DATASETS (default: DATASETS)
-  -h, --help                   show this help message and exit
+  -h, --help             show this help message and exit
+  -v, --version          show the application version and exit
 ```
 
 
@@ -77,8 +36,6 @@ EXAMPLES
 
 ```text
 dd-verify-migration load-from-dataverse
-dd-verify-migration load-from-vault -u uuids.txt
-dd-verify-migration load-from-fedora easy-fedora-to-bag-log.csv
 ```
 
 INSTALLATION AND CONFIGURATION

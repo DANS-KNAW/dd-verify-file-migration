@@ -33,21 +33,6 @@ import nl.knaw.dans.migration.core.tables.InputDataset;
 
 public class DdVerifyMigrationApplication extends Application<DdVerifyMigrationConfiguration> {
 
-    private final HibernateBundle<DdVerifyMigrationConfiguration> easyBundle = new HibernateBundle<DdVerifyMigrationConfiguration>(EasyFile.class) {
-
-        @Override
-        public DataSourceFactory getDataSourceFactory(DdVerifyMigrationConfiguration configuration) {
-            return configuration.getEasyDb();
-        }
-
-        @Override
-        public String name() {
-            // the default "hibernate" is apparently required for at least one bundle:
-            // the verificationBundle as that one is required by all subcommands
-            return "easyBundle";
-        }
-    };
-
     private final HibernateBundle<DdVerifyMigrationConfiguration> verificationBundle =
             new HibernateBundle<DdVerifyMigrationConfiguration>(ExpectedFile.class, ActualFile.class, ExpectedDataset.class, InputDataset.class, ActualDataset.class) {
 
@@ -70,7 +55,7 @@ public class DdVerifyMigrationApplication extends Application<DdVerifyMigrationC
     public void initialize(final Bootstrap<DdVerifyMigrationConfiguration> bootstrap) {
         bootstrap.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
         bootstrap.getObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        bootstrap.addBundle(verificationBundle);// easyBundle is added by LoadFromFedoraCommand
+        bootstrap.addBundle(verificationBundle);
         bootstrap.addCommand(new LoadFromDataverseCommand(this, verificationBundle));
     }
 

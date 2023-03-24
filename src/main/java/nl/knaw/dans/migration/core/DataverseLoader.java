@@ -98,7 +98,7 @@ public class DataverseLoader {
         String shortDoi = doi.replace("doi:", "");
         load(doi, versionsLoader, DatasetVersion.class, doi).ifPresent(versions ->
             versions.forEach(v -> {
-                if (v == null)
+                if (v == null || v.getVersionNumber() == null || v.getVersionMinorNumber() == null)
                     return;
                 if (mode.doDatasets()) {
                     ActualDataset actualDataset = new ActualDataset();
