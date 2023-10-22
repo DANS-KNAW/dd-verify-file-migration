@@ -16,9 +16,9 @@
 package nl.knaw.dans.migration.core;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Objects;
 

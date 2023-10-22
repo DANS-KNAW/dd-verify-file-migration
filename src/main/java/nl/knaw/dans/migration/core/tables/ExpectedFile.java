@@ -19,8 +19,8 @@ import nl.knaw.dans.migration.core.FileRights;
 import nl.knaw.dans.migration.core.ManifestCsv;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
