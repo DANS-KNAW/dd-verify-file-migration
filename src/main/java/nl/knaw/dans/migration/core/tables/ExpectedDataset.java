@@ -17,8 +17,8 @@ package nl.knaw.dans.migration.core.tables;
 
 import nl.knaw.dans.migration.core.AccessCategory;
 import nl.knaw.dans.migration.core.FileRights;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;

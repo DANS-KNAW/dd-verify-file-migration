@@ -15,7 +15,8 @@
  */
 package nl.knaw.dans.migration.core.tables;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
