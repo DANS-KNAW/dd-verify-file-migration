@@ -5,7 +5,7 @@ SYNOPSIS
 --------
 
 ```text   
-dd-verify-migration { server | check  | load-from-fedora | load-from-vault | load-from-dataverse } ...
+dd-verify-migration { server | check  | load-from-dataverse } ...
 ```
 
 DESCRIPTION
