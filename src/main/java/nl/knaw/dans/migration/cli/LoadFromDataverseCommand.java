@@ -112,7 +112,6 @@ public class LoadFromDataverseCommand extends DefaultConfigEnvironmentCommand<Dd
         String csvFile = namespace.getString(destCsv);
         String uuidsFile = namespace.getString(destUuids);
         Mode mode = Mode.from(namespace);
-        if (Mode.INPUT.equals(mode) ) throw new IllegalArgumentException("mode INPUT not implemented, please use load-from-fedora or load-from-vault");
         if (singleDoi != null) {
             proxy.deleteSingleDoi(singleDoi, mode);
             proxy.loadFromDataset(singleDoi, mode);

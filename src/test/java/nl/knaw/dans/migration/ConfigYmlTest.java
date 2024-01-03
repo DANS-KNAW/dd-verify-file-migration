@@ -26,7 +26,7 @@ import java.io.FileInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-public class ConfigurationTest {
+public class ConfigYmlTest {
     private final YamlConfigurationFactory<DdVerifyMigrationConfiguration> factory;
 
     {
