@@ -19,7 +19,7 @@ import net.sourceforge.argparse4j.inf.Argument;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 public enum Mode {
-    BOTH, FILES, DATASETS, INPUT;
+    BOTH, FILES, DATASETS;
 
     public boolean doDatasets() {
         return Mode.DATASETS.equals(this) || Mode.BOTH.equals(this);

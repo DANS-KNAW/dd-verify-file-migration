@@ -105,8 +105,12 @@ public class DataverseLoader {
                     actualDataset.setMajorVersionNr(v.getVersionNumber());
                     actualDataset.setMinorVersionNr(v.getVersionMinorNumber());
                     actualDataset.setDeaccessioned("DEACCESSIONED".equals(v.getVersionState()));
-                    actualDataset.setLicenseName(v.getLicense().getName());
-                    actualDataset.setLicenseUri(v.getLicense().getUri().toString());
+                    if (v.getLicense() == null)
+                        actualDataset.setLicenseName("custom");
+                    else {
+                        actualDataset.setLicenseName(v.getLicense().getName());
+                        actualDataset.setLicenseUri(v.getLicense().getUri().toString());
+                    }
                     actualDataset.setDoi(shortDoi);
                     load(doi, latestVersionLoader, DatasetLatestVersion.class, doi).ifPresent(latestVersion -> {
                         if (latestVersion.getPublicationDate() != null) // probably DRAFT

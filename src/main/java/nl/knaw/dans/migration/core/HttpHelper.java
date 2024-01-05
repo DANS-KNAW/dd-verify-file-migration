@@ -15,11 +15,11 @@
  */
 package nl.knaw.dans.migration.core;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.HttpResponseException;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,22 +31,29 @@ public class HttpHelper {
 
     public static String executeReq(HttpGet req, boolean logNotFound) throws IOException {
         log.info("{}", req);
-        HttpResponse resp = client.execute(req);
-        int statusCode = resp.getStatusLine().getStatusCode();
-        if (statusCode == 404) {
-            if (logNotFound)
-                log.error("Could not find {}", req.getURI());
-            return "";
+        BasicHttpClientResponseHandler handler = new BasicHttpClientResponseHandler();
+        try {
+            return client.execute(req, handler);
         }
-        if (statusCode == 410) {
-            if (logNotFound)
-                log.error("Deactivated {}", req.getURI());
-            return "";
+        catch (HttpResponseException e) {
+            int statusCode = e.getStatusCode();
+            if (statusCode == 404) {
+                if (logNotFound)
+                    log.error("Could not find {}", req.getRequestUri());
+                return "";
+            }
+            if (statusCode == 410) {
+                if (logNotFound)
+                    log.error("Deactivated {}", req.getRequestUri());
+                return "";
+            }
+            else if (statusCode < 200 || statusCode >= 300)
+                throw new IOException("not expected response code: " + statusCode);
+            throw new RuntimeException(e);
         }
-        else if (statusCode < 200 || statusCode >= 300)
-            throw new IOException("not expected response code: " + statusCode);
-        else
-            return EntityUtils.toString(resp.getEntity()); // max size 2147483647L
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
