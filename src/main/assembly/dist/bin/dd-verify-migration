@@ -2,7 +2,8 @@
 
 SCRIPTNAME=$(basename $0)
 BINPATH=$(command readlink -f $0 2> /dev/null || command grealpath $0 2> /dev/null)
-APPHOME=$(dirname  $(dirname $BINPATH))
+APPHOME=$(dirname  "$(dirname $BINPATH)")
 CONFIG_PATH=/etc/opt/dans.knaw.nl/$SCRIPTNAME/config.yml
 
-java $DANS_JAVA_OPTS -Ddans.default.config=$CONFIG_PATH -jar $APPHOME/bin/$SCRIPTNAME.jar "$@"
+# dans.default.config must be specified because deprecated ConfiguredCommandUtils is used in the code.
+java $DANS_JAVA_OPTS $JAVA_OPTS -D -Ddans.default.config=$CONFIG_PATH -jar $APPHOME/bin/$SCRIPTNAME.jar "$@"

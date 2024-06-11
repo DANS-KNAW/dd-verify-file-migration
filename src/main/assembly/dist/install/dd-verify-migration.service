@@ -5,6 +5,8 @@ Description=${project.name} Service
 ExecStart=/opt/dans.knaw.nl/dd-verify-migration/bin/dd-verify-migration server /etc/opt/dans.knaw.nl/dd-verify-migration/config.yml
 # Java returns 143 even if the SIGTERM was handled correctly.
 SuccessExitStatus=143
+Environment="JAVA_OPTS=-Xms64m"
+Environment="LC_ALL=en_US.UTF-8"
 
 User=dd-verify-migration
 Group=dd-verify-migration
